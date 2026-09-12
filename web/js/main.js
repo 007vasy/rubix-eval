@@ -6,7 +6,7 @@ import { adjacentCells, generateHyperScramble, stepCost as stepCost4 } from "./h
 const $ = (id) => document.getElementById(id);
 
 let mode = "3d";
-let viewer = new CubeViewer($("view"), updateStats);
+let viewer = new CubeViewer($("view"), updateStats, { clickToTurn: true });
 let modifier = 1;
 let wide = false;
 let twoShot = false;
@@ -58,7 +58,7 @@ function setMode(next) {
     viewer = new HyperViewer(canvas, updateStats);
     viewer.modifier = modifier;
   } else {
-    viewer = new CubeViewer(canvas, updateStats);
+    viewer = new CubeViewer(canvas, updateStats, { clickToTurn: true });
   }
   $("mode3d").setAttribute("aria-pressed", String(mode === "3d"));
   $("mode4d").setAttribute("aria-pressed", String(mode === "4d"));

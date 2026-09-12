@@ -11,7 +11,20 @@
   </head>
   <body>
     <canvas id="view"></canvas>
-    <button id="done" type="button" aria-label="done" title=""></button>
+    <aside id="help" aria-label="controls">
+      <div class="help-title">How to turn the cube</div>
+      <ul>
+        <li><kbd class="mouse">L</kbd> Click a sticker — clockwise 90°</li>
+        <li><kbd class="mouse">R</kbd> Right-click a sticker — the other way</li>
+        <li><kbd class="mouse">2×</kbd> Double-click a sticker — 180°</li>
+        <li><kbd class="mouse">drag</kbd> Drag empty space — look around</li>
+        <li><kbd class="go">✓</kbd> Green button — submit when solved</li>
+      </ul>
+    </aside>
+    <button id="done" type="button" aria-label="Submit: I think it is solved">
+      <span class="check"></span>
+      <span class="done-label">Done</span>
+    </button>
     <div id="flash" hidden></div>
     <script type="module" src="./js/visual-eval.js"></script>
   </body>

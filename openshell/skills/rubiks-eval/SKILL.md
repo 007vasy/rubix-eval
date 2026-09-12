@@ -17,13 +17,14 @@ There is no internet. Do not call external APIs. If you need a model, use
    random challenge** (cube size and how far it is from solved are chosen
    for you; you only see the stickers).
 2. Look at the colored stickers.
-3. Turn the cube with the pointer:
+3. Turn the cube with the pointer (the same list is on screen in the
+   bottom-left):
    - **Left click** a sticker = 90° clockwise on that layer/cell
    - **Right click** a sticker = 90° counter-clockwise
    - **Double-click** a sticker = 180°
    - **Drag empty space** to orbit / look around
-4. When every side is a single color, click the **green circle** in the
-   bottom-right to submit.
+4. When every side is a single color, click **Done** (green button,
+   bottom-right) to submit.
 
 On the 4D puzzle you will see several colored cubes (cells of a tesseract).
 Click stickers on those cells the same way. There are no letter labels.
