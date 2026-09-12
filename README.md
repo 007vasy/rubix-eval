@@ -8,6 +8,7 @@ The eval parameters are:
 | Parameter | Meaning |
 | --- | --- |
 | **size** `N` | Cube is `N×N×N` (2×2×2, 3×3×3, or any bigger cube) |
+| **kind** | `3d` or `4d` (the 3×3×3×3 hypercube) |
 | **scramble_depth** | How many random turns the cube is from solved |
 | **step cost** | HTM (each move = 1) and QTM (`U2` = 2) |
 
@@ -52,7 +53,13 @@ command. The solver reads task JSON on stdin and writes moves on stdout.
 ```bash
 rubix-eval run --oracle
 rubix-eval run --solver ./my_solver.sh --sizes 2,3 --depths 1,5,10 --trials 3
+rubix-eval task --4d --depth 8 --seed 1 -o hyper.json
+rubix-eval run --4d --oracle --depths 1,5,10
 ```
+
+The 4D puzzle is a **3×3×3×3** (tesseract / MagicCube4D analog): eight cubic
+cells `R L U D F B I O`. Moves are Zhao 2c clicks such as `RU` (twist the R
+cell 90° around U).
 
 ## 3D cube in the browser
 
@@ -63,7 +70,9 @@ rubix-eval view
 
 Or serve the `web/` folder as static files. Drag a sticker to turn that layer,
 drag empty space to orbit, use `U D L R F B` (shift for `'`). Size goes from
-2×2×2 through 7×7×7. The HUD reports HTM / QTM cost versus scramble depth.
+2×2×2 through 7×7×7. Toggle **4D 3³×3** for the exploded eight-cell hypercube
+and click a sticker to twist that cell. The HUD reports HTM / QTM versus
+scramble depth.
 
 ## OpenShell (no internet)
 

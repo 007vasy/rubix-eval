@@ -14,16 +14,17 @@ from .eval_runner import (
     run_suite,
     write_report,
 )
+from .hyper_moves import format_hyper_moves, parse_hyper_moves
 from .moves import format_moves, parse_moves
 from .paths import web_dir
-from .render import ascii_net, legend
-from .task import EvalTask, load_solution, make_task
+from .render import ascii_hyper_net, ascii_net, hyper_legend, legend
+from .task import EvalTask, load_solution, make_hyper_task, make_task
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="rubix-eval",
-        description="NxNxN Rubik's cube eval: scramble depth, step cost, offline agents.",
+        description="NxNxN and 3×3×3×3 (4D) Rubik's cube eval: scramble depth, step cost, offline agents.",
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
@@ -54,6 +55,7 @@ def main(argv: list[str] | None = None) -> int:
     run_p.add_argument("--seed", type=int, default=0)
     run_p.add_argument("--timeout", type=float, default=None)
     run_p.add_argument("--oracle", action="store_true", help="Use the inverse-scramble oracle instead of --solver")
+    run_p.add_argument("--4d", dest="four_d", action="store_true", help="Run 3×3×3×3 (4D) tasks instead of 3D")
     run_p.add_argument("-o", "--output", help="Write JSON report")
 
     view_p = sub.add_parser("view", help="Serve the interactive 3D cube in a browser")
@@ -82,10 +84,15 @@ def _add_puzzle_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--depth", type=int, default=8, help="Random turns away from solved")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--max-moves", type=int, default=None)
+    parser.add_argument("--4d", dest="four_d", action="store_true", help="3×3×3×3 hypercube instead of 3D")
 
 
 def _cmd_task(args: argparse.Namespace) -> int:
-    task = make_task(args.size, args.depth, args.seed, args.max_moves)
+    task = (
+        make_hyper_task(args.depth, args.seed, args.max_moves)
+        if args.four_d
+        else make_task(args.size, args.depth, args.seed, args.max_moves)
+    )
     text = task.dumps() + "\n"
     if args.output:
         Path(args.output).write_text(text, encoding="utf-8")
@@ -98,14 +105,22 @@ def _cmd_show(args: argparse.Namespace) -> int:
     if args.task:
         task = EvalTask.load(args.task)
         cube = task.cube()
-        print(f"{task.id}  size={task.size}  depth={task.scramble_depth}  seed={task.seed}")
+        print(f"{task.id}  kind={task.kind}  depth={task.scramble_depth}  seed={task.seed}")
     else:
-        task = make_task(args.size, args.depth, args.seed, args.max_moves)
+        task = (
+            make_hyper_task(args.depth, args.seed, args.max_moves)
+            if args.four_d
+            else make_task(args.size, args.depth, args.seed, args.max_moves)
+        )
         cube = task.cube()
         print(f"{task.id}")
     color = sys.stdout.isatty() and not args.no_color
-    print(legend())
-    print(ascii_net(cube, color=color))
+    if task.kind == "4d":
+        print(hyper_legend())
+        print(ascii_hyper_net(cube, color=color))
+    else:
+        print(legend())
+        print(ascii_net(cube, color=color))
     print(f"solved={cube.is_solved()}  misplaced={cube.misplaced_stickers()}")
     return 0
 
@@ -138,7 +153,13 @@ def _cmd_run(args: argparse.Namespace) -> int:
         return 2
     sizes = [int(x) for x in args.sizes.split(",") if x.strip()] or None
     depths = [int(x) for x in args.depths.split(",") if x.strip()] or None
-    tasks = build_suite(sizes=sizes, depths=depths, trials=args.trials, seed=args.seed)
+    tasks = build_suite(
+        sizes=sizes,
+        depths=depths,
+        trials=args.trials,
+        seed=args.seed,
+        kind="4d" if args.four_d else "3d",
+    )
     solver = oracle_solver if args.oracle else command_solver(args.solver)
     report = run_suite(tasks, solver, timeout=args.timeout)
     summary = report.summary()
@@ -157,7 +178,7 @@ def _cmd_view(args: argparse.Namespace) -> int:
     if not (root / "index.html").exists():
         print(f"web UI not found at {root}", file=sys.stderr)
         return 1
-    print(f"3D cube: http://{args.host}:{args.port}/")
+    print(f"cube viewer: http://{args.host}:{args.port}/")
     serve(root, args.host, args.port)
     return 0
 
@@ -166,10 +187,16 @@ def _cmd_apply(args: argparse.Namespace) -> int:
     task = EvalTask.load(args.task)
     cube = task.cube()
     text = " ".join(args.moves)
-    moves = parse_moves(text)
-    cube.apply(moves)
-    print(format_moves(moves))
-    print(ascii_net(cube, color=sys.stdout.isatty()))
+    if task.kind == "4d":
+        moves = parse_hyper_moves(text)
+        cube.apply(moves)
+        print(format_hyper_moves(moves))
+        print(ascii_hyper_net(cube, color=sys.stdout.isatty()))
+    else:
+        moves = parse_moves(text)
+        cube.apply(moves)
+        print(format_moves(moves))
+        print(ascii_net(cube, color=sys.stdout.isatty()))
     print(f"solved={cube.is_solved()}  misplaced={cube.misplaced_stickers()}")
     return 0
 

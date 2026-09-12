@@ -5,8 +5,9 @@ description: Solve an NxNxN Rubik's cube eval task without network access.
 
 # Rubik's cube eval
 
-You are solving a scrambled NxNxN cube. There is no internet. Do not call
-external APIs. If you need a model, use `https://inference.local` only.
+You are solving a scrambled NxNxN cube, or a 3×3×3×3 (4D) hypercube when
+`kind` is `"4d"`. There is no internet. Do not call external APIs. If you
+need a model, use `https://inference.local` only.
 
 ## Task files
 
@@ -25,12 +26,18 @@ rubix-eval apply /eval/task.json "R U R'"
 # rubix-eval grade /eval/task.json --solution /eval/solution.txt
 ```
 
-## Notation
+## Notation (3D)
 
 - Faces: `U D L R F B`
 - `'` is counter-clockwise, `2` is a half turn
 - Inner slices on big cubes: `2R`, `3U`
 - Wide turns: `Rw`, `3Uw`
+
+## Notation (4D, `kind: "4d"`)
+
+A 3×3×3×3 has eight cubic cells: `R L U D F B I` (inside) `O` (outside).
+`RU` twists the R cell 90° around U (2c click). `RU'` and `RU2` as usual.
+The task JSON `state.cells` is an 8-cell map of 3×3×3 sticker tensors.
 
 ## Scoring
 

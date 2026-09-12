@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from rubix_eval.eval_runner import build_suite, oracle_solver, run_suite
 from rubix_eval.metrics import grade_solution
-from rubix_eval.task import make_task
+from rubix_eval.task import make_hyper_task, make_task
 
 
 def test_oracle_solves_default_suite() -> None:
@@ -29,6 +29,21 @@ def test_task_prompt_hides_scramble() -> None:
     # The agent sees depth, never the generating sequence.
     assert oracle
     assert oracle not in prompt
+
+
+def test_oracle_solves_4d_suite() -> None:
+    tasks = build_suite(kind="4d", depths=(1, 5, 8), trials=1, seed=3)
+    report = run_suite(tasks, oracle_solver)
+    assert report.solved == report.total
+    for row in report.results:
+        assert row.htm == row.scramble_depth
+
+
+def test_hyper_task_prompt_hides_scramble() -> None:
+    task = make_hyper_task(6, seed=2)
+    prompt = task.prompt()
+    assert "3×3×3×3" in prompt
+    assert task.oracle_solution() not in prompt
 
 
 def test_empty_solution_on_solved_cube() -> None:

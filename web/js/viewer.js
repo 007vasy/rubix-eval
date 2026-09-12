@@ -45,6 +45,7 @@ export class CubeViewer {
     this.animating = false;
     this.pitch = 1.08;
     this.drag = null;
+    this._stopped = false;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0b0d10);
@@ -91,6 +92,15 @@ export class CubeViewer {
     window.addEventListener("resize", () => this.resize());
     this.rebuild();
     this.loop();
+  }
+
+  dispose() {
+    this._stopped = true;
+    this.canvas.removeEventListener("pointerdown", this.boundPointerDown);
+    window.removeEventListener("pointermove", this.boundPointerMove);
+    window.removeEventListener("pointerup", this.boundPointerUp);
+    this.controls.dispose();
+    this.renderer.dispose();
   }
 
   setSize(size) {
@@ -334,6 +344,7 @@ export class CubeViewer {
         solved: this.cube.isSolved(),
         moves: formatMoves(this.history),
         scrambleText: formatMoves(this.scramble),
+        kind: "3d",
       });
     }
   }
@@ -348,6 +359,7 @@ export class CubeViewer {
   }
 
   loop() {
+    if (this._stopped) return;
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(() => this.loop());

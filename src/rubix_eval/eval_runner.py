@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-from .task import EvalTask, make_task
+from .task import EvalTask, make_hyper_task, make_task
 
 Solver = Callable[[EvalTask], str]
 
@@ -33,6 +33,13 @@ DEFAULT_SUITE = (
     # n x n x n samples
     (5, 5),
     (7, 5),
+)
+
+DEFAULT_SUITE_4D = (
+    (3, 1),
+    (3, 5),
+    (3, 10),
+    (3, 20),
 )
 
 
@@ -104,19 +111,23 @@ def build_suite(
     trials: int = 1,
     seed: int = 0,
     pairs: Iterable[tuple[int, int]] | None = None,
+    kind: str = "3d",
 ) -> list[EvalTask]:
     if pairs is None:
         if sizes is None and depths is None:
-            pairs = DEFAULT_SUITE
+            pairs = DEFAULT_SUITE_4D if kind == "4d" else DEFAULT_SUITE
         else:
-            size_list = list(sizes or (2, 3, 4))
+            size_list = list(sizes or ((3,) if kind == "4d" else (2, 3, 4)))
             depth_list = list(depths or (1, 5, 10))
             pairs = [(size, depth) for size in size_list for depth in depth_list]
     tasks: list[EvalTask] = []
     index = 0
     for size, depth in pairs:
         for trial in range(trials):
-            tasks.append(make_task(size, depth, seed=seed + index))
+            if kind == "4d":
+                tasks.append(make_hyper_task(depth, seed=seed + index))
+            else:
+                tasks.append(make_task(size, depth, seed=seed + index))
             index += 1
     return tasks
 

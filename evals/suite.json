@@ -1,6 +1,6 @@
 {
   "name": "rubix-eval-default",
-  "description": "2x2x2, 3x3x3, and n×n×n cubes at several distances from solved.",
+  "description": "2x2x2, 3x3x3, n×n×n, and 3×3×3×3 (4D) cubes at several distances from solved.",
   "metric": "HTM",
   "pairs": [
     [2, 1],
@@ -17,5 +17,6 @@
     [4, 10],
     [5, 5],
     [7, 5]
-  ]
+  ],
+  "hyper_depths": [1, 5, 10, 20]
 }

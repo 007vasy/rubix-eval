@@ -8,8 +8,9 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from .cube import Cube
+from .hypercube import HyperCube
 from .metrics import grade_solution
-from .task import make_task
+from .task import make_hyper_task, make_task
 
 
 def serve(web_root: Path, host: str, port: int) -> None:
@@ -30,7 +31,8 @@ def serve(web_root: Path, host: str, port: int) -> None:
                 size = int(query.get("size", ["3"])[0])
                 depth = int(query.get("depth", ["8"])[0])
                 seed = int(query.get("seed", ["0"])[0])
-                task = make_task(size, depth, seed)
+                kind = query.get("kind", ["3d"])[0]
+                task = make_hyper_task(depth, seed) if kind == "4d" else make_task(size, depth, seed)
                 payload = task.to_dict()
                 payload["oracle"] = task.oracle_solution()
                 self._json(payload)
@@ -48,7 +50,10 @@ def serve(web_root: Path, host: str, port: int) -> None:
                 return
             if parsed.path == "/api/grade":
                 state = body.get("state", body)
-                cube = Cube.from_dict(state)
+                if state.get("kind") == "4d" or "cells" in state:
+                    cube = HyperCube.from_dict(state)
+                else:
+                    cube = Cube.from_dict(state)
                 depth = int(body.get("scramble_depth", 0))
                 max_moves = body.get("max_moves")
                 result = grade_solution(cube, body.get("solution", ""), depth, max_moves)

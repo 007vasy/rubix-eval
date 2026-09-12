@@ -1,10 +1,12 @@
 import { CubeViewer } from "./viewer.js";
-import { generateScramble, stepCost } from "./engine.js";
+import { generateScramble, stepCost as stepCost3 } from "./engine.js";
+import { HyperViewer } from "./hyperviewer.js";
+import { adjacentCells, generateHyperScramble, stepCost as stepCost4 } from "./hyperengine.js";
 
 const $ = (id) => document.getElementById(id);
 
-const viewer = new CubeViewer($("view"), updateStats);
-
+let mode = "3d";
+let viewer = new CubeViewer($("view"), updateStats);
 let modifier = 1;
 let wide = false;
 let twoShot = false;
@@ -26,13 +28,61 @@ function updateSizeLabel() {
 
 function setModifier(turns) {
   modifier = turns;
+  if (viewer.modifier !== undefined) viewer.modifier = turns;
   $("modCw").setAttribute("aria-pressed", String(turns === 1));
   $("modPrime").setAttribute("aria-pressed", String(turns === 3));
   $("mod2").setAttribute("aria-pressed", String(turns === 2));
 }
 
+function fillHyperAxes() {
+  const cell = $("hyperCell").value;
+  const pad = $("hyperAxes");
+  pad.innerHTML = "";
+  for (const axis of adjacentCells(cell)) {
+    const btn = document.createElement("button");
+    btn.textContent = cell + axis;
+    btn.addEventListener("click", () => {
+      if (mode !== "4d") return;
+      viewer.enqueue({ cell, axis, turns: modifier, order: 4, axisCells: [axis] });
+    });
+    pad.appendChild(btn);
+  }
+}
+
+function setMode(next) {
+  if (next === mode) return;
+  mode = next;
+  viewer.dispose();
+  const canvas = $("view");
+  if (mode === "4d") {
+    viewer = new HyperViewer(canvas, updateStats);
+    viewer.modifier = modifier;
+  } else {
+    viewer = new CubeViewer(canvas, updateStats);
+  }
+  $("mode3d").setAttribute("aria-pressed", String(mode === "3d"));
+  $("mode4d").setAttribute("aria-pressed", String(mode === "4d"));
+  const four = mode === "4d";
+  for (const [id, hide] of [
+    ["sizeRow", four],
+    ["pad3d", four],
+    ["pad4d", !four],
+    ["hint3d", four],
+    ["hint4d", !four],
+    ["modWide", four],
+    ["layerRow", four],
+  ]) {
+    const el = $(id);
+    el.hidden = hide;
+    el.style.display = hide ? "none" : "";
+  }
+  if (mode === "4d") fillHyperAxes();
+  viewer.notify();
+}
+
 function updateStats(state) {
-  const cost = stepCost(state.history, state.scramble.length);
+  const costFn = state.kind === "4d" ? stepCost4 : stepCost3;
+  const cost = costFn(state.history, state.scramble.length);
   $("htm").textContent = String(cost.htm);
   $("qtm").textContent = String(cost.qtm);
   $("scrambleDepth").textContent = String(cost.scrambleDepth);
@@ -52,19 +102,29 @@ function updateStats(state) {
   if (state.solved) {
     badge.textContent = "solved";
     badge.className = "badge solved";
+  } else if (state.kind === "4d") {
+    badge.textContent = "3×3×3×3 scrambled";
+    badge.className = "badge scrambled";
   } else {
     badge.textContent = `${state.cube.size}×${state.cube.size}×${state.cube.size} scrambled`;
     badge.className = "badge scrambled";
   }
 }
 
+$("mode3d").addEventListener("click", () => setMode("3d"));
+$("mode4d").addEventListener("click", () => setMode("4d"));
+$("hyperCell").addEventListener("change", fillHyperAxes);
+
 $("size").addEventListener("input", () => {
   updateSizeLabel();
-  viewer.setSize(sizeValue());
+  if (mode === "3d") viewer.setSize(sizeValue());
 });
 $("scramble").addEventListener("click", () => {
-  const moves = generateScramble(sizeValue(), Number($("depth").value), Number($("seed").value));
-  viewer.applyScramble(moves);
+  if (mode === "4d") {
+    viewer.applyScramble(generateHyperScramble(Number($("depth").value), Number($("seed").value)));
+  } else {
+    viewer.applyScramble(generateScramble(sizeValue(), Number($("depth").value), Number($("seed").value)));
+  }
 });
 $("reset").addEventListener("click", () => viewer.reset());
 $("undo").addEventListener("click", () => viewer.undo());
@@ -77,8 +137,9 @@ $("modWide").addEventListener("click", () => {
   $("modWide").setAttribute("aria-pressed", String(wide));
 });
 
-for (const button of document.querySelectorAll(".pad [data-face]")) {
+for (const button of document.querySelectorAll("#pad3d [data-face]")) {
   button.addEventListener("click", () => {
+    if (mode !== "3d") return;
     viewer.enqueue({
       face: button.dataset.face,
       layer: layerValue(),
@@ -90,6 +151,7 @@ for (const button of document.querySelectorAll(".pad [data-face]")) {
 
 window.addEventListener("keydown", (event) => {
   if (event.metaKey || event.ctrlKey || event.altKey) return;
+  if (mode === "4d") return;
   const key = event.key;
   if (key === "2") {
     twoShot = true;
@@ -105,4 +167,5 @@ window.addEventListener("keydown", (event) => {
 });
 
 updateSizeLabel();
+fillHyperAxes();
 viewer.notify();

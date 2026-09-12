@@ -8,10 +8,12 @@ from pathlib import Path
 from typing import Any
 
 from .cube import Cube
+from .hyper_moves import format_hyper_moves, invert_hyper_moves, parse_hyper_moves
+from .hypercube import HyperCube
 from .metrics import GradeResult, grade_solution
 from .moves import format_moves, invert_moves, parse_moves
-from .render import ascii_net, legend
-from .scramble import generate_scramble
+from .render import ascii_hyper_net, ascii_net, hyper_legend, legend
+from .scramble import generate_hyper_scramble, generate_scramble
 
 DEFAULT_MAX_MOVES = {
     2: 40,
@@ -38,12 +40,31 @@ class EvalTask:
     state: dict[str, Any]
     max_moves: int
     metric: str = "HTM"
+    kind: str = "3d"
 
-    def cube(self) -> Cube:
+    def cube(self) -> Cube | HyperCube:
+        if self.kind == "4d":
+            return HyperCube.from_dict(self.state)
         return Cube.from_dict(self.state)
 
     def prompt(self) -> str:
         cube = self.cube()
+        if self.kind == "4d":
+            return "\n".join(
+                [
+                    "Solve this 3×3×3×3 (4D) Rubik's cube.",
+                    f"It is {self.scramble_depth} random 2c cell-twists away from solved.",
+                    "Return Zhao notation: RU twists the R cell 90° around U; RU' and RU2 as usual.",
+                    "Cells: R L U D F B I (inside) O (outside).",
+                    f"Metric: {self.metric}. Stay under {self.max_moves} moves.",
+                    hyper_legend(),
+                    "",
+                    ascii_hyper_net(cube),
+                    "",
+                    "JSON state:",
+                    json.dumps(self.state, separators=(",", ":")),
+                ]
+            )
         return "\n".join(
             [
                 f"Solve this {self.size}x{self.size}x{self.size} Rubik's cube.",
@@ -64,12 +85,16 @@ class EvalTask:
 
     def oracle_solution(self) -> str:
         """Invert the withheld scramble. Used to test the engine, not the agent."""
+        if self.kind == "4d":
+            moves = generate_hyper_scramble(self.scramble_depth, self.seed)
+            return format_hyper_moves(invert_hyper_moves(moves))
         moves = generate_scramble(self.size, self.scramble_depth, self.seed)
         return format_moves(invert_moves(moves))
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
+            "kind": self.kind,
             "size": self.size,
             "scramble_depth": self.scramble_depth,
             "seed": self.seed,
@@ -88,14 +113,17 @@ class EvalTask:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> EvalTask:
+        kind = data.get("kind") or data.get("state", {}).get("kind") or "3d"
+        size = int(data.get("size") or 3)
         return cls(
             id=data["id"],
-            size=int(data["size"]),
+            size=size,
             scramble_depth=int(data["scramble_depth"]),
             seed=int(data["seed"]),
             state=data["state"],
-            max_moves=int(data.get("max_moves") or default_max_moves(int(data["size"]))),
+            max_moves=int(data.get("max_moves") or (120 if kind == "4d" else default_max_moves(size))),
             metric=data.get("metric", "HTM"),
+            kind=kind,
         )
 
     @classmethod
@@ -121,6 +149,22 @@ def make_task(
         seed=seed,
         state=cube.to_dict(),
         max_moves=max_moves if max_moves is not None else default_max_moves(size),
+        kind="3d",
+    )
+
+
+def make_hyper_task(depth: int, seed: int = 0, max_moves: int | None = None) -> EvalTask:
+    cube = HyperCube()
+    scramble = generate_hyper_scramble(depth, seed)
+    cube.apply(scramble)
+    return EvalTask(
+        id=f"3x3x3x3-d{depth}-s{seed}",
+        size=3,
+        scramble_depth=depth,
+        seed=seed,
+        state=cube.to_dict(),
+        max_moves=max_moves if max_moves is not None else 120,
+        kind="4d",
     )
 
 
@@ -140,5 +184,8 @@ def parse_solution(text: str) -> str:
     text = text.strip()
     if not text:
         return ""
-    parse_moves(text)  # validate
+    try:
+        parse_moves(text)
+    except ValueError:
+        parse_hyper_moves(text)
     return text

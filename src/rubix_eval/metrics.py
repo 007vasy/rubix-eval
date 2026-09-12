@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .cube import Cube
+from .hyper_moves import HyperMove, parse_hyper_moves
 from .moves import Move, parse_moves
 
 
@@ -53,7 +54,7 @@ class GradeResult:
         }
 
 
-def step_cost(moves: list[Move], scramble_depth: int) -> StepCost:
+def step_cost(moves: list[Move] | list[HyperMove], scramble_depth: int) -> StepCost:
     htm = sum(move.htm_cost() for move in moves)
     qtm = sum(move.qtm_cost() for move in moves)
     excess = htm - scramble_depth
@@ -69,7 +70,7 @@ def step_cost(moves: list[Move], scramble_depth: int) -> StepCost:
 
 def grade_solution(
     cube: Cube,
-    solution: str | list[Move],
+    solution: str | list[Move] | list[HyperMove],
     scramble_depth: int,
     max_moves: int | None = None,
 ) -> GradeResult:
@@ -78,8 +79,9 @@ def grade_solution(
     The cube is copied; the caller's cube is not mutated.
     """
     work = cube.copy()
+    parse = parse_hyper_moves if getattr(cube, "kind", "3d") == "4d" else parse_moves
     try:
-        moves = parse_moves(solution) if isinstance(solution, str) else list(solution)
+        moves = parse(solution) if isinstance(solution, str) else list(solution)
     except ValueError as exc:
         return GradeResult(
             solved=False,

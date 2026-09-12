@@ -5,6 +5,8 @@ Uses a portable LCG so the same (size, depth, seed) matches the web viewer.
 
 from __future__ import annotations
 
+from .hyper_moves import HyperMove, format_hyper_moves
+from .hypercube import CELLS, adjacent_cells
 from .moves import Move, format_moves
 
 _FACES = ("U", "D", "L", "R", "F", "B")
@@ -81,3 +83,24 @@ def generate_scramble(
 
 def scramble_text(size: int, depth: int, seed: int | None = None, **kwargs) -> str:
     return format_moves(generate_scramble(size, depth, seed, **kwargs))
+
+
+def generate_hyper_scramble(depth: int, seed: int | None = None) -> list[HyperMove]:
+    """`depth` random 2c 90° cell twists on a 3×3×3×3. Consecutive twists avoid the same cell."""
+    if depth < 0:
+        raise ValueError("depth must be >= 0")
+    rng = LCG(0 if seed is None else seed)
+    moves: list[HyperMove] = []
+    last_cell: str | None = None
+    for _ in range(depth):
+        cells = [c for c in CELLS if c != last_cell] if last_cell else list(CELLS)
+        cell = rng.choice(cells)
+        axis = rng.choice(adjacent_cells(cell))
+        turns = rng.choice(_TURNS)
+        moves.append(HyperMove(cell, axis, turns))
+        last_cell = cell
+    return moves
+
+
+def hyper_scramble_text(depth: int, seed: int | None = None) -> str:
+    return format_hyper_moves(generate_hyper_scramble(depth, seed))
