@@ -78,9 +78,10 @@ function makeLabel(text, hex) {
 }
 
 export class HyperViewer {
-  constructor(canvas, onChange) {
+  constructor(canvas, onChange, options = {}) {
     this.canvas = canvas;
     this.onChange = onChange;
+    this.showLabels = options.showLabels !== false;
     this.cube = new HyperCube();
     this.history = [];
     this.scramble = [];
@@ -88,6 +89,7 @@ export class HyperViewer {
     this.animating = false;
     this.modifier = 1;
     this._stopped = false;
+    this._lastClickAt = 0;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0b0d10);
@@ -102,6 +104,7 @@ export class HyperViewer {
     this.controls.dampingFactor = 0.08;
     this.controls.minDistance = 8;
     this.controls.maxDistance = 40;
+    this.controls.mouseButtons.RIGHT = -1;
 
     this.root = new THREE.Group();
     this.scene.add(this.root);
@@ -116,7 +119,9 @@ export class HyperViewer {
 
     this.onClick = this.handleClick.bind(this);
     this.onResize = () => this.resize();
+    this.onContext = (event) => event.preventDefault();
     canvas.addEventListener("pointerdown", this.onClick);
+    canvas.addEventListener("contextmenu", this.onContext);
     window.addEventListener("resize", this.onResize);
 
     this.resize();
@@ -127,6 +132,7 @@ export class HyperViewer {
   dispose() {
     this._stopped = true;
     this.canvas.removeEventListener("pointerdown", this.onClick);
+    this.canvas.removeEventListener("contextmenu", this.onContext);
     window.removeEventListener("resize", this.onResize);
     this.controls.dispose();
     this.renderer.dispose();
@@ -134,6 +140,14 @@ export class HyperViewer {
 
   reset() {
     this.cube.reset();
+    this.history = [];
+    this.scramble = [];
+    this.rebuild();
+    this.notify();
+  }
+
+  loadState(state) {
+    this.cube = new HyperCube(state);
     this.history = [];
     this.scramble = [];
     this.rebuild();
@@ -203,9 +217,11 @@ export class HyperViewer {
           }
         }
       }
-      const label = makeLabel(cell, COLOR_HEX[CELL_COLOR[cell]]);
-      label.position.set(0, 1.55, 0);
-      group.add(label);
+      if (this.showLabels) {
+        const label = makeLabel(cell, COLOR_HEX[CELL_COLOR[cell]]);
+        label.position.set(0, 1.55, 0);
+        group.add(label);
+      }
       this.root.add(group);
     }
   }
@@ -261,15 +277,26 @@ export class HyperViewer {
   }
 
   handleClick(event) {
-    if (this.animating || event.button !== 0) return;
+    if (this.animating || (event.button !== 0 && event.button !== 2)) return;
     const rect = this.canvas.getBoundingClientRect();
     this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     this.raycaster.setFromCamera(this.pointer, this.camera);
     const hit = this.raycaster.intersectObjects(this.stickerMeshes, false)[0];
     if (!hit) return;
+    this.controls.enabled = false;
+    const now = performance.now();
+    const dbl = event.button === 0 && now - this._lastClickAt < 320;
+    this._lastClickAt = now;
+    const prev = this.modifier;
+    if (event.button === 2) this.modifier = 3;
+    else if (dbl) this.modifier = 2;
     const move = this.stickerToMove(hit.object.userData);
+    this.modifier = prev;
     if (move) this.enqueue(move);
+    setTimeout(() => {
+      this.controls.enabled = true;
+    }, 40);
   }
 
   stickerToMove(data) {

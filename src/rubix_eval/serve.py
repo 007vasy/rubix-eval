@@ -1,8 +1,9 @@
-"""Static + JSON API server for the interactive 3D cube."""
+"""Static + JSON API server for the interactive cube and visual eval."""
 
 from __future__ import annotations
 
 import json
+import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -11,23 +12,58 @@ from .cube import Cube
 from .hypercube import HyperCube
 from .metrics import grade_solution
 from .task import make_hyper_task, make_task
+from .visual_session import boot_payload, grade_progress, new_session
 
 
-def serve(web_root: Path, host: str, port: int) -> None:
+def serve(
+    web_root: Path,
+    host: str,
+    port: int,
+    *,
+    visual_session: dict | None = None,
+) -> None:
     root = web_root.resolve()
+    lock = threading.Lock()
+    sessions: dict[str, dict] = {}
+    current_id: str | None = None
+    if visual_session is not None:
+        sessions[visual_session["id"]] = visual_session
+        current_id = visual_session["id"]
 
     class Handler(SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(root), **kwargs)
 
-        def log_message(self, fmt: str, *args) -> None:
-            sys_stderr_write = super().log_message
-            sys_stderr_write(fmt, *args)
-
         def do_GET(self) -> None:
             parsed = urlparse(self.path)
-            if parsed.path == "/api/task":
-                query = parse_qs(parsed.query)
+            path = parsed.path
+            query = parse_qs(parsed.query)
+            if path in ("/eval", "/eval/"):
+                self.path = "/eval.html"
+                super().do_GET()
+                return
+            if path == "/api/visual/boot":
+                with lock:
+                    sid = query.get("id", [current_id])[0]
+                    session = sessions.get(sid) if sid else None
+                if not session:
+                    self._json({"error": "no visual session"}, 404)
+                    return
+                self._json(boot_payload(session))
+                return
+            if path == "/api/visual/grade":
+                with lock:
+                    sid = query.get("id", [current_id])[0]
+                    session = sessions.get(sid) if sid else None
+                if not session:
+                    self._json({"error": "no visual session"}, 404)
+                    return
+                if not session.get("progress"):
+                    self._json({"error": "not submitted", "id": session["id"]}, 409)
+                    return
+                self._json(session["progress"])
+                return
+            if path == "/api/task":
                 size = int(query.get("size", ["3"])[0])
                 depth = int(query.get("depth", ["8"])[0])
                 seed = int(query.get("seed", ["0"])[0])
@@ -48,6 +84,18 @@ def serve(web_root: Path, host: str, port: int) -> None:
             except json.JSONDecodeError:
                 self._json({"error": "invalid JSON"}, 400)
                 return
+            if parsed.path == "/api/visual/submit":
+                with lock:
+                    sid = body.get("id") or current_id
+                    session = sessions.get(sid) if sid else None
+                    if not session:
+                        self._json({"error": "no visual session"}, 404)
+                        return
+                    session["progress"] = grade_progress(session, body)
+                    session["submitted"] = True
+                    payload = session["progress"]
+                self._json(payload)
+                return
             if parsed.path == "/api/grade":
                 state = body.get("state", body)
                 if state.get("kind") == "4d" or "cells" in state:
@@ -66,6 +114,7 @@ def serve(web_root: Path, host: str, port: int) -> None:
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(data)

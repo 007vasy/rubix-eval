@@ -35,10 +35,11 @@ function faceDir(face) {
 }
 
 export class CubeViewer {
-  constructor(canvas, onChange) {
+  constructor(canvas, onChange, options = {}) {
     this.canvas = canvas;
     this.onChange = onChange;
-    this.cube = new Cube(3);
+    this.clickToTurn = Boolean(options.clickToTurn);
+    this.cube = new Cube(options.size || 3);
     this.history = [];
     this.scramble = [];
     this.queue = [];
@@ -46,6 +47,7 @@ export class CubeViewer {
     this.pitch = 1.08;
     this.drag = null;
     this._stopped = false;
+    this._lastClickAt = 0;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0b0d10);
@@ -62,6 +64,9 @@ export class CubeViewer {
     this.controls.minDistance = 4;
     this.controls.maxDistance = 28;
     this.controls.target.set(0, 0, 0);
+    if (this.clickToTurn) {
+      this.controls.mouseButtons.RIGHT = -1;
+    }
 
     this.pivot = new THREE.Group();
     this.scene.add(this.pivot);
@@ -87,6 +92,8 @@ export class CubeViewer {
     canvas.addEventListener("pointerdown", this.boundPointerDown);
     window.addEventListener("pointermove", this.boundPointerMove);
     window.addEventListener("pointerup", this.boundPointerUp);
+    this.boundContext = (event) => event.preventDefault();
+    canvas.addEventListener("contextmenu", this.boundContext);
 
     this.resize();
     window.addEventListener("resize", () => this.resize());
@@ -99,6 +106,7 @@ export class CubeViewer {
     this.canvas.removeEventListener("pointerdown", this.boundPointerDown);
     window.removeEventListener("pointermove", this.boundPointerMove);
     window.removeEventListener("pointerup", this.boundPointerUp);
+    this.canvas.removeEventListener("contextmenu", this.boundContext);
     this.controls.dispose();
     this.renderer.dispose();
   }
@@ -281,21 +289,24 @@ export class CubeViewer {
   }
 
   onPointerDown(event) {
-    if (this.animating || event.button !== 0) return;
+    if (this.animating) return;
     const hit = this.hitSticker(event);
     if (!hit) return;
+    if (event.button !== 0 && event.button !== 2) return;
     this.controls.enabled = false;
     this.drag = {
       startX: event.clientX,
       startY: event.clientY,
       cubie: hit.object.userData.cubie,
       face: hit.object.userData.face,
+      button: event.button,
       committed: false,
     };
   }
 
   onPointerMove(event) {
     if (!this.drag || this.drag.committed) return;
+    if (this.clickToTurn) return;
     const dx = event.clientX - this.drag.startX;
     const dy = event.clientY - this.drag.startY;
     if (Math.hypot(dx, dy) < 18) return;
@@ -306,9 +317,30 @@ export class CubeViewer {
     this.enqueue(move);
   }
 
-  onPointerUp() {
+  onPointerUp(event) {
+    if (this.drag && !this.drag.committed && this.clickToTurn) {
+      const dx = event.clientX - this.drag.startX;
+      const dy = event.clientY - this.drag.startY;
+      if (Math.hypot(dx, dy) < 14) {
+        const now = performance.now();
+        const dbl = now - this._lastClickAt < 320;
+        this._lastClickAt = now;
+        let turns = this.drag.button === 2 ? 3 : 1;
+        if (dbl && this.drag.button === 0) turns = 2;
+        this.enqueue(this.stickerClickMove(this.drag.face, this.drag.cubie, turns));
+      }
+    }
     this.drag = null;
     this.controls.enabled = true;
+  }
+
+  stickerClickMove(face, cubie, turns) {
+    const n = this.cube.size;
+    const axis = { R: 0, L: 0, U: 1, D: 1, F: 2, B: 2 }[face];
+    const coord = [cubie.x, cubie.y, cubie.z][axis];
+    const fromZero = face === "L" || face === "D" || face === "B";
+    const layer = fromZero ? coord + 1 : n - coord;
+    return { face, layer, wide: false, turns };
   }
 
   dragToMove(drag, dx, dy) {

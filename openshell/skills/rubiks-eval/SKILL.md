@@ -1,52 +1,42 @@
 ---
 name: rubiks-eval
-description: Solve an NxNxN Rubik's cube eval task without network access.
+description: Solve a scrambled cube by looking at it and clicking stickers. Visual only. Computer use.
 ---
 
-# Rubik's cube eval
+# Visual cube eval (computer use)
 
-You are solving a scrambled NxNxN cube, or a 3×3×3×3 (4D) hypercube when
-`kind` is `"4d"`. There is no internet. Do not call external APIs. If you
-need a model, use `https://inference.local` only.
+You are solving a scrambled Rubik's cube **by looking at it**. You do not get
+the scramble, a net, JSON, or move names.
 
-## Task files
+There is no internet. Do not call external APIs. If you need a model, use
+`https://inference.local` only.
 
-- `/eval/task.json` is the puzzle. It has `size`, `scramble_depth`, and `state`.
-- The scramble sequence is withheld on purpose. Invert-guessing it is cheating
-  only if it appears in the file; it will not.
-- Write your solution to `/eval/solution.txt` as WCA moves, space-separated.
+## What you may do
 
-## CLI
+1. Open the cube window (the page at `/eval`, usually `http://127.0.0.1:8765/eval`).
+2. Look at the colored stickers.
+3. Turn the cube with the pointer:
+   - **Left click** a sticker = 90° clockwise on that layer/cell
+   - **Right click** a sticker = 90° counter-clockwise
+   - **Double-click** a sticker = 180°
+   - **Drag empty space** to orbit / look around
+4. When every side is a single color, click the **green circle** in the
+   bottom-right to submit.
 
-```bash
-rubix-eval show /eval/task.json --no-color
-rubix-eval apply /eval/task.json "R U R'"
-# When finished:
-# echo "R U R' U'" > /eval/solution.txt
-# rubix-eval grade /eval/task.json --solution /eval/solution.txt
-```
+On the 4D puzzle you will see several colored cubes (cells of a tesseract).
+Click stickers on those cells the same way. There are no letter labels.
 
-## Notation (3D)
+## What you must not do
 
-- Faces: `U D L R F B`
-- `'` is counter-clockwise, `2` is a half turn
-- Inner slices on big cubes: `2R`, `3U`
-- Wide turns: `Rw`, `3Uw`
+- Do not open `/eval/task.json`, `task.json`, or any JSON.
+- Do not run `rubix-eval show`, `oracle`, or `grade`.
+- Do not read the page source, network responses, or DevTools.
+- Do not type face letters as a substitute for looking at the stickers.
+- Do not fetch `/api/task` (that endpoint is for humans, not this eval).
 
-## Notation (4D, `kind: "4d"`)
+If a terminal is available, ignore it for this task. Use the display.
 
-A 3×3×3×3 has eight cubic cells: `R L U D F B I` (inside) `O` (outside).
-`RU` twists the R cell 90° around U (2c click). `RU'` and `RU2` as usual.
-The task JSON `state.cells` is an 8-cell map of 3×3×3 sticker tensors.
+## Scoring (you cannot see these numbers)
 
-## Scoring
-
-You are graded on:
-
-1. `solved` — every face one color
-2. `htm` — number of moves (half-turn metric)
-3. `qtm` — quarter-turn metric (`U2` costs 2)
-4. `excess_htm` — `htm - scramble_depth` (lower is better; negative means a shorter path than the scramble)
-5. Stay under `max_moves`
-
-Prefer a short correct solution over a long one.
+Solved, move count (HTM/QTM), and extra moves vs scramble depth.
+Shorter correct solutions score better.

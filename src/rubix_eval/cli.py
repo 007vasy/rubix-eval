@@ -62,6 +62,15 @@ def main(argv: list[str] | None = None) -> int:
     view_p.add_argument("--host", default="127.0.0.1")
     view_p.add_argument("--port", type=int, default=8765)
 
+    vis_p = sub.add_parser(
+        "visual",
+        help="Visual-only eval: agent sees the cube and turns it with the pointer (computer use)",
+    )
+    _add_puzzle_args(vis_p)
+    vis_p.add_argument("--host", default="127.0.0.1")
+    vis_p.add_argument("--port", type=int, default=8765)
+    vis_p.add_argument("--no-open", action="store_true", help="Do not open a browser")
+
     apply_p = sub.add_parser("apply", help="Apply moves to a task and print the new net")
     apply_p.add_argument("task", help="Task JSON path")
     apply_p.add_argument("moves", nargs="+", help="Moves to apply")
@@ -74,6 +83,7 @@ def main(argv: list[str] | None = None) -> int:
         "oracle": _cmd_oracle,
         "run": _cmd_run,
         "view": _cmd_view,
+        "visual": _cmd_visual,
         "apply": _cmd_apply,
     }
     return handlers[args.cmd](args)
@@ -179,7 +189,37 @@ def _cmd_view(args: argparse.Namespace) -> int:
         print(f"web UI not found at {root}", file=sys.stderr)
         return 1
     print(f"cube viewer: http://{args.host}:{args.port}/")
+    print(f"visual eval: http://{args.host}:{args.port}/eval")
     serve(root, args.host, args.port)
+    return 0
+
+
+def _cmd_visual(args: argparse.Namespace) -> int:
+    import webbrowser
+
+    from .serve import serve
+    from .visual_session import new_session
+
+    root = web_dir()
+    if not (root / "eval.html").exists():
+        print(f"visual eval page not found at {root}", file=sys.stderr)
+        return 1
+    session = new_session(
+        size=args.size,
+        depth=args.depth,
+        seed=args.seed,
+        kind="4d" if args.four_d else "3d",
+        max_moves=args.max_moves,
+    )
+    url = f"http://{args.host}:{args.port}/eval"
+    print("Visual-only eval (computer use). The agent should only look at this window.")
+    print(f"  cube:  {url}")
+    print(f"  grade: http://{args.host}:{args.port}/api/visual/grade")
+    print("Left click = 90° CW · right click = 90° CCW · double-click = 180°")
+    print("Drag empty space to orbit · green circle = submit")
+    if not args.no_open:
+        webbrowser.open(url)
+    serve(root, args.host, args.port, visual_session=session)
     return 0
 
 

@@ -61,6 +61,30 @@ The 4D puzzle is a **3×3×3×3** (tesseract / MagicCube4D analog): eight cubic
 cells `R L U D F B I O`. Moves are Zhao 2c clicks such as `RU` (twist the R
 cell 90° around U).
 
+## Visual-only eval (computer use)
+
+The agent should **only look at the cube** and turn it with the pointer. No
+JSON, no ASCII net, no scramble, no move names on screen.
+
+```bash
+rubix-eval visual --size 3 --depth 8 --seed 1
+# 4D:
+rubix-eval visual --4d --depth 8 --seed 1
+```
+
+Opens `http://127.0.0.1:8765/eval`:
+
+- Left click a sticker = 90° clockwise
+- Right click = 90° counter-clockwise
+- Double-click = 180°
+- Drag empty space to orbit
+- Green circle = submit
+
+The harness grades at `http://127.0.0.1:8765/api/visual/grade` after submit.
+The boot API does not include the scramble or oracle. Point a computer-use
+agent at that window (screenshot + click). Inference stays on
+`inference.local` inside NVIDIA OpenShell; the cube UI is this local page.
+
 ## 3D cube in the browser
 
 ```bash

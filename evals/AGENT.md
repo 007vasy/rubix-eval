@@ -4,7 +4,12 @@ You are being evaluated on solving Rubik's cubes of size N×N×N, or a
 3×3×3×3 hypercube when `kind` is `"4d"`, that are `scramble_depth`
 random turns from solved.
 
-Rules:
+**Visual / computer-use eval (default for agents):**
+
+- Open `/eval`. Look at the cube. Click stickers. Do not read JSON or use the CLI.
+- Left click = CW, right click = CCW, double-click = 180°. Green circle submits.
+
+**Text eval (only if you were given `task.json`):**
 
 - No internet. Do not fetch cube solvers, docs, or APIs.
 - Read `task.json` (stdin or `/eval/task.json`).
