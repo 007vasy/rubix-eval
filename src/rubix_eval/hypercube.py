@@ -131,14 +131,17 @@ class HyperCube:
         return parsed
 
     def _apply_move(self, move: HyperMove) -> None:
-        if move.cell not in CELL_AXIS or move.axis not in CELL_AXIS:
+        if move.cell not in CELL_AXIS:
             raise ValueError(f"invalid 4D move {move}")
-        if CELL_AXIS[move.cell][0] == CELL_AXIS[move.axis][0]:
-            raise ValueError(f"{move}: cell and axis must be on different 4D axes")
         if move.order == 4:
+            if move.axis not in CELL_AXIS:
+                raise ValueError(f"invalid 4D move {move}")
+            if CELL_AXIS[move.cell][0] == CELL_AXIS[move.axis][0]:
+                raise ValueError(f"{move}: cell and axis must be on different 4D axes")
             self._twist_90(move.cell, move.axis, move.turns)
         elif move.order == 2:
-            self._twist_90(move.cell, move.axis, (move.turns * 2) % 4)
+            axis = move.axis_cells[0] if move.axis_cells else move.axis[0]
+            self._twist_90(move.cell, axis, (move.turns * 2) % 4)
         else:
             self._twist_120(move.cell, move.axis_cells, move.turns)
 

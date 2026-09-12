@@ -65,6 +65,29 @@ function permSign(seq) {
   return inv % 2 ? -1 : 1;
 }
 
+export function twist90Position(pos, cell, axisCell, turns) {
+  const n = 3;
+  const [cellAxis, cellExt] = CELL_AXIS[cell];
+  const [rotAxis, rotExt] = CELL_AXIS[axisCell];
+  turns = ((turns % 4) + 4) % 4;
+  if (rotExt === 0) turns = (-turns + 4) % 4;
+  if (cellExt === 0) turns = (-turns + 4) % 4;
+  if (!turns) return pos.slice();
+  const [i, j] = orientedPlane(cellAxis, rotAxis);
+  const out = pos.slice();
+  let ci = out[i];
+  let cj = out[j];
+  for (let t = 0; t < turns; t += 1) {
+    const nextI = n - 1 - cj;
+    const nextJ = ci;
+    ci = nextI;
+    cj = nextJ;
+  }
+  out[i] = ci;
+  out[j] = cj;
+  return out;
+}
+
 export function orientedPlane(cellAxis, rotAxis) {
   const others = [0, 1, 2, 3].filter((a) => a !== cellAxis && a !== rotAxis);
   let i = others[0];
@@ -353,5 +376,28 @@ export class HyperCube {
     const cells = {};
     for (const cell of CELLS) cells[cell] = this.cellStickers(cell);
     return { kind: "4d", size: 3, ndim: 4, cells };
+  }
+
+  setCells(cells) {
+    const n = 3;
+    this.cubies.clear();
+    for (const [cell, grid] of Object.entries(cells)) {
+      const [cellAxis, cellExt] = CELL_AXIS[cell];
+      const [a, b, c] = this.cellLocalAxes(cell);
+      for (let k = 0; k < n; k += 1) {
+        for (let j = 0; j < n; j += 1) {
+          for (let i = 0; i < n; i += 1) {
+            const pos = [0, 0, 0, 0];
+            pos[cellAxis] = cellExt;
+            pos[a] = i;
+            pos[b] = j;
+            pos[c] = k;
+            const key = this.key(pos);
+            if (!this.cubies.has(key)) this.cubies.set(key, { pos: pos.slice(), colors: {} });
+            this.cubies.get(key).colors[cell] = String(grid[k][j][i]);
+          }
+        }
+      }
+    }
   }
 }

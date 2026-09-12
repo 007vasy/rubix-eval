@@ -14,10 +14,12 @@ import {
   invertHyperMoves,
   parseHyperMoves,
   stepCost,
+  twist90Position,
 } from "./hyperengine.js";
 
-const SEP = 4.4;
-const PITCH = 0.78;
+const PITCH = 0.82;
+const CUBIE = 0.72;
+const SEP = 5.1;
 const CELL_ORIGIN = {
   I: [0, 0, 0],
   R: [SEP, 0, 0],
@@ -26,8 +28,23 @@ const CELL_ORIGIN = {
   D: [0, -SEP, 0],
   F: [0, 0, SEP],
   B: [0, 0, -SEP],
-  O: [SEP * 1.15, -SEP * 0.15, -SEP * 1.05],
+  O: [SEP * 2, 0, 0],
 };
+
+const BOX_FACE_NORMALS = [
+  [1, 0, 0],
+  [1, 0, 0],
+  [-1, 0, 0],
+  [-1, 0, 0],
+  [0, 1, 0],
+  [0, 1, 0],
+  [0, -1, 0],
+  [0, -1, 0],
+  [0, 0, 1],
+  [0, 0, 1],
+  [0, 0, -1],
+  [0, 0, -1],
+];
 
 function localAxes(cell) {
   const cellAxis = CELL_AXIS[cell][0];
@@ -48,16 +65,85 @@ function localToOffset(cell, i, j, k) {
   return [v4[0], v4[1], v4[2]];
 }
 
-function axisWorldDir(cell, axisCell) {
-  const dummy = localToOffset(cell, 1, 1, 1);
-  const [cellAxis] = CELL_AXIS[cell];
-  const rotAxis = CELL_AXIS[axisCell][0];
+function pos4ToOffset(cell, pos) {
   const [a, b, c] = localAxes(cell);
-  const i = a === rotAxis ? 2 : 1;
-  const j = b === rotAxis ? 2 : 1;
-  const k = c === rotAxis ? 2 : 1;
-  const tip = localToOffset(cell, i, j, k);
-  return new THREE.Vector3(tip[0] - dummy[0], tip[1] - dummy[1], tip[2] - dummy[2]).normalize();
+  return localToOffset(cell, pos[a], pos[b], pos[c]);
+}
+
+function worldNormalToAxisCell(cell, nx, ny, nz) {
+  const [cellAxis, cellExt] = CELL_AXIS[cell];
+  const sign = cellExt === 2 ? 1 : -1;
+  let axis4;
+  let positive;
+  if (cellAxis === 0) {
+    if (Math.abs(nx) >= Math.abs(ny) && Math.abs(nx) >= Math.abs(nz)) {
+      axis4 = 3;
+      positive = nx * sign > 0;
+    } else if (Math.abs(ny) >= Math.abs(nz)) {
+      axis4 = 1;
+      positive = ny > 0;
+    } else {
+      axis4 = 2;
+      positive = nz > 0;
+    }
+  } else if (cellAxis === 1) {
+    if (Math.abs(ny) >= Math.abs(nx) && Math.abs(ny) >= Math.abs(nz)) {
+      axis4 = 3;
+      positive = ny * sign > 0;
+    } else if (Math.abs(nx) >= Math.abs(nz)) {
+      axis4 = 0;
+      positive = nx > 0;
+    } else {
+      axis4 = 2;
+      positive = nz > 0;
+    }
+  } else if (cellAxis === 2) {
+    if (Math.abs(nz) >= Math.abs(nx) && Math.abs(nz) >= Math.abs(ny)) {
+      axis4 = 3;
+      positive = nz * sign > 0;
+    } else if (Math.abs(nx) >= Math.abs(ny)) {
+      axis4 = 0;
+      positive = nx > 0;
+    } else {
+      axis4 = 1;
+      positive = ny > 0;
+    }
+  } else if (Math.abs(nx) >= Math.abs(ny) && Math.abs(nx) >= Math.abs(nz)) {
+    axis4 = 0;
+    positive = nx > 0;
+  } else if (Math.abs(ny) >= Math.abs(nz)) {
+    axis4 = 1;
+    positive = ny > 0;
+  } else {
+    axis4 = 2;
+    positive = nz > 0;
+  }
+  return AXIS_CELL[`${axis4},${positive ? 2 : 0}`];
+}
+
+function twistWorldRotation(cell, axisCell, turns) {
+  const [cellAxis, cellExt] = CELL_AXIS[cell];
+  const rotAxis = CELL_AXIS[axisCell][0];
+  const pos = [1, 1, 1, 1];
+  pos[cellAxis] = cellExt;
+  pos[rotAxis] = 2;
+  const plane = [0, 1, 2, 3].find((a) => a !== cellAxis && a !== rotAxis);
+  pos[plane] = 2;
+  const before = new THREE.Vector3(...pos4ToOffset(cell, pos));
+  const after = new THREE.Vector3(...pos4ToOffset(cell, twist90Position(pos, cell, axisCell, turns)));
+  if (before.lengthSq() < 1e-8 || after.lengthSq() < 1e-8) {
+    return { axis: new THREE.Vector3(0, 1, 0), angle: 0 };
+  }
+  const axis = new THREE.Vector3().crossVectors(before, after);
+  if (axis.lengthSq() < 1e-8) {
+    const q = ((turns % 4) + 4) % 4;
+    const angle = q === 2 ? Math.PI : 0;
+    const fallback = before.clone().normalize();
+    const helper = Math.abs(fallback.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+    return { axis: new THREE.Vector3().crossVectors(fallback, helper).normalize(), angle };
+  }
+  axis.normalize();
+  return { axis, angle: before.angleTo(after) };
 }
 
 function makeLabel(text, hex) {
@@ -89,12 +175,13 @@ export class HyperViewer {
     this.animating = false;
     this.modifier = 1;
     this._stopped = false;
-    this._lastClickAt = 0;
+    this._press = null;
+    this._pendingClick = null;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0b0d10);
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
-    this.camera.position.set(8.5, 6.5, 12);
+    this.camera.position.set(16, 11, 18);
 
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -102,25 +189,30 @@ export class HyperViewer {
     this.controls.enablePan = false;
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
-    this.controls.minDistance = 8;
-    this.controls.maxDistance = 40;
+    this.controls.minDistance = 10;
+    this.controls.maxDistance = 48;
+    this.controls.target.set(SEP * 0.7, 0, 0);
     this.controls.mouseButtons.RIGHT = -1;
 
     this.root = new THREE.Group();
     this.scene.add(this.root);
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x1a1a1a, 1.1));
     const key = new THREE.DirectionalLight(0xffffff, 1.0);
-    key.position.set(8, 12, 10);
+    key.position.set(10, 14, 12);
     this.scene.add(key);
 
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
     this.stickerMeshes = [];
 
-    this.onClick = this.handleClick.bind(this);
+    this.onDown = this.handlePointerDown.bind(this);
+    this.onMove = this.handlePointerMove.bind(this);
+    this.onUp = this.handlePointerUp.bind(this);
     this.onResize = () => this.resize();
     this.onContext = (event) => event.preventDefault();
-    canvas.addEventListener("pointerdown", this.onClick);
+    canvas.addEventListener("pointerdown", this.onDown);
+    window.addEventListener("pointermove", this.onMove);
+    window.addEventListener("pointerup", this.onUp);
     canvas.addEventListener("contextmenu", this.onContext);
     window.addEventListener("resize", this.onResize);
 
@@ -131,7 +223,10 @@ export class HyperViewer {
 
   dispose() {
     this._stopped = true;
-    this.canvas.removeEventListener("pointerdown", this.onClick);
+    if (this._pendingClick) clearTimeout(this._pendingClick);
+    this.canvas.removeEventListener("pointerdown", this.onDown);
+    window.removeEventListener("pointermove", this.onMove);
+    window.removeEventListener("pointerup", this.onUp);
     this.canvas.removeEventListener("contextmenu", this.onContext);
     window.removeEventListener("resize", this.onResize);
     this.controls.dispose();
@@ -173,7 +268,7 @@ export class HyperViewer {
   }
 
   undo() {
-    if (this.animating || !this.history.length) return;
+    if (!this.history.length) return;
     const last = this.history.pop();
     this.enqueue({ ...last, turns: last.order === 4 ? 4 - last.turns : last.turns, _undo: true });
   }
@@ -186,7 +281,7 @@ export class HyperViewer {
   rebuild() {
     while (this.root.children.length) this.root.remove(this.root.children[0]);
     this.stickerMeshes = [];
-    const geo = new THREE.BoxGeometry(0.7, 0.7, 0.7);
+    const geo = new THREE.BoxGeometry(CUBIE, CUBIE, CUBIE);
     for (const cell of CELLS) {
       const group = new THREE.Group();
       group.position.set(...CELL_ORIGIN[cell]);
@@ -219,7 +314,7 @@ export class HyperViewer {
       }
       if (this.showLabels) {
         const label = makeLabel(cell, COLOR_HEX[CELL_COLOR[cell]]);
-        label.position.set(0, 1.55, 0);
+        label.position.set(0, 1.7, 0);
         group.add(label);
       }
       this.root.add(group);
@@ -235,25 +330,23 @@ export class HyperViewer {
     const move = this.queue.shift();
     const group = this.root.children.find((g) => g.userData.cell === move.cell);
     const axisCell = move.axisCells ? move.axisCells[0] : move.axis;
-    const axis = move.order === 4 && axisCell ? axisWorldDir(move.cell, axisCell) : new THREE.Vector3(0, 1, 0);
-    let radians = Math.PI / 2;
-    if (move.order === 4) {
-      const q = ((move.turns % 4) + 4) % 4;
-      radians = q === 1 ? Math.PI / 2 : q === 2 ? Math.PI : q === 3 ? -Math.PI / 2 : 0;
-      if (CELL_AXIS[move.cell][1] === 0) radians = -radians;
-      if (CELL_AXIS[axisCell][1] === 0) radians = -radians;
-    } else if (move.order === 2) radians = Math.PI;
-    else radians = ((move.turns % 3) * 2 * Math.PI) / 3;
+    let axis = new THREE.Vector3(0, 1, 0);
+    let angle = 0;
+    if (move.order === 4 && axisCell && CELL_AXIS[axisCell]) {
+      const rot = twistWorldRotation(move.cell, axisCell, move.turns);
+      axis = rot.axis;
+      angle = rot.angle;
+    } else if (move.order === 2) {
+      angle = Math.PI;
+    }
 
     const start = performance.now();
-    const duration = 200;
+    const duration = move.turns === 2 ? 280 : 200;
     const tick = (now) => {
       if (this._stopped) return;
       const t = Math.min(1, (now - start) / duration);
       const eased = 1 - (1 - t) ** 3;
-      if (group && move.order === 4) {
-        group.setRotationFromAxisAngle(axis, radians * eased);
-      }
+      if (group && angle) group.setRotationFromAxisAngle(axis, angle * eased);
       if (t < 1) {
         requestAnimationFrame(tick);
         return;
@@ -276,56 +369,65 @@ export class HyperViewer {
     requestAnimationFrame(tick);
   }
 
-  handleClick(event) {
-    if (this.animating || (event.button !== 0 && event.button !== 2)) return;
+  pointerNDC(event) {
     const rect = this.canvas.getBoundingClientRect();
     this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-    this.raycaster.setFromCamera(this.pointer, this.camera);
-    const hit = this.raycaster.intersectObjects(this.stickerMeshes, false)[0];
-    if (!hit) return;
-    this.controls.enabled = false;
-    const now = performance.now();
-    const dbl = event.button === 0 && now - this._lastClickAt < 320;
-    this._lastClickAt = now;
-    const prev = this.modifier;
-    if (event.button === 2) this.modifier = 3;
-    else if (dbl) this.modifier = 2;
-    const move = this.stickerToMove(hit.object.userData);
-    this.modifier = prev;
-    if (move) this.enqueue(move);
-    setTimeout(() => {
-      this.controls.enabled = true;
-    }, 40);
   }
 
-  stickerToMove(data) {
-    const { cell, i, j, k } = data;
-    const axes = localAxes(cell);
-    const coords = [i, j, k];
-    const extremes = [];
-    coords.forEach((v, idx) => {
-      if (v === 0 || v === 2) {
-        extremes.push(AXIS_CELL[`${axes[idx]},${v}`]);
-      }
-    });
-    if (extremes.length === 1) {
-      return {
-        cell,
-        axis: extremes[0],
-        turns: this.modifier,
-        order: 4,
-        axisCells: extremes,
-      };
+  hitSticker(event) {
+    this.pointerNDC(event);
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    return this.raycaster.intersectObjects(this.stickerMeshes, false)[0] || null;
+  }
+
+  handlePointerDown(event) {
+    if (event.button !== 0 && event.button !== 2) return;
+    const hit = this.hitSticker(event);
+    this._press = {
+      x: event.clientX,
+      y: event.clientY,
+      button: event.button,
+      hit,
+      dragged: false,
+    };
+    if (hit) this.controls.enabled = false;
+  }
+
+  handlePointerMove(event) {
+    if (!this._press) return;
+    if (Math.hypot(event.clientX - this._press.x, event.clientY - this._press.y) > 12) {
+      this._press.dragged = true;
+      this.controls.enabled = true;
     }
-    if (extremes.length === 2) {
-      return { cell, axis: extremes.join(""), turns: 1, order: 2, axisCells: extremes };
+  }
+
+  handlePointerUp(event) {
+    const press = this._press;
+    this._press = null;
+    this.controls.enabled = true;
+    if (!press || press.dragged || !press.hit) return;
+    const face = press.hit.faceIndex ?? 0;
+    const [nx, ny, nz] = BOX_FACE_NORMALS[face] || [0, 1, 0];
+    const cell = press.hit.object.userData.cell;
+    const axis = worldNormalToAxisCell(cell, nx, ny, nz);
+    if (!axis || axis === cell || CELL_AXIS[axis][0] === CELL_AXIS[cell][0]) return;
+    const turns = press.button === 2 ? 3 : 1;
+    if (press.button === 0 && this._pendingClick) {
+      clearTimeout(this._pendingClick);
+      this._pendingClick = null;
+      this.enqueue({ cell, axis, turns: 2, order: 4, axisCells: [axis] });
+      return;
     }
-    if (extremes.length === 3) {
-      const turns = this.modifier === 3 ? 2 : 1;
-      return { cell, axis: extremes.join(""), turns, order: 3, axisCells: extremes };
+    const move = { cell, axis, turns, order: 4, axisCells: [axis] };
+    if (press.button === 0) {
+      this._pendingClick = setTimeout(() => {
+        this._pendingClick = null;
+        this.enqueue(move);
+      }, 220);
+    } else {
+      this.enqueue(move);
     }
-    return null;
   }
 
   notify() {
