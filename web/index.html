@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rubix-eval — interactive NxNxN cube</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/app.css" />
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <b>rubix-eval</b>
+          <span>NxNxN cube · steps from solved · step cost</span>
+        </div>
+        <div id="badge" class="badge solved">solved</div>
+      </header>
+
+      <aside class="sidebar">
+        <h2>Puzzle</h2>
+        <label>
+          Size (N × N × N)
+          <input id="size" type="range" min="2" max="7" value="3" />
+          <span id="sizeLabel">3×3×3</span>
+        </label>
+        <label>
+          Steps from solved
+          <input id="depth" type="number" min="0" max="200" value="8" />
+        </label>
+        <label>
+          Seed
+          <input id="seed" type="number" min="0" value="1" />
+        </label>
+        <label>
+          Inner layer (big cubes)
+          <input id="layer" type="number" min="1" max="6" value="1" />
+        </label>
+        <div class="row">
+          <button class="primary" id="scramble">Scramble</button>
+          <button id="reset">Reset</button>
+        </div>
+        <div class="row" style="margin-top: 8px">
+          <button id="undo">Undo</button>
+          <button id="solve">Reverse scramble</button>
+        </div>
+
+        <h2>Turns</h2>
+        <div class="mods">
+          <button id="modCw" aria-pressed="true">CW</button>
+          <button id="modPrime" aria-pressed="false">'</button>
+          <button id="mod2" aria-pressed="false">2</button>
+          <button id="modWide" aria-pressed="false">wide</button>
+        </div>
+        <div class="pad">
+          <button data-face="U">U</button>
+          <button data-face="F">F</button>
+          <button data-face="R">R</button>
+          <button data-face="D">D</button>
+          <button data-face="B">B</button>
+          <button data-face="L">L</button>
+        </div>
+        <p class="hint">Drag a sticker to turn that layer. Drag empty space to orbit. Keys: U D L R F B, shift for prime, 2 then a face for a half turn.</p>
+      </aside>
+
+      <main class="stage">
+        <canvas id="view"></canvas>
+      </main>
+
+      <aside class="stats">
+        <h2>Eval cost</h2>
+        <div class="metric">HTM steps <b id="htm">0</b></div>
+        <div class="metric">QTM steps <b id="qtm">0</b></div>
+        <div class="metric">Scramble depth <b id="scrambleDepth">0</b></div>
+        <div class="metric">Excess HTM <b id="excess">0</b></div>
+        <div class="metric">Efficiency <b id="eff">—</b></div>
+        <div class="metric">Misplaced stickers <b id="misplaced">0</b></div>
+        <h2>Move sequence</h2>
+        <div class="history" id="history">(none)</div>
+      </aside>
+
+      <footer class="statusbar">
+        <span>Offline eval: agents solve without internet inside NVIDIA OpenShell.</span>
+        <span>Drag stickers · orbit background · <kbd>u</kbd><kbd>d</kbd><kbd>l</kbd><kbd>r</kbd><kbd>f</kbd><kbd>b</kbd></span>
+      </footer>
+    </div>
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>

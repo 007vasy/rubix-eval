@@ -1,0 +1,26 @@
+# Offline eval policy for NVIDIA OpenShell.
+# Deny all outbound network. inference.local stays available so a local
+# or gateway-routed model can run without the agent reaching the public internet.
+version: 1
+
+filesystem_policy:
+  include_workdir: true
+  read_only:
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /app
+    - /etc
+    - /var/log
+  read_write:
+    - /sandbox
+    - /tmp
+    - /dev/null
+
+landlock:
+  compatibility: best_effort
+
+# Empty on purpose: default-deny. Do not add api.openai.com, api.anthropic.com,
+# or any other egress. Route models through OpenShell inference.local instead.
+network_policies: {}

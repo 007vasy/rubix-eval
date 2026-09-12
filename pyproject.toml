@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rubix-eval"
+version = "0.1.0"
+description = "Offline NxNxN Rubik's cube eval for sandboxed agents, with an interactive 3D viewer."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "rubix-eval" }]
+keywords = ["rubiks", "cube", "eval", "openshell", "benchmark"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+rubix-eval = "rubix_eval.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/007vasy/rubix-eval"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
