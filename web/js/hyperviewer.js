@@ -7,6 +7,7 @@ import {
   CELLS,
   COLOR_HEX,
   HyperCube,
+  PLASTIC,
   adjacentCells,
   formatHyperMoves,
   generateHyperScramble,
@@ -17,9 +18,10 @@ import {
   twist90Position,
 } from "./hyperengine.js";
 
-const PITCH = 0.82;
-const CUBIE = 0.72;
-const SEP = 5.1;
+const PITCH = 0.98;
+const CUBIE = 0.58;
+const STICKER = 0.5;
+const SEP = 5.4;
 const CELL_ORIGIN = {
   I: [0, 0, 0],
   R: [SEP, 0, 0],
@@ -30,21 +32,6 @@ const CELL_ORIGIN = {
   B: [0, 0, -SEP],
   O: [SEP * 2, 0, 0],
 };
-
-const BOX_FACE_NORMALS = [
-  [1, 0, 0],
-  [1, 0, 0],
-  [-1, 0, 0],
-  [-1, 0, 0],
-  [0, 1, 0],
-  [0, 1, 0],
-  [0, -1, 0],
-  [0, -1, 0],
-  [0, 0, 1],
-  [0, 0, 1],
-  [0, 0, -1],
-  [0, 0, -1],
-];
 
 function localAxes(cell) {
   const cellAxis = CELL_AXIS[cell][0];
@@ -196,8 +183,8 @@ export class HyperViewer {
 
     this.root = new THREE.Group();
     this.scene.add(this.root);
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x1a1a1a, 1.1));
-    const key = new THREE.DirectionalLight(0xffffff, 1.0);
+    this.scene.add(new THREE.HemisphereLight(0xc8c8c8, 0x1a1a1a, 0.85));
+    const key = new THREE.DirectionalLight(0xffffff, 0.75);
     key.position.set(10, 14, 12);
     this.scene.add(key);
 
@@ -281,7 +268,21 @@ export class HyperViewer {
   rebuild() {
     while (this.root.children.length) this.root.remove(this.root.children[0]);
     this.stickerMeshes = [];
-    const geo = new THREE.BoxGeometry(CUBIE, CUBIE, CUBIE);
+    const bodyGeo = new THREE.BoxGeometry(CUBIE, CUBIE, CUBIE);
+    const stickerGeo = new THREE.PlaneGeometry(STICKER, STICKER);
+    const plastic = new THREE.MeshStandardMaterial({
+      color: PLASTIC,
+      roughness: 0.55,
+      metalness: 0.08,
+    });
+    const faceDirs = [
+      [1, 0, 0],
+      [-1, 0, 0],
+      [0, 1, 0],
+      [0, -1, 0],
+      [0, 0, 1],
+      [0, 0, -1],
+    ];
     for (const cell of CELLS) {
       const group = new THREE.Group();
       group.position.set(...CELL_ORIGIN[cell]);
@@ -298,17 +299,25 @@ export class HyperViewer {
             pos[c] = k;
             const cubie = this.cube.cubies.get(pos.join(","));
             const color = cubie.colors[cell];
-            const mat = new THREE.MeshStandardMaterial({
-              color: COLOR_HEX[color],
-              roughness: 0.35,
-              metalness: 0.04,
-            });
-            const mesh = new THREE.Mesh(geo, mat);
+            const piece = new THREE.Group();
             const off = localToOffset(cell, i, j, k);
-            mesh.position.set(...off);
-            mesh.userData = { cell, i, j, k };
-            group.add(mesh);
-            this.stickerMeshes.push(mesh);
+            piece.position.set(...off);
+            piece.add(new THREE.Mesh(bodyGeo, plastic));
+            const stickerMat = new THREE.MeshStandardMaterial({
+              color: COLOR_HEX[color] ?? 0x444444,
+              roughness: 0.4,
+              metalness: 0.02,
+            });
+            const z = CUBIE / 2 + 0.004;
+            for (const [nx, ny, nz] of faceDirs) {
+              const sticker = new THREE.Mesh(stickerGeo, stickerMat);
+              sticker.position.set(nx * z, ny * z, nz * z);
+              sticker.lookAt(sticker.position.clone().add(new THREE.Vector3(nx, ny, nz)));
+              sticker.userData = { cell, i, j, k, nx, ny, nz };
+              piece.add(sticker);
+              this.stickerMeshes.push(sticker);
+            }
+            group.add(piece);
           }
         }
       }
@@ -407,9 +416,11 @@ export class HyperViewer {
     this._press = null;
     this.controls.enabled = true;
     if (!press || press.dragged || !press.hit) return;
-    const face = press.hit.faceIndex ?? 0;
-    const [nx, ny, nz] = BOX_FACE_NORMALS[face] || [0, 1, 0];
-    const cell = press.hit.object.userData.cell;
+    const data = press.hit.object.userData;
+    const cell = data.cell;
+    const nx = data.nx ?? 0;
+    const ny = data.ny ?? 1;
+    const nz = data.nz ?? 0;
     const axis = worldNormalToAxisCell(cell, nx, ny, nz);
     if (!axis || axis === cell || CELL_AXIS[axis][0] === CELL_AXIS[cell][0]) return;
     const turns = press.button === 2 ? 3 : 1;

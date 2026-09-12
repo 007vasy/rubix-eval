@@ -32,15 +32,16 @@ export const CELL_COLOR = {
   O: "C",
 };
 export const COLOR_HEX = {
-  W: 0xf4f1ea,
-  Y: 0xf1c40f,
-  G: 0x27ae60,
-  B: 0x2e86de,
-  O: 0xe67e22,
-  R: 0xe74c3c,
-  P: 0xe056a0,
-  C: 0x1abc9c,
+  W: 0xdedad0,
+  Y: 0xf0c400,
+  G: 0x1e9e4a,
+  B: 0x1f6fbf,
+  O: 0xe06b12,
+  R: 0xd63b2f,
+  P: 0xc63d8c,
+  C: 0x129a82,
 };
+export const PLASTIC = 0x111111;
 export const OPPOSITE = {
   R: "L",
   L: "R",
