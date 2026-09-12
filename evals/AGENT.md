@@ -6,7 +6,9 @@ random turns from solved.
 
 **Visual / computer-use eval (default for agents):**
 
-- Open `/eval`. Look at the cube. Click stickers. Do not read JSON or use the CLI.
+- Open `/eval`. Each load is a new random challenge (size 2–10, 1–10 moves
+  from solved or fully scrambled). Look at the cube. Click stickers. Do not
+  read JSON or use the CLI.
 - Left click = CW, right click = CCW, double-click = 180°. Green circle submits.
 
 **Text eval (only if you were given `task.json`):**

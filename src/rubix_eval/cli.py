@@ -66,10 +66,35 @@ def main(argv: list[str] | None = None) -> int:
         "visual",
         help="Visual-only eval: agent sees the cube and turns it with the pointer (computer use)",
     )
-    _add_puzzle_args(vis_p)
+    vis_p.add_argument("--size", type=int, default=None, help="Pin cube size; omit to randomize")
+    vis_p.add_argument("--depth", default=None, help="Pin 1–10 or 'full'; omit to randomize")
+    vis_p.add_argument("--seed", type=int, default=None)
+    vis_p.add_argument("--max-moves", type=int, default=None)
+    vis_p.add_argument("--4d", dest="four_d", action="store_true")
     vis_p.add_argument("--host", default="127.0.0.1")
     vis_p.add_argument("--port", type=int, default=8765)
     vis_p.add_argument("--no-open", action="store_true", help="Do not open a browser")
+    vis_p.add_argument(
+        "--challenge",
+        action="store_true",
+        default=True,
+        help="Draw a random catalog challenge on every page load (default)",
+    )
+
+    ch_p = sub.add_parser(
+        "challenge",
+        help="Request a randomized challenge (fresh seed every call)",
+    )
+    ch_p.add_argument("--size", type=int, default=None, help="Pin cube size N, otherwise random")
+    ch_p.add_argument(
+        "--depth",
+        default=None,
+        help="Pin 1–10 or 'full', otherwise random",
+    )
+    ch_p.add_argument("--4d", dest="four_d", action="store_true")
+    ch_p.add_argument("--list", action="store_true", help="Print the challenge catalog and exit")
+    ch_p.add_argument("--visual-pool", action="store_true", help="Only sizes 2–10 (browser-safe)")
+    ch_p.add_argument("-o", "--output", help="Write JSON to this path")
 
     apply_p = sub.add_parser("apply", help="Apply moves to a task and print the new net")
     apply_p.add_argument("task", help="Task JSON path")
@@ -84,6 +109,7 @@ def main(argv: list[str] | None = None) -> int:
         "run": _cmd_run,
         "view": _cmd_view,
         "visual": _cmd_visual,
+        "challenge": _cmd_challenge,
         "apply": _cmd_apply,
     }
     return handlers[args.cmd](args)
@@ -196,23 +222,29 @@ def _cmd_view(args: argparse.Namespace) -> int:
 
 def _cmd_visual(args: argparse.Namespace) -> int:
     import webbrowser
+    from urllib.parse import urlencode
 
     from .serve import serve
-    from .visual_session import new_session
+    from .visual_session import random_visual_session
 
     root = web_dir()
     if not (root / "eval.html").exists():
         print(f"visual eval page not found at {root}", file=sys.stderr)
         return 1
-    session = new_session(
-        size=args.size,
-        depth=args.depth,
-        seed=args.seed,
-        kind="4d" if args.four_d else "3d",
-        max_moves=args.max_moves,
+    query: dict[str, str] = {"random": "1"}
+    if args.four_d:
+        query["kind"] = "4d"
+    if args.size:
+        query["size"] = str(args.size)
+    if args.depth is not None:
+        query["depth"] = str(args.depth)
+    session = random_visual_session(
+        size=int(query["size"]) if "size" in query else None,
+        depth=query.get("depth"),
+        kind=query.get("kind", "3d"),
     )
-    url = f"http://{args.host}:{args.port}/eval"
-    print("Visual-only eval (computer use). The agent should only look at this window.")
+    url = f"http://{args.host}:{args.port}/eval?{urlencode(query)}"
+    print("Visual-only eval (computer use). Each load draws a fresh random scramble.")
     print(f"  cube:  {url}")
     print(f"  grade: http://{args.host}:{args.port}/api/visual/grade")
     print("Left click = 90° CW · right click = 90° CCW · double-click = 180°")
@@ -220,6 +252,33 @@ def _cmd_visual(args: argparse.Namespace) -> int:
     if not args.no_open:
         webbrowser.open(url)
     serve(root, args.host, args.port, visual_session=session)
+    return 0
+
+
+def _cmd_challenge(args: argparse.Namespace) -> int:
+    from .challenges import catalog, request_challenge
+
+    kind = "4d" if args.four_d else "3d"
+    if args.list:
+        rows = catalog(kind=kind, visual=args.visual_pool)
+        json.dump({"count": len(rows), "challenges": rows}, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+    try:
+        challenge = request_challenge(
+            size=args.size,
+            depth=args.depth,
+            kind=kind,
+            visual=args.visual_pool,
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    text = json.dumps(challenge.public_dict(), indent=2) + "\n"
+    if args.output:
+        Path(args.output).write_text(text, encoding="utf-8")
+    else:
+        sys.stdout.write(text)
     return 0
 
 

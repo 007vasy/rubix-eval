@@ -12,7 +12,9 @@ const canvas = document.getElementById("view");
 const done = document.getElementById("done");
 const flash = document.getElementById("flash");
 
-const boot = await fetch("/api/visual/boot", { cache: "no-store" }).then((r) => {
+const bootQs = new URLSearchParams(location.search);
+if (!bootQs.has("random")) bootQs.set("random", "1");
+const boot = await fetch(`/api/visual/boot?${bootQs}`, { cache: "no-store" }).then((r) => {
   if (!r.ok) throw new Error("visual session missing — start with: rubix-eval visual");
   return r.json();
 });

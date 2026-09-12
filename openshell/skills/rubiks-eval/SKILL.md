@@ -13,7 +13,9 @@ There is no internet. Do not call external APIs. If you need a model, use
 
 ## What you may do
 
-1. Open the cube window (the page at `/eval`, usually `http://127.0.0.1:8765/eval`).
+1. Open the cube window (`http://127.0.0.1:8765/eval`). Each visit is a **new
+   random challenge** (cube size and how far it is from solved are chosen
+   for you; you only see the stickers).
 2. Look at the colored stickers.
 3. Turn the cube with the pointer:
    - **Left click** a sticker = 90° clockwise on that layer/cell

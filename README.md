@@ -61,15 +61,42 @@ The 4D puzzle is a **3×3×3×3** (tesseract / MagicCube4D analog): eight cubic
 cells `R L U D F B I O`. Moves are Zhao 2c clicks such as `RU` (twist the R
 cell 90° around U).
 
+## Challenges
+
+Each time a model **requests a challenge**, a new instance is drawn:
+
+- **Sizes:** 2×2×2, 3×3×3, …, 10×10×10, plus 40×40×40 and 100×100×100
+- **Distance from solved:** 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 random turns, or **fully scrambled** (WCA-length: 11 / 25 / 45 / … / 1200 depending on N)
+- **Seed:** new on every request, so the same size×depth pair is never the same scramble twice
+
+```bash
+rubix-eval challenge              # random size, depth, seed
+rubix-eval challenge --size 3     # random depth + seed on a 3×3×3
+rubix-eval challenge --depth 1    # random size, one move from solved
+rubix-eval challenge --depth full --size 4
+rubix-eval challenge --list       # print the catalog
+```
+
+HTTP (no oracle, scramble withheld):
+
+```
+GET /api/challenge
+GET /api/challenge?size=5&depth=10
+GET /api/challenges
+```
+
+The visual page draws a **new random challenge on every load** (browser-safe sizes 2–10). Giant cubes (40, 100) are text/API challenges only.
+
 ## Visual-only eval (computer use)
 
 The agent should **only look at the cube** and turn it with the pointer. No
 JSON, no ASCII net, no scramble, no move names on screen.
 
 ```bash
+rubix-eval visual                 # random challenge on every load
+rubix-eval visual --size 3        # random depth on a 3×3×3
+rubix-eval visual --4d            # random 3×3×3×3 hypercube
 rubix-eval visual --size 3 --depth 8 --seed 1
-# 4D:
-rubix-eval visual --4d --depth 8 --seed 1
 ```
 
 Opens `http://127.0.0.1:8765/eval`:
