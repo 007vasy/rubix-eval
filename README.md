@@ -17,6 +17,25 @@ should solve **without internet**. NVIDIA OpenShell runs that constraint as a
 default-deny sandbox; `https://inference.local` is still available for a local
 or gateway-routed model.
 
+## Inspect eval (UK AISI)
+
+The agent-facing eval is an [Inspect](https://inspect.aisi.org.uk/) task.
+The cube engine still withholds the scramble; the scorer replays the model's
+moves on the stored state.
+
+```bash
+pip install -e ".[inspect]"
+# dry-run the engine through Inspect (plays the oracle, not an LLM)
+inspect eval evals/inspect_rubix.py@rubix_oracle -T sizes=3 -T depths=1 --model mockllm/model
+# text eval (ASCII + JSON in, WCA/Zhao out)
+inspect eval evals/inspect_rubix.py@rubix --model openai/gpt-4.1-mini -T sizes=3 -T depths=1,5
+# tool-use eval: look() / twist() only — no scramble, no oracle
+inspect eval evals/inspect_rubix.py@rubix_visual --model openai/gpt-4.1-mini -T depths=1,2,5
+```
+
+Open logs with `inspect view`. The interactive browser eval (`rubix-eval visual`)
+is unchanged for human/computer-use sessions.
+
 ## Quick start
 
 ```bash

@@ -13,6 +13,10 @@ random turns from solved.
   the CLI.
 - Left click = CW, right click = CCW, double-click = 180°. Green circle submits.
 
+**Inspect eval (UK AISI):** `inspect eval evals/inspect_rubix.py@rubix` (text) or
+`@rubix_visual` (`look` / `twist` tools). The scorer replays your moves. You
+never receive the scramble sequence.
+
 **Text eval (only if you were given `task.json`):**
 
 - No internet. Do not fetch cube solvers, docs, or APIs.

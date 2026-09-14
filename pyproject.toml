@@ -19,6 +19,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+inspect = ["inspect-ai>=0.3"]
 
 [project.scripts]
 rubix-eval = "rubix_eval.cli:main"
