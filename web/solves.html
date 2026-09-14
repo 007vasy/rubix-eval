@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rubix-eval — recorded solves</title>
+    <link rel="stylesheet" href="./css/solves.css" />
+    <link rel="stylesheet" href="./css/leaderboard.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <b>Recorded solves</b>
+        <span>Grouped by cube size and scramble depth. Best (solved, fewest HTM) first.</span>
+      </div>
+      <nav>
+        <a href="/eval">eval</a>
+        <a href="/leaderboard">puzzles</a>
+        <a href="/ai">AI</a>
+      </nav>
+    </header>
+    <main>
+      <p id="empty" hidden>No solves recorded yet. Submit from <code>/eval</code> (green Done button).</p>
+      <div id="controls" hidden>
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-mode="size" type="button">Cube size</button>
+          <button class="tab" data-mode="scramble" type="button">How scrambled</button>
+        </div>
+        <div id="subnav" class="pills"></div>
+      </div>
+      <div id="boards"></div>
+      <article id="detail" hidden></article>
+    </main>
+    <script type="module" src="./js/solves.js"></script>
+  </body>
+</html>

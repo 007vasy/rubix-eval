@@ -21,6 +21,27 @@ export const AXIS_CELL = {
   "3,2": "O",
   "3,0": "I",
 };
+
+export function cellAxisOf(cell, n = 3) {
+  const lo = { L: 0, D: 1, B: 2, I: 3 };
+  const hi = { R: 0, U: 1, F: 2, O: 3 };
+  if (cell in lo) return [lo[cell], 0];
+  if (cell in hi) return [hi[cell], n - 1];
+  return CELL_AXIS[cell];
+}
+
+export function axisCellOf(axis, coord, n = 3) {
+  const pair = [
+    ["L", "R"],
+    ["D", "U"],
+    ["B", "F"],
+    ["I", "O"],
+  ][axis];
+  if (!pair) return AXIS_CELL[`${axis},${coord}`];
+  if (coord === 0) return pair[0];
+  if (coord === n - 1) return pair[1];
+  return AXIS_CELL[`${axis},${coord}`];
+}
 export const CELL_COLOR = {
   R: "R",
   L: "O",
@@ -32,14 +53,15 @@ export const CELL_COLOR = {
   O: "C",
 };
 export const COLOR_HEX = {
-  W: 0xdedad0,
-  Y: 0xf0c400,
-  G: 0x1e9e4a,
-  B: 0x1f6fbf,
-  O: 0xe06b12,
-  R: 0xd63b2f,
-  P: 0xc63d8c,
-  C: 0x129a82,
+  // MagicCube4D DEFAULT_FACE_COLORS (cutelyaware/magiccube4d MagicCube.java).
+  W: 0xffffff,
+  Y: 0xffe500,
+  G: 0x009e49,
+  B: 0x0080ff,
+  O: 0xff8d00,
+  R: 0xff0000,
+  P: 0x9959ff,
+  C: 0xff7fff,
 };
 export const PLASTIC = 0x111111;
 export const OPPOSITE = {
@@ -196,8 +218,9 @@ export function stepCost(moves, scrambleDepth) {
 
 export class HyperCube {
   constructor(state = null) {
-    this.size = 3;
-    this.kind = "4d";
+    this.size = state && state.size ? state.size : 3;
+    this.ndim = state && state.ndim ? state.ndim : 4;
+    this.kind = state && state.kind ? state.kind : "4d";
     this.cubies = new Map();
     if (state) this.setCells(state.cells || state);
     else this.reset();
@@ -208,7 +231,7 @@ export class HyperCube {
   }
 
   reset() {
-    const n = 3;
+    const n = this.size;
     this.cubies.clear();
     for (let x = 0; x < n; x += 1) {
       for (let y = 0; y < n; y += 1) {
@@ -219,7 +242,7 @@ export class HyperCube {
             const coords = [x, y, z, w];
             for (let axis = 0; axis < 4; axis += 1) {
               if (coords[axis] === 0 || coords[axis] === n - 1) {
-                const cell = AXIS_CELL[`${axis},${coords[axis]}`];
+                const cell = axisCellOf(axis, coords[axis], n);
                 colors[cell] = CELL_COLOR[cell];
               }
             }
@@ -246,19 +269,19 @@ export class HyperCube {
   }
 
   twist90(cell, axisCell, turns) {
-    const n = 3;
-    const [cellAxis, cellExt] = CELL_AXIS[cell];
-    const [rotAxis, rotExt] = CELL_AXIS[axisCell];
+    const n = this.size;
+    const [cellAxis, cellExt] = cellAxisOf(cell, n);
+    const [rotAxis, rotExt] = cellAxisOf(axisCell, n);
     turns = ((turns % 4) + 4) % 4;
     if (rotExt === 0) turns = (-turns + 4) % 4;
     if (cellExt === 0) turns = (-turns + 4) % 4;
     if (!turns) return;
     const [i, j] = orientedPlane(cellAxis, rotAxis);
     const cycle = [
-      AXIS_CELL[`${i},${n - 1}`],
-      AXIS_CELL[`${j},${n - 1}`],
-      AXIS_CELL[`${i},0`],
-      AXIS_CELL[`${j},0`],
+      axisCellOf(i, n - 1, n),
+      axisCellOf(j, n - 1, n),
+      axisCellOf(i, 0, n),
+      axisCellOf(j, 0, n),
     ];
     const mapping = {};
     for (let k = 0; k < 4; k += 1) mapping[cycle[k]] = cycle[(k + turns) % 4];

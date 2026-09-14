@@ -11,6 +11,9 @@ html, body {
   height: 100%;
   display: block;
   cursor: pointer;
+  object-fit: fill;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 #help {

@@ -42,18 +42,21 @@ class EvalTask:
     metric: str = "HTM"
     kind: str = "3d"
 
+    ndim: int = 3
+
     def cube(self) -> Cube | HyperCube:
-        if self.kind == "4d":
+        if self.kind != "3d":
             return HyperCube.from_dict(self.state)
         return Cube.from_dict(self.state)
 
     def prompt(self) -> str:
         cube = self.cube()
-        if self.kind == "4d":
+        if self.kind != "3d":
+            shape = "×".join([str(self.size)] * int(self.state.get("ndim", 4)))
             return "\n".join(
                 [
-                    "Solve this 3×3×3×3 (4D) Rubik's cube.",
-                    f"It is {self.scramble_depth} random 2c cell-twists away from solved.",
+                    f"Solve this {shape} ({self.kind}) Rubik's cube.",
+                    f"It is {self.scramble_depth} random cell-twists away from solved.",
                     "Return Zhao notation: RU twists the R cell 90° around U; RU' and RU2 as usual.",
                     "Cells: R L U D F B I (inside) O (outside).",
                     f"Metric: {self.metric}. Stay under {self.max_moves} moves.",
@@ -85,8 +88,11 @@ class EvalTask:
 
     def oracle_solution(self) -> str:
         """Invert the withheld scramble. Used to test the engine, not the agent."""
-        if self.kind == "4d":
-            moves = generate_hyper_scramble(self.scramble_depth, self.seed)
+        if self.kind != "3d":
+            ndim = int(self.state.get("ndim") or self.ndim or 4)
+            moves = generate_hyper_scramble(
+                self.scramble_depth, self.seed, size=self.size, ndim=ndim
+            )
             return format_hyper_moves(invert_hyper_moves(moves))
         moves = generate_scramble(self.size, self.scramble_depth, self.seed)
         return format_moves(invert_moves(moves))
@@ -101,6 +107,7 @@ class EvalTask:
             "state": self.state,
             "max_moves": self.max_moves,
             "metric": self.metric,
+            "ndim": self.ndim,
         }
 
     def dumps(self) -> str:
@@ -115,15 +122,17 @@ class EvalTask:
     def from_dict(cls, data: dict[str, Any]) -> EvalTask:
         kind = data.get("kind") or data.get("state", {}).get("kind") or "3d"
         size = int(data.get("size") or 3)
+        ndim = int(data.get("ndim") or data.get("state", {}).get("ndim") or (3 if kind == "3d" else 4))
         return cls(
             id=data["id"],
             size=size,
             scramble_depth=int(data["scramble_depth"]),
             seed=int(data["seed"]),
             state=data["state"],
-            max_moves=int(data.get("max_moves") or (120 if kind == "4d" else default_max_moves(size))),
+            max_moves=int(data.get("max_moves") or (120 if kind != "3d" else default_max_moves(size))),
             metric=data.get("metric", "HTM"),
             kind=kind,
+            ndim=ndim,
         )
 
     @classmethod
@@ -153,18 +162,27 @@ def make_task(
     )
 
 
-def make_hyper_task(depth: int, seed: int = 0, max_moves: int | None = None) -> EvalTask:
-    cube = HyperCube()
-    scramble = generate_hyper_scramble(depth, seed)
+def make_hyper_task(
+    depth: int,
+    seed: int = 0,
+    max_moves: int | None = None,
+    *,
+    size: int = 3,
+    ndim: int = 4,
+) -> EvalTask:
+    cube = HyperCube(size=size, ndim=ndim)
+    scramble = generate_hyper_scramble(depth, seed, size=size, ndim=ndim)
     cube.apply(scramble)
+    shape = "x".join([str(size)] * ndim)
     return EvalTask(
-        id=f"3x3x3x3-d{depth}-s{seed}",
-        size=3,
+        id=f"{shape}-d{depth}-s{seed}",
+        size=size,
         scramble_depth=depth,
         seed=seed,
         state=cube.to_dict(),
-        max_moves=max_moves if max_moves is not None else 120,
-        kind="4d",
+        max_moves=max_moves if max_moves is not None else max(120, size * ndim * 20),
+        kind=f"{ndim}d",
+        ndim=ndim,
     )
 
 

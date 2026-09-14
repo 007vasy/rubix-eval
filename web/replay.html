@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rubix-eval — replay</title>
+    <link rel="stylesheet" href="./css/eval.css" />
+    <link rel="stylesheet" href="./css/replay.css" />
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three.module.js" } }
+    </script>
+  </head>
+  <body class="replay">
+    <header>
+      <div>
+        <b>Replay</b>
+        <span id="title">Loading…</span>
+      </div>
+      <nav>
+        <a href="/ai">AI</a>
+        <a href="/leaderboard">puzzles</a>
+        <a href="/solves">solves</a>
+      </nav>
+    </header>
+    <canvas id="view"></canvas>
+    <p id="nodraw" hidden>This puzzle is not drawn in the viewer. Step through the recorded moves below.</p>
+    <aside id="panel">
+      <div class="stats" id="stats"></div>
+      <div class="transport">
+        <button type="button" id="reset">Reset</button>
+        <button type="button" id="prev">Prev</button>
+        <button type="button" id="play">Play</button>
+        <button type="button" id="next">Next</button>
+      </div>
+      <p class="progress" id="progress">0 / 0</p>
+      <ol id="moves"></ol>
+      <h3 id="clicks-title" hidden>Clicks</h3>
+      <ol id="clicks" hidden></ol>
+    </aside>
+    <script type="module" src="./js/replay.js"></script>
+  </body>
+</html>

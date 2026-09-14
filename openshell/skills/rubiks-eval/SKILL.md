@@ -41,5 +41,6 @@ If a terminal is available, ignore it for this task. Use the display.
 
 ## Scoring (you cannot see these numbers)
 
-Solved, move count (HTM/QTM), and extra moves vs scramble depth.
-Shorter correct solutions score better.
+Solved, move count (HTM/QTM), extra moves vs scramble depth, and how that
+length compares to inverse-scramble, God's algorithm (HTM search), and
+Kociemba on 3×3×3. Shorter correct solutions score better.

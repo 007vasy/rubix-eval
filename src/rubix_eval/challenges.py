@@ -6,6 +6,7 @@ import secrets
 from dataclasses import dataclass
 from typing import Any
 
+from .puzzles import ND_PUZZLES, ensure_puzzle, find_puzzle
 from .task import EvalTask, make_hyper_task, make_task
 
 # 2×2×2 through 10×10×10, then 40×40×40 and 100×100×100.
@@ -30,10 +31,14 @@ _FULL_DEPTH = {
 }
 
 
-def full_scramble_depth(size: int, kind: str = "3d") -> int:
+def full_scramble_depth(size: int, kind: str = "3d", ndim: int | None = None) -> int:
     """WCA-style 'fully scrambled' length for this cube."""
-    if kind == "4d":
-        return 40
+    d = ndim
+    if d is None and kind and kind.endswith("d") and kind[0].isdigit():
+        d = int(kind[0])
+    if d and d >= 4:
+        puzzle = find_puzzle(d, size) or ensure_puzzle(d, size)
+        return int(puzzle["full_depth"])
     return _FULL_DEPTH.get(size, max(25, size * 12))
 
 
@@ -48,20 +53,38 @@ def resolve_depth(size: int, depth: int | str, kind: str = "3d") -> tuple[int, s
 
 def catalog(*, kind: str = "3d", visual: bool = False) -> list[dict[str, Any]]:
     """All challenge types (not instances)."""
-    if kind == "4d":
-        sizes: tuple[int, ...] = (3,)
-    else:
-        sizes = VISUAL_SIZES if visual else SIZES
     entries = []
+    if kind != "3d":
+        d = int(kind[0]) if kind[0].isdigit() else 4
+        puzzles = [p for p in ND_PUZZLES if p["ndim"] == d]
+        if visual:
+            puzzles = [p for p in puzzles if p["visual"]]
+        for puzzle in puzzles:
+            size = int(puzzle["size"])
+            for label in DEPTH_LABELS:
+                depth = full_scramble_depth(size, kind, d) if label == "full" else int(label)
+                prefix = f"{d}d-n{size}" if not (d == 4 and size == 3) else "4d"
+                entries.append(
+                    {
+                        "id": f"{prefix}-d{label}",
+                        "kind": f"{d}d",
+                        "size": size,
+                        "ndim": d,
+                        "depth_label": label,
+                        "scramble_depth": depth,
+                    }
+                )
+        return entries
+    sizes = VISUAL_SIZES if visual else SIZES
     for size in sizes:
         for label in DEPTH_LABELS:
             depth = full_scramble_depth(size, kind) if label == "full" else int(label)
-            prefix = "4d" if kind == "4d" else f"n{size}"
             entries.append(
                 {
-                    "id": f"{prefix}-d{label}",
+                    "id": f"n{size}-d{label}",
                     "kind": kind,
                     "size": size,
+                    "ndim": 3,
                     "depth_label": label,
                     "scramble_depth": depth,
                 }
@@ -101,8 +124,13 @@ def request_challenge(
         raise ValueError("no challenge matches size/depth/kind")
     pick = entries[secrets.randbelow(len(entries))]
     instance_seed = secrets.randbelow(2**31) if seed is None else int(seed)
-    if pick["kind"] == "4d":
-        task = make_hyper_task(pick["scramble_depth"], instance_seed)
+    if pick["kind"] != "3d":
+        task = make_hyper_task(
+            pick["scramble_depth"],
+            instance_seed,
+            size=int(pick["size"]),
+            ndim=int(pick.get("ndim") or 4),
+        )
     else:
         task = make_task(pick["size"], pick["scramble_depth"], instance_seed)
     return Challenge(

@@ -79,7 +79,10 @@ def grade_solution(
     The cube is copied; the caller's cube is not mutated.
     """
     work = cube.copy()
-    parse = parse_hyper_moves if getattr(cube, "kind", "3d") == "4d" else parse_moves
+    if getattr(cube, "ndim", 3) >= 4:
+        parse = lambda text: parse_hyper_moves(text, ndim=int(cube.ndim))
+    else:
+        parse = parse_moves
     try:
         moves = parse(solution) if isinstance(solution, str) else list(solution)
     except ValueError as exc:

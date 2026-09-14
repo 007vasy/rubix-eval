@@ -1,0 +1,124 @@
+body.replay {
+  overflow: hidden;
+}
+body.replay header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: rgba(11, 13, 16, 0.92);
+  border-bottom: 1px solid #2a3140;
+}
+body.replay header b { color: #9adf2f; margin-right: 10px; }
+body.replay header span { color: #8b95a8; font-size: 0.9rem; }
+body.replay header nav { display: flex; gap: 8px; }
+body.replay header a {
+  color: #76b900;
+  text-decoration: none;
+  border: 1px solid #2a3140;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+body.replay #view {
+  position: absolute;
+  inset: 52px 320px 0 0;
+  width: auto;
+  height: auto;
+}
+#nodraw {
+  position: absolute;
+  inset: 52px 320px 0 0;
+  align-items: center;
+  justify-content: center;
+  color: #8b95a8;
+  padding: 24px;
+}
+#nodraw:not([hidden]) {
+  display: flex;
+}
+#panel {
+  position: fixed;
+  top: 52px;
+  right: 0;
+  bottom: 0;
+  width: 320px;
+  overflow: auto;
+  padding: 14px 16px 24px;
+  background: #12151b;
+  border-left: 1px solid #2a3140;
+  z-index: 2;
+}
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.stat {
+  border: 1px solid #2a3140;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.stat b {
+  display: block;
+  color: #8b95a8;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.stat span { color: #e8edf5; font-weight: 700; }
+.transport {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.transport button {
+  background: #1c222c;
+  color: #e8edf5;
+  border: 1px solid #3a4456;
+  border-radius: 8px;
+  padding: 8px 4px;
+  cursor: pointer;
+  font: 600 0.8rem/1 "Segoe UI", sans-serif;
+}
+.transport button:hover { border-color: #76b900; color: #9adf2f; }
+.progress { color: #8b95a8; font-size: 0.82rem; margin: 0 0 10px; }
+#moves, #clicks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#moves li, #clicks li {
+  padding: 6px 8px;
+  border-radius: 8px;
+  font: 0.8rem/1.35 ui-monospace, "IBM Plex Mono", monospace;
+  color: #d5dbe6;
+}
+#moves li.current, #clicks li.current {
+  background: #1c2a14;
+  color: #9adf2f;
+}
+#moves li.done { color: #8b95a8; }
+#panel h3 {
+  margin: 16px 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #76b900;
+}
+@media (max-width: 800px) {
+  body.replay #view, #nodraw { inset: 52px 0 46vh 0; }
+  #panel {
+    top: auto;
+    height: 46vh;
+    width: 100%;
+    border-left: 0;
+    border-top: 1px solid #2a3140;
+  }
+}

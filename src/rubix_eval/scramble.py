@@ -6,7 +6,7 @@ Uses a portable LCG so the same (size, depth, seed) matches the web viewer.
 from __future__ import annotations
 
 from .hyper_moves import HyperMove, format_hyper_moves
-from .hypercube import CELLS, adjacent_cells
+from .hypercube import adjacent_cells, cells_for, two_plane_partners
 from .moves import Move, format_moves
 
 _FACES = ("U", "D", "L", "R", "F", "B")
@@ -85,22 +85,36 @@ def scramble_text(size: int, depth: int, seed: int | None = None, **kwargs) -> s
     return format_moves(generate_scramble(size, depth, seed, **kwargs))
 
 
-def generate_hyper_scramble(depth: int, seed: int | None = None) -> list[HyperMove]:
-    """`depth` random 2c 90° cell twists on a 3×3×3×3. Consecutive twists avoid the same cell."""
+def generate_hyper_scramble(
+    depth: int,
+    seed: int | None = None,
+    *,
+    size: int = 3,
+    ndim: int = 4,
+) -> list[HyperMove]:
+    """`depth` random cell/2-plane twists. Consecutive twists avoid the same cell."""
     if depth < 0:
         raise ValueError("depth must be >= 0")
     rng = LCG(0 if seed is None else seed)
+    cells = list(cells_for(ndim))
+    max_layer = size - 1 if size > 2 else 1
     moves: list[HyperMove] = []
     last_cell: str | None = None
     for _ in range(depth):
-        cells = [c for c in CELLS if c != last_cell] if last_cell else list(CELLS)
-        cell = rng.choice(cells)
-        axis = rng.choice(adjacent_cells(cell))
+        pool = [c for c in cells if c != last_cell] if last_cell else cells
+        cell = rng.choice(pool)
         turns = rng.choice(_TURNS)
-        moves.append(HyperMove(cell, axis, turns))
+        layer = 1 if max_layer <= 1 else rng.randint(1, max_layer)
+        if ndim == 4:
+            neighbors = list(adjacent_cells(cell, ndim=ndim, size=size))
+            axis = rng.choice(neighbors)
+            moves.append(HyperMove(cell, axis, turns, 4, (axis,), layer if layer > 1 else None))
+        else:
+            a, b = rng.choice(two_plane_partners(cell, ndim, size))
+            moves.append(HyperMove(cell, a, turns, 4, (a, b), layer if layer > 1 else None))
         last_cell = cell
     return moves
 
 
-def hyper_scramble_text(depth: int, seed: int | None = None) -> str:
-    return format_hyper_moves(generate_hyper_scramble(depth, seed))
+def hyper_scramble_text(depth: int, seed: int | None = None, **kwargs) -> str:
+    return format_hyper_moves(generate_hyper_scramble(depth, seed, **kwargs))

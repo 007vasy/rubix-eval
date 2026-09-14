@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "../vendor/OrbitControls.js";
 import {
-  AXIS_CELL,
   CELL_AXIS,
   CELL_COLOR,
   CELLS,
@@ -9,13 +8,13 @@ import {
   HyperCube,
   PLASTIC,
   adjacentCells,
+  cellAxisOf,
   formatHyperMoves,
   generateHyperScramble,
   hyperNotation,
   invertHyperMoves,
   parseHyperMoves,
   stepCost,
-  twist90Position,
 } from "./hyperengine.js";
 
 const PITCH = 0.98;
@@ -38,13 +37,14 @@ function localAxes(cell) {
   return [0, 1, 2, 3].filter((a) => a !== cellAxis);
 }
 
-function localToOffset(cell, i, j, k) {
-  const [cellAxis, cellExt] = CELL_AXIS[cell];
+function localToOffset(cell, i, j, k, n = 3) {
+  const [cellAxis, cellExt] = cellAxisOf(cell, n);
   const [a, b, c] = localAxes(cell);
   const v4 = [0, 0, 0, 0];
-  v4[a] = (i - 1) * PITCH;
-  v4[b] = (j - 1) * PITCH;
-  v4[c] = (k - 1) * PITCH;
+  const mid = (n - 1) / 2;
+  v4[a] = (i - mid) * PITCH;
+  v4[b] = (j - mid) * PITCH;
+  v4[c] = (k - mid) * PITCH;
   const sign = cellExt === 2 ? 1 : -1;
   if (cellAxis === 0) return [v4[3] * sign, v4[1], v4[2]];
   if (cellAxis === 1) return [v4[0], v4[3] * sign, v4[2]];
@@ -287,11 +287,12 @@ export class HyperViewer {
       const group = new THREE.Group();
       group.position.set(...CELL_ORIGIN[cell]);
       group.userData.cell = cell;
-      const [cellAxis, cellExt] = CELL_AXIS[cell];
+      const n = this.cube.size;
+      const [cellAxis, cellExt] = cellAxisOf(cell, n);
       const [a, b, c] = localAxes(cell);
-      for (let i = 0; i < 3; i += 1) {
-        for (let j = 0; j < 3; j += 1) {
-          for (let k = 0; k < 3; k += 1) {
+      for (let i = 0; i < n; i += 1) {
+        for (let j = 0; j < n; j += 1) {
+          for (let k = 0; k < n; k += 1) {
             const pos = [0, 0, 0, 0];
             pos[cellAxis] = cellExt;
             pos[a] = i;
@@ -300,7 +301,7 @@ export class HyperViewer {
             const cubie = this.cube.cubies.get(pos.join(","));
             const color = cubie.colors[cell];
             const piece = new THREE.Group();
-            const off = localToOffset(cell, i, j, k);
+            const off = localToOffset(cell, i, j, k, n);
             piece.position.set(...off);
             piece.add(new THREE.Mesh(bodyGeo, plastic));
             const stickerMat = new THREE.MeshStandardMaterial({

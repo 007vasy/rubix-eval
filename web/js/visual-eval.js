@@ -1,14 +1,8 @@
 /**
- * Visual-only eval. The agent sees stickers, not text.
- * Left click = 90° CW, right click = 90° CCW, double-click = 180°.
- * Drag empty space to orbit. Green circle = submit.
+ * Hardened visual eval. The page shows a server-rendered image.
+ * Clicks go to the server; cubie JSON never reaches this page.
  */
-import { CubeViewer } from "./viewer.js";
-import { HyperViewer } from "./hyperviewer.js";
-import { stepCost as stepCost3 } from "./engine.js";
-import { stepCost as stepCost4 } from "./hyperengine.js";
-
-const canvas = document.getElementById("view");
+const view = document.getElementById("view");
 const done = document.getElementById("done");
 const flash = document.getElementById("flash");
 
@@ -19,43 +13,96 @@ const boot = await fetch(`/api/visual/boot?${bootQs}`, { cache: "no-store" }).th
   return r.json();
 });
 
-let latest = {
-  solved: false,
-  htm: 0,
-  qtm: 0,
-  misplaced: 0,
-  history: [],
+const usage = {
+  tokens_used: bootQs.get("tokens") || bootQs.get("tokens_used") || null,
+  token_cost_usd: bootQs.get("cost") || bootQs.get("token_cost") || bootQs.get("token_cost_usd") || null,
 };
 
-function onChange(state) {
-  const costFn = state.kind === "4d" ? stepCost4 : stepCost3;
-  const cost = costFn(state.history, 0);
-  latest = {
-    solved: state.solved,
-    htm: cost.htm,
-    qtm: cost.qtm,
-    misplaced: state.cube.misplacedStickers(),
-    history: state.history,
-  };
-  document.body.classList.toggle("solved", state.solved);
+let frameSeq = 0;
+async function refreshFrame() {
+  frameSeq += 1;
+  const url = `${boot.frame}&t=${frameSeq}`;
+  view.src = url;
+  if (view.decode) await view.decode().catch(() => {});
+  else await new Promise((r) => { view.onload = r; });
 }
 
-const viewer =
-  boot.kind === "4d"
-    ? new HyperViewer(canvas, onChange, { showLabels: false })
-    : new CubeViewer(canvas, onChange, { clickToTurn: true, size: boot.size });
-viewer.loadState(boot.state);
+function mapPoint(event) {
+  const rect = view.getBoundingClientRect();
+  const nw = view.naturalWidth || 1280;
+  const nh = view.naturalHeight || 800;
+  const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * nw;
+  const y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * nh;
+  return { x: Math.round(x), y: Math.round(y) };
+}
+
+async function sendInput(payload) {
+  await fetch("/api/visual/input", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: boot.id, ...payload }),
+  });
+  await refreshFrame();
+}
+
+let drag = null;
+let lastClickAt = 0;
+let ignoreClick = false;
+
+view.addEventListener("pointerdown", (event) => {
+  const p = mapPoint(event);
+  drag = { ...p, button: event.button, moved: false };
+});
+view.addEventListener("pointermove", (event) => {
+  if (!drag) return;
+  const p = mapPoint(event);
+  if (Math.hypot(p.x - drag.x, p.y - drag.y) > 14) drag.moved = true;
+});
+view.addEventListener("pointerup", async (event) => {
+  if (!drag) return;
+  const start = drag;
+  drag = null;
+  if (!start.moved) return;
+  ignoreClick = true;
+  const p = mapPoint(event);
+  await sendInput({ type: "orbit", x: start.x, y: start.y, dx: p.x - start.x, dy: p.y - start.y });
+});
+
+view.addEventListener("click", async (event) => {
+  if (ignoreClick) {
+    ignoreClick = false;
+    return;
+  }
+  const p = mapPoint(event);
+  const now = performance.now();
+  const dbl = event.detail === 2 || now - lastClickAt < 320;
+  lastClickAt = now;
+  await sendInput({ type: "click", x: p.x, y: p.y, button: 0, dbl });
+});
+view.addEventListener("contextmenu", async (event) => {
+  event.preventDefault();
+  const p = mapPoint(event);
+  await sendInput({ type: "click", x: p.x, y: p.y, button: 2, dbl: false });
+});
 
 window.__rubixEval = {
   id: boot.id,
   kind: boot.kind,
-  snapshot() {
-    return { id: boot.id, kind: boot.kind, ...latest };
+  usage,
+  setUsage(next) {
+    Object.assign(usage, next || {});
   },
+  input: sendInput,
 };
 
 done.addEventListener("click", async () => {
-  const payload = { id: boot.id, ...latest };
+  const payload = {
+    id: boot.id,
+    tokens_used: usage.tokens_used,
+    token_cost_usd: usage.token_cost_usd,
+  };
+  const ai = bootQs.get("ai") || bootQs.get("agent") || bootQs.get("model");
+  if (ai) payload.ai = ai;
   const res = await fetch("/api/visual/submit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -63,9 +110,12 @@ done.addEventListener("click", async () => {
   });
   const grade = await res.json();
   flash.hidden = false;
+  flash.textContent = grade.solved ? "solved" : "not solved";
   flash.className = grade.solved ? "ok" : "bad";
+  document.body.classList.toggle("solved", Boolean(grade.solved));
   setTimeout(() => {
     flash.hidden = true;
-    flash.className = "";
   }, 700);
 });
+
+await refreshFrame();

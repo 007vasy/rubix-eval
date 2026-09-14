@@ -66,7 +66,8 @@ def main(argv: list[str] | None = None) -> int:
         "visual",
         help="Visual-only eval: agent sees the cube and turns it with the pointer (computer use)",
     )
-    vis_p.add_argument("--size", type=int, default=None, help="Pin cube size; omit to randomize")
+    vis_p.add_argument("--size", type=int, default=None, help="Pin cube size N (3D N^3 or 4D N^4)")
+    vis_p.add_argument("--ndim", type=int, default=None, help="4–7 for hypercubes")
     vis_p.add_argument("--depth", default=None, help="Pin 1–10 or 'full'; omit to randomize")
     vis_p.add_argument("--seed", type=int, default=None)
     vis_p.add_argument("--max-moves", type=int, default=None)
@@ -75,11 +76,33 @@ def main(argv: list[str] | None = None) -> int:
     vis_p.add_argument("--port", type=int, default=8765)
     vis_p.add_argument("--no-open", action="store_true", help="Do not open a browser")
     vis_p.add_argument(
+        "--ai",
+        default=None,
+        help="Name of the AI / model taking the visual eval (stored on each solve)",
+    )
+    vis_p.add_argument(
         "--challenge",
         action="store_true",
         default=True,
         help="Draw a random catalog challenge on every page load (default)",
     )
+
+    solves_p = sub.add_parser(
+        "solves",
+        help="List recorded visual solves and how they compare to known algorithms",
+    )
+    solves_p.add_argument("record", nargs="?", help="Record id (prints full JSON)")
+    solves_p.add_argument("--dir", help="Solves directory (default: ./solves)")
+    solves_p.add_argument("--limit", type=int, default=50)
+
+    board_p = sub.add_parser(
+        "leaderboard",
+        help="Per-version full-solve and end-step leaderboard (algorithm time + human WR)",
+    )
+    board_p.add_argument("--bench", action="store_true", help="Time the local solvers and cache the result")
+    board_p.add_argument("--all-sizes", action="store_true", help="Include 40³ and 100³")
+    board_p.add_argument("--ai", action="store_true", dest="ai_only", help="AI-only ranking by hardest solved challenge")
+    board_p.add_argument("--json", action="store_true", dest="as_json")
 
     ch_p = sub.add_parser(
         "challenge",
@@ -111,6 +134,8 @@ def main(argv: list[str] | None = None) -> int:
         "visual": _cmd_visual,
         "challenge": _cmd_challenge,
         "apply": _cmd_apply,
+        "solves": _cmd_solves,
+        "leaderboard": _cmd_leaderboard,
     }
     return handlers[args.cmd](args)
 
@@ -120,13 +145,15 @@ def _add_puzzle_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--depth", type=int, default=8, help="Random turns away from solved")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--max-moves", type=int, default=None)
-    parser.add_argument("--4d", dest="four_d", action="store_true", help="3×3×3×3 hypercube instead of 3D")
+    parser.add_argument("--4d", dest="four_d", action="store_true", help="nD hypercube (default 3^4; use --size / --ndim)")
+    parser.add_argument("--ndim", type=int, default=None, help="Dimension 4–7 for hypercubes")
 
 
 def _cmd_task(args: argparse.Namespace) -> int:
+    ndim = args.ndim or (4 if args.four_d else 3)
     task = (
-        make_hyper_task(args.depth, args.seed, args.max_moves)
-        if args.four_d
+        make_hyper_task(args.depth, args.seed, args.max_moves, size=args.size, ndim=ndim)
+        if ndim >= 4
         else make_task(args.size, args.depth, args.seed, args.max_moves)
     )
     text = task.dumps() + "\n"
@@ -143,9 +170,10 @@ def _cmd_show(args: argparse.Namespace) -> int:
         cube = task.cube()
         print(f"{task.id}  kind={task.kind}  depth={task.scramble_depth}  seed={task.seed}")
     else:
+        ndim = args.ndim or (4 if args.four_d else 3)
         task = (
-            make_hyper_task(args.depth, args.seed, args.max_moves)
-            if args.four_d
+            make_hyper_task(args.depth, args.seed, args.max_moves, size=args.size, ndim=ndim)
+            if ndim >= 4
             else make_task(args.size, args.depth, args.seed, args.max_moves)
         )
         cube = task.cube()
@@ -216,6 +244,9 @@ def _cmd_view(args: argparse.Namespace) -> int:
         return 1
     print(f"cube viewer: http://{args.host}:{args.port}/")
     print(f"visual eval: http://{args.host}:{args.port}/eval")
+    print(f"solve log:    http://{args.host}:{args.port}/solves")
+    print(f"leaderboard:  http://{args.host}:{args.port}/leaderboard")
+    print(f"AI ranks:     http://{args.host}:{args.port}/ai")
     serve(root, args.host, args.port)
     return 0
 
@@ -232,21 +263,34 @@ def _cmd_visual(args: argparse.Namespace) -> int:
         print(f"visual eval page not found at {root}", file=sys.stderr)
         return 1
     query: dict[str, str] = {"random": "1"}
-    if args.four_d:
+    if args.ndim:
+        query["kind"] = f"{args.ndim}d"
+        query["size"] = str(args.size or 3)
+    elif args.four_d:
         query["kind"] = "4d"
     if args.size:
         query["size"] = str(args.size)
     if args.depth is not None:
         query["depth"] = str(args.depth)
+    if args.ai:
+        query["ai"] = args.ai
     session = random_visual_session(
         size=int(query["size"]) if "size" in query else None,
         depth=query.get("depth"),
         kind=query.get("kind", "3d"),
     )
+    if args.ai:
+        session["ai"] = args.ai
     url = f"http://{args.host}:{args.port}/eval?{urlencode(query)}"
     print("Visual-only eval (computer use). Each load draws a fresh random scramble.")
-    print(f"  cube:  {url}")
-    print(f"  grade: http://{args.host}:{args.port}/api/visual/grade")
+    print(f"  cube:   {url}")
+    print(f"  grade:  http://{args.host}:{args.port}/api/visual/grade")
+    print(f"  solves:      http://{args.host}:{args.port}/solves")
+    print(f"  leaderboard: http://{args.host}:{args.port}/leaderboard")
+    print(f"  AI ranks:    http://{args.host}:{args.port}/ai")
+    print("Each Done click is recorded and compared to inverse-scramble, HTM search, and Kociemba.")
+    if args.ai:
+        print(f"  AI:     {args.ai}")
     print("Left click = 90° CW · right click = 90° CCW · double-click = 180°")
     print("Drag empty space to orbit · green circle = submit")
     if not args.no_open:
@@ -279,6 +323,102 @@ def _cmd_challenge(args: argparse.Namespace) -> int:
         Path(args.output).write_text(text, encoding="utf-8")
     else:
         sys.stdout.write(text)
+    return 0
+
+
+def _cmd_solves(args: argparse.Namespace) -> int:
+    from .records import list_records, load_record, solves_dir
+
+    directory = Path(args.dir) if args.dir else solves_dir()
+    if args.record:
+        record = load_record(args.record, directory)
+        if not record:
+            print(f"no record matching {args.record!r} in {directory}", file=sys.stderr)
+            return 1
+        json.dump(record, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+    rows = list_records(directory, limit=args.limit)
+    if not rows:
+        print(f"no recorded solves in {directory}")
+        return 0
+    print(
+        f"{'when':<22} {'solver':<16} {'puzzle':<10} {'htm':>4} {'best':>4} {'ratio':>6} {'alg':<18} result"
+    )
+    for row in rows:
+        when = (row.get("recorded_at") or "")[:19]
+        puzzle = "4d" if row.get("kind") == "4d" else f"{row.get('size')}³"
+        depth = row.get("scramble_depth")
+        puzzle = f"{puzzle} d{depth}"
+        htm = row.get("ai_htm")
+        best = row.get("best_htm")
+        ratio = row.get("optimality_ratio")
+        solver = (row.get("ai") or "unspecified AI")[:16]
+        flag = "SOLVED" if row.get("solved") else "fail"
+        if row.get("optimal"):
+            flag = "OPTIMAL"
+        print(
+            f"{when:<22} {solver:<16} {puzzle:<10} "
+            f"{htm if htm is not None else '—':>4} {best if best is not None else '—':>4} "
+            f"{ratio if ratio is not None else '—':>6} {str(row.get('best_algorithm') or '—'):<18} {flag}"
+        )
+    return 0
+
+
+def _fmt_seconds(value: float | None) -> str:
+    if value is None:
+        return "—"
+    if value <= 0:
+        return "< 1 µs"
+    if value < 0.001:
+        return f"{max(1, round(value * 1_000_000))} µs"
+    if value < 0.1:
+        return f"{value * 1000:.2f} ms"
+    if value < 60:
+        return f"{value:.2f} s"
+    minutes = int(value // 60)
+    rest = value - minutes * 60
+    return f"{minutes}:{rest:05.2f}"
+
+
+def _cmd_leaderboard(args: argparse.Namespace) -> int:
+    from .leaderboard import build_ai_leaderboard, build_leaderboard
+
+    if args.ai_only:
+        data = build_ai_leaderboard()
+        if args.as_json:
+            json.dump(data, sys.stdout, indent=2)
+            sys.stdout.write("\n")
+            return 0
+        if not data["ais"]:
+            print("no AI solves recorded yet")
+            return 0
+        print(f"{'#':>3} {'AI':<20} {'hardest':<28} {'htm':>5} {'solves':>6}")
+        for row in data["ais"]:
+            h = row["hardest"]
+            print(
+                f"{row['rank']:>3} {row['ai'][:20]:<20} {h['puzzle']:<28} "
+                f"{h['htm'] if h['htm'] is not None else '—':>5} {row['solves']:>6}"
+            )
+        return 0
+
+    data = build_leaderboard(bench=args.bench, visual_only=not args.all_sizes)
+    if args.as_json:
+        json.dump(data, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+        return 0
+    for board in data["boards"]:
+        print(f"\n== {board['label']} ==")
+        for group in board.get("groups") or []:
+            print(f"  {group['title']}")
+            if not group["entries"]:
+                print("    (no times yet — run with --bench)")
+                continue
+            for row in group["entries"]:
+                mark = " ★ Human WR" if row.get("highlight") else ""
+                print(
+                    f"    {row['rank']:>2}. {_fmt_seconds(row['seconds']):>10}  {row['who']}{mark}"
+                )
     return 0
 
 

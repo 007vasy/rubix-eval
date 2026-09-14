@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rubix-eval — AI leaderboard</title>
+    <link rel="stylesheet" href="./css/solves.css" />
+    <link rel="stylesheet" href="./css/leaderboard.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <b>AI leaderboard</b>
+        <span>Ranked by the hardest challenge each model has actually solved. No humans, no algorithms.</span>
+      </div>
+      <nav>
+        <a href="/eval">eval</a>
+        <a href="/leaderboard">puzzles</a>
+        <a href="/solves">solves</a>
+      </nav>
+    </header>
+    <main>
+      <p id="empty" hidden>No AI has solved a challenge yet. Tag a run with <code>--ai "Grok 4.6"</code> and click Done when the cube is solved.</p>
+      <section id="board" class="board" hidden>
+        <h2>Hardest solve per AI</h2>
+        <p class="sub">Harder = higher dimension, then bigger cube, then full scramble, then more turns from solved.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>AI</th>
+              <th>Hardest challenge solved</th>
+              <th>HTM</th>
+              <th>Steps</th>
+              <th>Clicks</th>
+              <th>Time</th>
+              <th>Tokens</th>
+              <th>Solves</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </section>
+      <article id="detail" hidden></article>
+    </main>
+    <script type="module" src="./js/ai.js"></script>
+  </body>
+</html>

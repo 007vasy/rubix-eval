@@ -54,12 +54,31 @@ command. The solver reads task JSON on stdin and writes moves on stdout.
 rubix-eval run --oracle
 rubix-eval run --solver ./my_solver.sh --sizes 2,3 --depths 1,5,10 --trials 3
 rubix-eval task --4d --depth 8 --seed 1 -o hyper.json
+rubix-eval task --4d --size 4 --depth full --seed 1   # 4×4×4×4 on demand
+rubix-eval task --ndim 5 --size 3 --depth 8           # 3^5
 rubix-eval run --4d --oracle --depths 1,5,10
 ```
 
-The 4D puzzle is a **3×3×3×3** (tesseract / MagicCube4D analog): eight cubic
-cells `R L U D F B I O`. Moves are Zhao 2c clicks such as `RU` (twist the R
-cell 90° around U).
+The 4D puzzle is a **3×3×3×3** (tesseract): eight cubic cells `R L U D F B I O`.
+Moves are Zhao 2c clicks such as `RU` (twist the R cell 90° around U).
+
+4D reference software (not bundled; used for records, colors, and the cheat-solve
+= inverse-scramble baseline):
+
+- [MagicCube4D](https://github.com/cutelyaware/magiccube4d) — Melinda Green,
+  Don Hatch, Jay Berkenbilt, Roice Nelson. Canonical 3⁴ UI and
+  [Hall of Fame](https://superliminal.com/cube/halloffame.htm).
+- [MPUlt](https://github.com/cutelyaware/MPUlt) — Andrey Astrelin, Magic Puzzle
+  Ultimate, higher-dimensional twisty puzzles.
+
+Bigger cubes and higher dimensions are created on demand (`--size`, `--ndim`
+4–7). There does not need to be a solver — inverse scramble always exists.
+Every n^d that has a published human record (MC4D / MPUlt / Hyperspeedcube /
+MC7D) is on the leaderboard so an AI computer-use run can beat it.
+
+The 3⁴ speed WR follows
+[Hypercubing records](https://hypercubing.xyz/leaderboards/records/) (MC4D
+lineage). Shortest human 3⁴ is 191 twists (Charles Doan, 2021).
 
 ## Challenges
 
@@ -94,6 +113,7 @@ JSON, no ASCII net, no scramble, no move names on screen.
 
 ```bash
 rubix-eval visual                 # random challenge on every load
+rubix-eval visual --ai "Grok 4.6" # tag recorded solves with this AI
 rubix-eval visual --size 3        # random depth on a 3×3×3
 rubix-eval visual --4d            # random 3×3×3×3 hypercube
 rubix-eval visual --size 3 --depth 8 --seed 1
@@ -108,6 +128,43 @@ Opens `http://127.0.0.1:8765/eval`:
 - Green circle = submit
 
 The harness grades at `http://127.0.0.1:8765/api/visual/grade` after submit.
+Every **Done** click is written under `solves/` and scored against known
+algorithms (the agent-facing `/eval` page does not show these numbers).
+Pass `--ai "Grok 4.6"` (or `?ai=` / `RUBIX_AI`) so the log and leaderboard
+name which AI solved it.
+
+| Algorithm | What it is |
+| --- | --- |
+| Inverse scramble | Exact inverse of the withheld generating sequence |
+| God's algorithm | Optimal HTM search (bidirectional BFS on the eval move set) |
+| Kociemba two-phase | Standard 3×3×3 solver (near-optimal, always a solution) |
+
+`optimality_ratio` is `best_htm / ai_htm` (1.0 means the AI matched the best
+known length). Review the log at `http://127.0.0.1:8765/solves` or:
+
+```bash
+rubix-eval solves
+rubix-eval solves <record-id>
+```
+
+A per-version **leaderboard** lives at `http://127.0.0.1:8765/leaderboard`:
+
+- **Full scramble** (WCA-length): how fast the local solvers produce a
+  solution, plus the human world-record single (WCA for 2×2–7×7; unofficial
+  for 8×8–10×10 and 3×3×3×3).
+- **End-step** (1–10 turns from solved): algorithm time only — there is no
+  human record for a cube that is already almost solved.
+
+```bash
+rubix-eval leaderboard
+rubix-eval leaderboard --bench   # time the solvers and cache the result
+rubix-eval leaderboard --ai      # AI-only: hardest challenge each model solved
+```
+
+A separate **AI leaderboard** at `http://127.0.0.1:8765/ai` ranks models by the
+hardest challenge they have actually solved (higher dimension, then bigger
+cube, then full scramble, then more turns from solved).
+
 The boot API does not include the scramble or oracle. Point a computer-use
 agent at that window (screenshot + click). Inference stays on
 `inference.local` inside NVIDIA OpenShell; the cube UI is this local page.

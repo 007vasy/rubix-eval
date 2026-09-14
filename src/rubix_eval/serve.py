@@ -13,7 +13,10 @@ from .hypercube import HyperCube
 from .metrics import grade_solution
 from .task import make_hyper_task, make_task
 from .challenges import catalog, request_challenge
-from .visual_session import boot_payload, grade_progress, random_visual_session
+from .records import list_records, load_record, public_record
+from .leaderboard import build_ai_leaderboard, build_leaderboard
+from .trusted_view import TrustedView
+from .visual_session import bind_submit_body, boot_payload, grade_progress, random_visual_session
 
 
 def serve(
@@ -27,6 +30,7 @@ def serve(
     lock = threading.Lock()
     sessions: dict[str, dict] = {}
     current_id: str | None = None
+    view: TrustedView | None = None
     if visual_session is not None:
         sessions[visual_session["id"]] = visual_session
         current_id = visual_session["id"]
@@ -44,6 +48,41 @@ def serve(
                 self.path = "/eval.html"
                 super().do_GET()
                 return
+            if path in ("/solves", "/solves/"):
+                self.path = "/solves.html"
+                super().do_GET()
+                return
+            if path in ("/leaderboard", "/leaderboard/"):
+                self.path = "/leaderboard.html"
+                super().do_GET()
+                return
+            if path in ("/ai", "/ai/", "/leaderboard/ai"):
+                self.path = "/ai.html"
+                super().do_GET()
+                return
+            if path in ("/replay", "/replay/"):
+                self.path = "/replay.html"
+                super().do_GET()
+                return
+            if path == "/api/leaderboard/ai":
+                self._json(build_ai_leaderboard())
+                return
+            if path == "/api/leaderboard":
+                want_bench = query.get("bench", ["0"])[0] in ("1", "true")
+                visual = query.get("visual", ["1"])[0] not in ("0", "false")
+                self._json(build_leaderboard(bench=want_bench, visual_only=visual))
+                return
+            if path == "/api/solves":
+                sid = query.get("id", [None])[0]
+                if sid:
+                    record = load_record(sid)
+                    if not record:
+                        self._json({"error": "not found"}, 404)
+                        return
+                    self._json(public_record(record))
+                    return
+                self._json({"solves": list_records()})
+                return
             if path == "/api/visual/boot":
                 kind = query.get("kind", ["3d"])[0]
                 size = int(query["size"][0]) if query.get("size") else None
@@ -56,9 +95,28 @@ def serve(
                         session = sessions.get(sid) if sid else None
                     if session is None:
                         session = random_visual_session(size=size, depth=depth, kind=kind)
+                        ai = (query.get("ai") or query.get("agent") or query.get("model") or [None])[0]
+                        if ai and str(ai).strip():
+                            session["ai"] = str(ai).strip()[:80]
                         sessions[session["id"]] = session
                         current_id = session["id"]
+                        if view is not None:
+                            view.load(session)
+                    elif query.get("ai") or query.get("agent") or query.get("model"):
+                        ai = (query.get("ai") or query.get("agent") or query.get("model") or [None])[0]
+                        if ai and str(ai).strip():
+                            session["ai"] = str(ai).strip()[:80]
                 self._json(boot_payload(session))
+                return
+            if path == "/api/visual/frame":
+                sid = query.get("id", [current_id])[0]
+                with lock:
+                    session = sessions.get(sid) if sid else None
+                if not session or view is None:
+                    self._json({"error": "no visual session"}, 404)
+                    return
+                png = view.png(session)
+                self._png(png)
                 return
             if path == "/api/challenges":
                 kind = query.get("kind", ["3d"])[0]
@@ -96,9 +154,14 @@ def serve(
                 depth = int(query.get("depth", ["8"])[0])
                 seed = int(query.get("seed", ["0"])[0])
                 kind = query.get("kind", ["3d"])[0]
-                task = make_hyper_task(depth, seed) if kind == "4d" else make_task(size, depth, seed)
+                ndim = int(kind[0]) if kind and kind[0].isdigit() and kind.endswith("d") and kind != "3d" else 3
+                task = (
+                    make_hyper_task(depth, seed, size=size, ndim=ndim)
+                    if ndim >= 4
+                    else make_task(size, depth, seed)
+                )
                 payload = task.to_dict()
-                payload["oracle"] = task.oracle_solution()
+                payload.pop("oracle", None)
                 self._json(payload)
                 return
             super().do_GET()
@@ -112,6 +175,32 @@ def serve(
             except json.JSONDecodeError:
                 self._json({"error": "invalid JSON"}, 400)
                 return
+            if parsed.path == "/api/visual/input":
+                with lock:
+                    sid = body.get("id") or current_id
+                    session = sessions.get(sid) if sid else None
+                    if not session or view is None:
+                        self._json({"error": "no visual session"}, 404)
+                        return
+                    kind = body.get("type") or "click"
+                    if kind == "orbit":
+                        view.orbit(
+                            session,
+                            body.get("x") or 80,
+                            body.get("y") or 200,
+                            body.get("dx") or 0,
+                            body.get("dy") or 0,
+                        )
+                    else:
+                        view.click(
+                            session,
+                            body.get("x") or 0,
+                            body.get("y") or 0,
+                            body.get("button") or 0,
+                            bool(body.get("dbl")),
+                        )
+                self._json({"ok": True})
+                return
             if parsed.path == "/api/visual/submit":
                 with lock:
                     sid = body.get("id") or current_id
@@ -119,9 +208,31 @@ def serve(
                     if not session:
                         self._json({"error": "no visual session"}, 404)
                         return
-                    session["progress"] = grade_progress(session, body)
-                    session["submitted"] = True
-                    payload = session["progress"]
+                    body = bind_submit_body(session, body)
+                    snapshot = {
+                        key: session[key]
+                        for key in (
+                            "id",
+                            "kind",
+                            "size",
+                            "scramble_depth",
+                            "seed",
+                            "max_moves",
+                            "state",
+                            "oracle",
+                            "challenge_id",
+                            "depth_label",
+                            "started_at",
+                            "ai",
+                        )
+                        if key in session
+                    }
+                payload = grade_progress(snapshot, body, compare=True, record=True)
+                with lock:
+                    live = sessions.get(sid)
+                    if live is not None:
+                        live["progress"] = payload
+                        live["submitted"] = True
                 self._json(payload)
                 return
             if parsed.path == "/api/grade":
@@ -137,6 +248,18 @@ def serve(
                 return
             self._json({"error": "not found"}, 404)
 
+        def end_headers(self) -> None:
+            self.send_header("Cache-Control", "no-store")
+            super().end_headers()
+
+        def _png(self, data: bytes) -> None:
+            self.send_response(200)
+            self.send_header("Content-Type", "image/png")
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(data)
+
         def _json(self, payload: dict, status: int = 200) -> None:
             data = json.dumps(payload).encode("utf-8")
             self.send_response(status)
@@ -148,9 +271,18 @@ def serve(
             self.wfile.write(data)
 
     httpd = ThreadingHTTPServer((host, port), Handler)
+    worker = threading.Thread(target=httpd.serve_forever, daemon=True)
+    worker.start()
+    origin_host = "127.0.0.1" if host in ("0.0.0.0", "::", "") else host
+    view = TrustedView(f"http://{origin_host}:{port}", root)
+    if visual_session is not None:
+        view.load(visual_session)
     try:
-        httpd.serve_forever()
+        worker.join()
     except KeyboardInterrupt:
         print("\nstopped")
     finally:
+        httpd.shutdown()
+        if view is not None:
+            view.close()
         httpd.server_close()
