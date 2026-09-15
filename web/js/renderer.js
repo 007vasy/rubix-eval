@@ -66,12 +66,14 @@ window.__trusted = {
     };
     const event = { clientX, clientY, button: button || 0 };
     const hit = viewer && viewer.hitSticker ? viewer.hitSticker(event) : null;
-    if (viewer && viewer.handlePointerDown && viewer.handlePointerUp) {
-      viewer.handlePointerDown(event);
-      viewer.handlePointerUp(event);
+    const down = viewer && (viewer.handlePointerDown || viewer.onPointerDown);
+    const up = viewer && (viewer.handlePointerUp || viewer.onPointerUp);
+    if (typeof down === "function" && typeof up === "function") {
+      down.call(viewer, event);
+      up.call(viewer, event);
       if (dbl) {
-        viewer.handlePointerDown(event);
-        viewer.handlePointerUp(event);
+        down.call(viewer, event);
+        up.call(viewer, event);
       }
     }
     return {
