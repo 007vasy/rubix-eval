@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "../vendor/OrbitControls.js";
 import {
+  AXIS_CELL,
   CELL_AXIS,
   CELL_COLOR,
   CELLS,
@@ -8,6 +9,7 @@ import {
   HyperCube,
   PLASTIC,
   adjacentCells,
+  axisCellOf,
   cellAxisOf,
   formatHyperMoves,
   generateHyperScramble,
@@ -15,6 +17,7 @@ import {
   invertHyperMoves,
   parseHyperMoves,
   stepCost,
+  twist90Position,
 } from "./hyperengine.js";
 
 const PITCH = 0.98;
@@ -57,7 +60,7 @@ function pos4ToOffset(cell, pos) {
   return localToOffset(cell, pos[a], pos[b], pos[c]);
 }
 
-function worldNormalToAxisCell(cell, nx, ny, nz) {
+function worldNormalToAxisCell(cell, nx, ny, nz, n = 3) {
   const [cellAxis, cellExt] = CELL_AXIS[cell];
   const sign = cellExt === 2 ? 1 : -1;
   let axis4;
@@ -105,7 +108,7 @@ function worldNormalToAxisCell(cell, nx, ny, nz) {
     axis4 = 2;
     positive = nz > 0;
   }
-  return AXIS_CELL[`${axis4},${positive ? 2 : 0}`];
+  return axisCellOf(axis4, positive ? n - 1 : 0, n) || AXIS_CELL[`${axis4},${positive ? 2 : 0}`];
 }
 
 function twistWorldRotation(cell, axisCell, turns) {
@@ -299,7 +302,9 @@ export class HyperViewer {
             pos[b] = j;
             pos[c] = k;
             const cubie = this.cube.cubies.get(pos.join(","));
+            if (!cubie || !cubie.colors) continue;
             const color = cubie.colors[cell];
+            if (color == null) continue;
             const piece = new THREE.Group();
             const off = localToOffset(cell, i, j, k, n);
             piece.position.set(...off);
@@ -422,24 +427,18 @@ export class HyperViewer {
     const nx = data.nx ?? 0;
     const ny = data.ny ?? 1;
     const nz = data.nz ?? 0;
-    const axis = worldNormalToAxisCell(cell, nx, ny, nz);
-    if (!axis || axis === cell || CELL_AXIS[axis][0] === CELL_AXIS[cell][0]) return;
-    const turns = press.button === 2 ? 3 : 1;
-    if (press.button === 0 && this._pendingClick) {
-      clearTimeout(this._pendingClick);
-      this._pendingClick = null;
-      this.enqueue({ cell, axis, turns: 2, order: 4, axisCells: [axis] });
-      return;
+    let axis = worldNormalToAxisCell(cell, nx, ny, nz, this.cube.size);
+    if (!axis || axis === cell || (CELL_AXIS[axis] && CELL_AXIS[axis][0] === CELL_AXIS[cell][0])) {
+      const neighbors = adjacentCells(cell).filter((name) => name !== cell);
+      axis = neighbors[0];
     }
-    const move = { cell, axis, turns, order: 4, axisCells: [axis] };
-    if (press.button === 0) {
-      this._pendingClick = setTimeout(() => {
-        this._pendingClick = null;
-        this.enqueue(move);
-      }, 220);
-    } else {
-      this.enqueue(move);
-    }
+    if (!axis) return;
+    const now = performance.now();
+    const dbl = press.button === 0 && now - (this._lastClickAt || 0) < 320;
+    this._lastClickAt = now;
+    let turns = press.button === 2 ? 3 : 1;
+    if (dbl) turns = 2;
+    this.enqueue({ cell, axis, turns, order: 4, axisCells: [axis] });
   }
 
   notify() {

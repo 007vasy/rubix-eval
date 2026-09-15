@@ -8,9 +8,16 @@ const flash = document.getElementById("flash");
 
 const bootQs = new URLSearchParams(location.search);
 if (!bootQs.has("random")) bootQs.set("random", "1");
-const boot = await fetch(`/api/visual/boot?${bootQs}`, { cache: "no-store" }).then((r) => {
-  if (!r.ok) throw new Error("visual session missing — start with: rubix-eval visual");
-  return r.json();
+const kindHint = bootQs.get("kind") || "3d";
+if (kindHint !== "3d" && !bootQs.get("size")) bootQs.set("size", "3");
+const boot = await fetch(`/api/visual/boot?${bootQs}`, { cache: "no-store" }).then(async (r) => {
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const msg = data.error || "visual session missing — start with: rubix-eval visual";
+    document.body.insertAdjacentHTML("afterbegin", `<p style="color:#f88;padding:16px">${msg}</p>`);
+    throw new Error(msg);
+  }
+  return data;
 });
 
 const usage = {

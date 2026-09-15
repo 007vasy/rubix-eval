@@ -101,7 +101,11 @@ def serve(
                         sessions[session["id"]] = session
                         current_id = session["id"]
                         if view is not None:
-                            view.load(session)
+                            try:
+                                view.load(session)
+                            except Exception as exc:
+                                self._json({"error": f"renderer failed: {exc}"}, 500)
+                                return
                     elif query.get("ai") or query.get("agent") or query.get("model"):
                         ai = (query.get("ai") or query.get("agent") or query.get("model") or [None])[0]
                         if ai and str(ai).strip():
@@ -184,7 +188,7 @@ def serve(
                         return
                     kind = body.get("type") or "click"
                     if kind == "orbit":
-                        view.orbit(
+                        result = view.orbit(
                             session,
                             body.get("x") or 80,
                             body.get("y") or 200,
@@ -192,14 +196,22 @@ def serve(
                             body.get("dy") or 0,
                         )
                     else:
-                        view.click(
+                        result = view.click(
                             session,
                             body.get("x") or 0,
                             body.get("y") or 0,
                             body.get("button") or 0,
                             bool(body.get("dbl")),
                         )
-                self._json({"ok": True})
+                payload = {"ok": True}
+                if isinstance(result, dict):
+                    payload["ok"] = bool(result.get("ok", True))
+                    for key in ("pick", "error"):
+                        if result.get(key) is not None:
+                            payload[key] = result[key]
+                    if result.get("history") is not None:
+                        payload["n"] = len(result["history"])
+                self._json(payload)
                 return
             if parsed.path == "/api/visual/submit":
                 with lock:

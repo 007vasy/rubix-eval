@@ -73,13 +73,16 @@ async function handle(msg) {
     return { ok: true };
   }
   if (op === "click") {
-    const button = msg.button === 2 ? "right" : "left";
-    const opts = { button, delay: 20 };
-    if (msg.dbl) opts.count = 2;
-    await page.mouse.click(msg.x, msg.y, opts);
-    await new Promise((r) => setTimeout(r, msg.dbl ? 450 : 320));
+    const pick = await page.evaluate(
+      (x, y, button, dbl) => window.__trusted.pointer(x, y, button, dbl),
+      msg.x,
+      msg.y,
+      msg.button || 0,
+      Boolean(msg.dbl),
+    );
+    await new Promise((r) => setTimeout(r, 650));
     const snap = await page.evaluate(() => window.__trusted.snapshot());
-    return { ok: true, ...snap };
+    return { ok: true, pick, ...snap };
   }
   if (op === "orbit") {
     const x0 = msg.x ?? 80;

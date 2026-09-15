@@ -402,14 +402,13 @@ class HyperCube:
             "kind": self.kind,
             "size": self.size,
             "ndim": self.ndim,
+            "cubies": [
+                {"pos": list(pos), "colors": dict(colors)}
+                for pos, colors in sorted(self._cubies.items())
+            ],
         }
         if self.ndim == 4:
             data["cells"] = self.cells()
-        else:
-            data["cubies"] = [
-                {"pos": list(pos), "colors": dict(colors)}
-                for pos, colors in sorted(self._cubies.items())
-            ]
         return data
 
     @classmethod

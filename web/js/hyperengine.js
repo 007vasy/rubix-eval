@@ -222,8 +222,18 @@ export class HyperCube {
     this.ndim = state && state.ndim ? state.ndim : 4;
     this.kind = state && state.kind ? state.kind : "4d";
     this.cubies = new Map();
-    if (state) this.setCells(state.cells || state);
+    if (state && Array.isArray(state.cubies)) this.loadCubies(state.cubies);
+    else if (state && state.cells) this.setCells(state.cells);
+    else if (state && typeof state === "object" && state.R) this.setCells(state);
     else this.reset();
+  }
+
+  loadCubies(cubies) {
+    this.cubies.clear();
+    for (const row of cubies) {
+      const pos = (row.pos || []).map(Number);
+      this.cubies.set(this.key(pos), { pos, colors: { ...(row.colors || {}) } });
+    }
   }
 
   key(pos) {
@@ -348,8 +358,8 @@ export class HyperCube {
   }
 
   cellStickers(cell) {
-    const n = 3;
-    const [cellAxis, cellExt] = CELL_AXIS[cell];
+    const n = this.size;
+    const [cellAxis, cellExt] = cellAxisOf(cell, n);
     const [a, b, c] = this.cellLocalAxes(cell);
     const grid = [];
     for (let k = 0; k < n; k += 1) {
@@ -362,7 +372,8 @@ export class HyperCube {
           pos[a] = i;
           pos[b] = j;
           pos[c] = k;
-          row.push(this.cubies.get(this.key(pos)).colors[cell]);
+          const cubie = this.cubies.get(this.key(pos));
+          row.push(cubie && cubie.colors ? cubie.colors[cell] : "");
         }
         layer.push(row);
       }
@@ -403,10 +414,10 @@ export class HyperCube {
   }
 
   setCells(cells) {
-    const n = 3;
+    const n = this.size;
     this.cubies.clear();
     for (const [cell, grid] of Object.entries(cells)) {
-      const [cellAxis, cellExt] = CELL_AXIS[cell];
+      const [cellAxis, cellExt] = cellAxisOf(cell, n);
       const [a, b, c] = this.cellLocalAxes(cell);
       for (let k = 0; k < n; k += 1) {
         for (let j = 0; j < n; j += 1) {
