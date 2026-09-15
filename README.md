@@ -188,6 +188,10 @@ The boot API does not include the scramble or oracle. Point a computer-use
 agent at that window (screenshot + click). Inference stays on
 `inference.local` inside NVIDIA OpenShell; the cube UI is this local page.
 
+To **support-check** the browser eval as it ships (clicks, 3D/4D, submit,
+anti-cheat, replay), follow
+[docs/computer-use-handbook.md](docs/computer-use-handbook.md).
+
 ## 3D cube in the browser
 
 ```bash
