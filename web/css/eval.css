@@ -14,6 +14,7 @@ html, body {
   object-fit: fill;
   user-select: none;
   -webkit-user-drag: none;
+  touch-action: none;
 }
 
 #help {
@@ -72,6 +73,15 @@ html, body {
   background: #1f6f3a;
   border: 1px solid #3dd68c;
   color: #e8edf5;
+}
+#help .repo {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: #8b95a8;
+}
+#help .repo a {
+  color: #76b900;
+  pointer-events: auto;
 }
 
 #done {

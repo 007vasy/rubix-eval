@@ -4,8 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
+
+
+def _default_port() -> int:
+    return int(os.environ.get("PORT") or "8765")
 
 from .eval_runner import (
     build_suite,
@@ -59,8 +64,8 @@ def main(argv: list[str] | None = None) -> int:
     run_p.add_argument("-o", "--output", help="Write JSON report")
 
     view_p = sub.add_parser("view", help="Serve the interactive 3D cube in a browser")
-    view_p.add_argument("--host", default="127.0.0.1")
-    view_p.add_argument("--port", type=int, default=8765)
+    view_p.add_argument("--host", default="0.0.0.0" if os.environ.get("PORT") else "127.0.0.1")
+    view_p.add_argument("--port", type=int, default=_default_port())
 
     vis_p = sub.add_parser(
         "visual",
@@ -72,8 +77,8 @@ def main(argv: list[str] | None = None) -> int:
     vis_p.add_argument("--seed", type=int, default=None)
     vis_p.add_argument("--max-moves", type=int, default=None)
     vis_p.add_argument("--4d", dest="four_d", action="store_true")
-    vis_p.add_argument("--host", default="127.0.0.1")
-    vis_p.add_argument("--port", type=int, default=8765)
+    vis_p.add_argument("--host", default="0.0.0.0" if os.environ.get("PORT") else "127.0.0.1")
+    vis_p.add_argument("--port", type=int, default=_default_port())
     vis_p.add_argument("--no-open", action="store_true", help="Do not open a browser")
     vis_p.add_argument(
         "--ai",
@@ -288,6 +293,9 @@ def _cmd_visual(args: argparse.Namespace) -> int:
     print(f"  solves:      http://{args.host}:{args.port}/solves")
     print(f"  leaderboard: http://{args.host}:{args.port}/leaderboard")
     print(f"  AI ranks:    http://{args.host}:{args.port}/ai")
+    print(f"  verified:    http://{args.host}:{args.port}/verified")
+    print("  github:   https://github.com/007vasy/rubix-eval")
+    print("  issues:   https://github.com/007vasy/rubix-eval/issues")
     print("Each Done click is recorded and compared to inverse-scramble, HTM search, and Kociemba.")
     if args.ai:
         print(f"  AI:     {args.ai}")

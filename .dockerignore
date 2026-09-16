@@ -1,9 +1,7 @@
 .venv
 .git
-__pycache__
-*.pyc
+solves
+logs
+**/__pycache__
+*.eval
 .pytest_cache
-web/vendor/three.module.js
-dist
-build
-*.egg-info

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -64,8 +65,13 @@ def serve(
                 self.path = "/replay.html"
                 super().do_GET()
                 return
+            if path in ("/verified", "/verified/"):
+                self.path = "/verified.html"
+                super().do_GET()
+                return
             if path == "/api/leaderboard/ai":
-                self._json(build_ai_leaderboard())
+                lane = query.get("lane", ["open"])[0]
+                self._json(build_ai_leaderboard(lane=lane))
                 return
             if path == "/api/leaderboard":
                 want_bench = query.get("bench", ["0"])[0] in ("1", "true")
@@ -286,9 +292,15 @@ def serve(
     worker = threading.Thread(target=httpd.serve_forever, daemon=True)
     worker.start()
     origin_host = "127.0.0.1" if host in ("0.0.0.0", "::", "") else host
-    view = TrustedView(f"http://{origin_host}:{port}", root)
-    if visual_session is not None:
-        view.load(visual_session)
+    want_trusted = os.environ.get("RUBIX_TRUSTED_RENDERER", "0").lower() in {"1", "true", "yes"}
+    if want_trusted:
+        try:
+            view = TrustedView(f"http://{origin_host}:{port}", root)
+            if visual_session is not None:
+                view.load(visual_session)
+        except Exception as exc:  # noqa: BLE001 — hosted eval does not require Chrome
+            print(f"trusted renderer unavailable ({exc}); in-browser WebGL eval")
+            view = None
     try:
         worker.join()
     except KeyboardInterrupt:

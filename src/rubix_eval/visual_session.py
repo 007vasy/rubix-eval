@@ -147,6 +147,9 @@ def session_from_task(
         "challenge_id": challenge_id,
         "depth_label": depth_label,
         "ai": resolve_ai_name(ai),
+        "lane": os.environ.get("RUBIX_LANE") or "open",
+        "web_access": os.environ.get("RUBIX_WEB_ACCESS", "1") not in ("0", "false", "no"),
+        "harness": os.environ.get("RUBIX_HARNESS") or "browser",
         "progress": None,
         "submitted": False,
         "started_at": time.time(),
@@ -190,12 +193,15 @@ def bind_submit_body(session: dict[str, Any], body: dict[str, Any]) -> dict[str,
 
 
 def boot_payload(session: dict[str, Any]) -> dict[str, Any]:
-    """What the agent page is allowed to know. No cubies, scramble, or oracle."""
+    """Public boot for the in-browser cube. Oracle and seed stay on the server."""
     return {
         "id": session["id"],
         "kind": session["kind"],
         "size": session["size"],
-        "frame": f"/api/visual/frame?id={session['id']}",
+        "ndim": session.get("ndim") or (3 if session.get("kind") == "3d" else 4),
+        "state": session["state"],
+        "github": "https://github.com/007vasy/rubix-eval",
+        "issues": "https://github.com/007vasy/rubix-eval/issues",
     }
 
 

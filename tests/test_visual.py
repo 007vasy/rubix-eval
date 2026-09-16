@@ -16,9 +16,11 @@ def test_boot_hides_scramble_and_oracle() -> None:
     assert "seed" not in boot
     assert boot["kind"] == "3d"
     assert boot["size"] == 3
-    assert "state" not in boot
     assert "oracle" not in boot
-    assert boot["frame"].startswith("/api/visual/frame")
+    assert "seed" not in boot
+    assert "scramble_depth" not in boot
+    assert "state" in boot
+    assert boot["github"].startswith("https://github.com/")
     assert session["oracle"]
     assert session["scramble_depth"] == 8
 
@@ -27,9 +29,9 @@ def test_boot_4d() -> None:
     session = new_session(kind="4d", depth=5, seed=2)
     boot = boot_payload(session)
     assert boot["kind"] == "4d"
-    assert "state" not in boot
+    assert "state" in boot
     assert "oracle" not in boot
-    assert "frame" in boot
+    assert "seed" not in boot
 
 
 def test_submit_ignores_client_history_when_server_owns_cube() -> None:

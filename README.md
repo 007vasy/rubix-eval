@@ -189,8 +189,21 @@ agent at that window (screenshot + click). Inference stays on
 `inference.local` inside NVIDIA OpenShell; the cube UI is this local page.
 
 To **support-check** the browser eval as it ships (clicks, 3D/4D, submit,
-anti-cheat, replay), follow
+replay), follow
 [docs/computer-use-handbook.md](docs/computer-use-handbook.md).
+
+Public hosted eval (Cloud Run): anyone can open `/eval`, `/solves`, `/ai`,
+`/leaderboard`, `/replay`, and `/verified` with no login. Point a computer-use
+agent at `/eval`. File problems on
+[GitHub Issues](https://github.com/007vasy/rubix-eval/issues).
+The **Verified** board is only for offline harness runs with internet
+disallowed — not browser or customer-agent solves.
+
+```bash
+# slim image, no Chrome
+docker build -f Dockerfile.cloudrun -t rubix-eval .
+docker run --rm -p 8080:8080 rubix-eval
+```
 
 ## 3D cube in the browser
 

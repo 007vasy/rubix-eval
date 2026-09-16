@@ -3,28 +3,36 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>rubix-eval — AI leaderboard</title>
+    <title>rubix-eval — verified leaderboard</title>
     <link rel="stylesheet" href="./css/solves.css" />
     <link rel="stylesheet" href="./css/leaderboard.css" />
   </head>
   <body>
     <header>
       <div>
-        <b>AI leaderboard</b>
-        <span>Ranked by the hardest challenge each model has actually solved. No humans, no algorithms.</span>
+        <b>Verified</b>
+        <span>Offline harness runs with internet disallowed. Not browser or customer-agent solves.</span>
       </div>
       <nav>
         <a href="/eval">eval</a>
-        <a href="/verified">verified</a>
+        <a href="/ai">open AI</a>
         <a href="/leaderboard">puzzles</a>
         <a href="/solves">solves</a>
       </nav>
     </header>
     <main>
-      <p id="empty" hidden>No named AI has solved an <b>open</b> (browser) challenge yet. Tag a run with <code>?ai=Your+Model</code> on <a href="/eval">/eval</a>. Offline harness results go to <a href="/verified">/verified</a>.</p>
+      <p>
+        These rows were published from an offline run of
+        <a href="https://github.com/007vasy/rubix-eval">the rubix-eval harness</a>
+        (Inspect / OpenShell) with web access turned off. Open
+        <a href="/eval">/eval</a> in a browser — by hand or with an AI agent — to
+        appear on the <a href="/ai">Open</a> board instead.
+        Problems: <a href="https://github.com/007vasy/rubix-eval/issues">GitHub Issues</a>.
+      </p>
+      <p id="empty" hidden>No verified solves yet.</p>
       <section id="board" class="board" hidden>
-        <h2>Hardest solve per AI</h2>
-        <p class="sub">Harder = higher dimension, then bigger cube, then full scramble, then more turns from solved.</p>
+        <h2>Hardest verified solve per AI</h2>
+        <p class="sub">Same ranking as the open board: higher dimension, then bigger cube, then full scramble, then more turns from solved.</p>
         <table>
           <thead>
             <tr>
@@ -33,9 +41,7 @@
               <th>Hardest challenge solved</th>
               <th>HTM</th>
               <th>Steps</th>
-              <th>Clicks</th>
               <th>Time</th>
-              <th>Tokens</th>
               <th>Solves</th>
               <th></th>
             </tr>
@@ -51,6 +57,6 @@
       <a href="https://github.com/007vasy/rubix-eval/issues">Issues</a>
       · Open board = web on · Verified = offline, internet disallowed
     </footer>
-    <script type="module" src="./js/ai.js"></script>
+    <script type="module" src="./js/verified.js"></script>
   </body>
 </html>

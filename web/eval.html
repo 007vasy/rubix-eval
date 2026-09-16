@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>cube</title>
     <link rel="stylesheet" href="./css/eval.css" />
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three.module.js" } }
+    </script>
   </head>
   <body>
-    <img id="view" alt="cube" draggable="false" />
+    <canvas id="view"></canvas>
     <aside id="help" aria-label="controls">
       <div class="help-title">How to turn the cube</div>
       <ul>
@@ -17,6 +20,11 @@
         <li><kbd class="mouse">drag</kbd> Drag empty space — look around</li>
         <li><kbd class="go">✓</kbd> Green button — submit when solved</li>
       </ul>
+      <p class="repo">
+        <a href="https://github.com/007vasy/rubix-eval">GitHub</a>
+        ·
+        <a href="https://github.com/007vasy/rubix-eval/issues">Issues</a>
+      </p>
     </aside>
     <button id="done" type="button" aria-label="Submit: I think it is solved">
       <span class="check"></span>

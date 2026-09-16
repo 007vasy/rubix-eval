@@ -4,11 +4,15 @@ Use this when you are checking **the eval as it ships today**, not when you
 are the agent under test. Sit in a browser, click what an agent would click,
 and mark each check pass or fail.
 
-The computer-use path is: the model **only sees a picture of the cube** and
-**turns it with the pointer**. The server owns the cube. Submit grades the
-server’s move list, not whatever the client claims.
+The computer-use path is: the model opens **this browser page**, looks at the
+WebGL cube, and turns stickers with the pointer. Done submits the viewer’s
+move list; the server replays those moves on the withheld scramble. There is
+no server-side Puppeteer on the hosted eval.
 
-Default origin in this handbook: `http://127.0.0.1:8765`
+Open (browser/agent, web on) and Verified (operator offline, internet
+disallowed) are different boards.
+
+Default origin: `http://127.0.0.1:8765` locally, or the public Cloud Run URL.
 
 ---
 
@@ -16,9 +20,10 @@ Default origin in this handbook: `http://127.0.0.1:8765`
 
 | URL | What it is | Use it for support-check? |
 | --- | --- | --- |
-| `/eval` | **Computer-use eval.** Full-window PNG, clicks go to the server. No cubie JSON on the page. | **Yes. This is the eval.** |
-| `/` | Interactive playground. Live WebGL, size slider, keyboard moves, HUD with HTM. | No. Practice cube only. |
-| `/renderer.html` | Hidden Puppeteer page that draws the PNG. | Do not browse it as the eval. |
+| `/eval` | **Computer-use eval.** Full-window live WebGL cube, help card, green **Done**. | **Yes. This is the eval.** |
+| `/` | Interactive playground. Size slider, keyboard moves, HUD with HTM. | No. Practice cube only. |
+| `/verified` | Offline harness board (internet disallowed). | Yes, as a reader. |
+| GitHub / Issues | https://github.com/007vasy/rubix-eval | Reuse the harness; file bugs. |
 
 If you can drag a sticker on a 3D mesh and see a size slider, you are on `/`,
 not `/eval`.
@@ -40,9 +45,8 @@ You should see:
 cube:   http://127.0.0.1:8765/eval?random=1
 ```
 
-Chrome needs GPU/WebGL (SwiftShader is fine). If `/eval` is a black rectangle
-and stays that way after a few seconds, the trusted renderer failed — restart
-the command, do not keep scoring.
+The cube draws **in this tab** (WebGL). If `/eval` is a black rectangle, the
+browser blocked WebGL — try another Chrome, do not keep scoring.
 
 Hard refresh (`Ctrl+Shift+R`) after pulling JS so you are not on a cached
 `visual-eval.js`.
@@ -83,8 +87,7 @@ Each load of `/eval` boots a **new** session. Reloading mid-check is a new cube.
 
 Open `/eval`. Expect:
 
-1. Dark full-window **photograph** of a cube (not a live Three.js canvas you
-   can inspect as meshes in the page).
+1. Dark full-window **live cube** (WebGL canvas in this tab).
 2. Bottom-left help card: left click / right click / double-click / drag /
    green button.
 3. Bottom-right green **Done** pill.
@@ -231,18 +234,13 @@ Do these on a fresh `/eval?kind=3d&size=3&depth=8` tab.
 
 DevTools → Network → `/api/visual/boot`.
 
-The JSON **must** be only:
-
-```json
-{ "id": "...", "kind": "3d", "size": 3, "frame": "/api/visual/frame?id=..." }
-```
-
-Fail if you see `oracle`, `scramble`, `scramble_depth`, `seed`, `state`,
-`cubies`, `faces`, or a move string.
+The JSON must include `id`, `kind`, `size`, and `state` (needed to draw).
+Fail if you see `oracle` or `seed`. `state` on the open eval is expected
+(the cube draws in the visitor’s browser). Verified runs do not use this page.
 
 ### 7.2 Frame
 
-`/api/visual/frame?id=...` is `image/png`, not JSON.
+Hosted `/eval` does not use `/api/visual/frame`. A 404 here is fine.
 
 ### 7.3 Page globals
 
@@ -337,7 +335,7 @@ From a row with a replay link, or `/replay?id=<record_id>`:
 | Left click sticker | 90° CW, server-side | Live WebGL turn |
 | Right click sticker | 90° CCW | Live WebGL turn |
 | Double-click sticker | 180° | 180° |
-| Drag empty space | Orbit (new PNG) | Orbit (live) |
+| Drag empty space | Orbit (live) | Orbit (live) |
 | Green **Done** | Grade + write `solves/` | Not present |
 | Keyboard U/R/F… | **None** (fail if it works) | Yes, on `/` |
 
@@ -350,8 +348,8 @@ HTM: every recorded turn costs 1, including 180°. QTM counts 180° as 2.
 Do these in order. Stop on the first unexpected fail.
 
 1. Start `rubix-eval visual --no-open --ai "Support check"`.
-2. Open `/eval`. Confirm PNG + help + Done, no JSON.
-3. Network: boot JSON has only `id, kind, size, frame`.
+2. Open `/eval`. Confirm live cube + help + Done + GitHub/Issues. No oracle.
+3. Network: boot JSON has `id, kind, size, state` and no `oracle` / `seed`.
 4. `/eval?kind=3d&size=3&depth=1` — left click changes the picture; right
    click restores it; double-click is 180°; drag orbits.
 5. Done while unsolved → `not solved` + `/solves` row.
@@ -360,7 +358,7 @@ Do these in order. Stop on the first unexpected fail.
 8. `/eval?kind=4d&size=3&depth=1` — eight cells; click + right-click restore.
 9. `/eval?kind=4d` with no size still draws 3⁴ (not a 500).
 10. Console fake-history submit is ignored.
-11. `/eval?kind=5d&size=2` is a blank PNG, not a crash.
+11. `/eval?kind=5d&size=2` should not 500 (drawing may be empty).
 
 ---
 
@@ -391,7 +389,7 @@ Date:
 Commit:
 Server: rubix-eval visual on :8765
 
-[ ] /eval is a PNG, not the playground
+[ ] /eval is the computer-use cube (help + Done), not the playground slider
 [ ] Boot JSON has no oracle / state / scramble
 [ ] 3×3×3 depth-1: left click turns
 [ ] Same sticker right click restores

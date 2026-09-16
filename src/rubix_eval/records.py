@@ -22,6 +22,12 @@ def record_path(record_id: str) -> Path:
     return solves_dir() / f"{record_id}.json"
 
 
+def record_lane(session: dict[str, Any] | None = None) -> str:
+    raw = (session or {}).get("lane") or os.environ.get("RUBIX_LANE") or "open"
+    lane = str(raw).strip().lower()
+    return "verified" if lane == "verified" else "open"
+
+
 def make_record(
     session: dict[str, Any],
     verified: dict[str, Any],
@@ -32,6 +38,13 @@ def make_record(
 ) -> dict[str, Any]:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     record_id = f"{stamp}-{session['id']}"
+    lane = record_lane(session)
+    web_access = lane != "verified"
+    if session.get("web_access") is not None:
+        web_access = bool(session.get("web_access"))
+    harness = session.get("harness") or os.environ.get("RUBIX_HARNESS") or (
+        "inspect" if lane == "verified" else "browser"
+    )
     return {
         "record_id": record_id,
         "recorded_at": datetime.now(timezone.utc).isoformat(),
@@ -45,6 +58,10 @@ def make_record(
         "depth_label": session.get("depth_label"),
         "ai": verified.get("ai") or session.get("ai") or "unspecified AI",
         "state": session["state"],
+        "lane": lane,
+        "web_access": web_access,
+        "harness": str(harness)[:32],
+        "attested": lane == "verified",
         "attempt": verified,
         "client": {
             "solved": (progress or {}).get("solved"),
@@ -121,6 +138,10 @@ def list_records(directory: Path | None = None, *, limit: int = 200) -> list[dic
                 "optimality_ratio": opt.get("optimality_ratio"),
                 "excess_vs_best": opt.get("excess_vs_best"),
                 "optimal": opt.get("optimal"),
+                "lane": data.get("lane") or "open",
+                "web_access": data.get("web_access") if data.get("web_access") is not None else data.get("lane") != "verified",
+                "harness": data.get("harness") or "browser",
+                "attested": bool(data.get("attested")),
             }
         )
     return rows

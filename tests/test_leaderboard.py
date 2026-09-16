@@ -112,6 +112,30 @@ def test_ai_leaderboard_skips_unnamed_solves(tmp_path, monkeypatch) -> None:
     assert "unspecified AI" not in {row["ai"] for row in board["ais"]}
 
 
+def test_ai_leaderboard_splits_open_and_verified(tmp_path, monkeypatch) -> None:
+    from rubix_eval.solvers import history_to_moves
+
+    monkeypatch.setenv("RUBIX_SOLVES_DIR", str(tmp_path))
+    open_sess = session_from_task(make_task(2, 1, seed=1), ai="BrowserBot")
+    open_sess["lane"] = "open"
+    moves = history_to_moves("3d", open_sess["oracle"])
+    history = [{"face": m.face, "layer": m.layer, "wide": m.wide, "turns": m.turns} for m in moves]
+    grade_progress(open_sess, {"history": history}, compare=False, record=True)
+
+    ver = session_from_task(make_task(3, 1, seed=1), ai="OfflineBot")
+    ver["lane"] = "verified"
+    ver["web_access"] = False
+    ver["harness"] = "inspect"
+    grade_progress(ver, {"history": ver["oracle"]}, compare=False, record=True)
+
+    opened = build_ai_leaderboard(tmp_path, lane="open")
+    verified = build_ai_leaderboard(tmp_path, lane="verified")
+    assert [row["ai"] for row in opened["ais"]] == ["BrowserBot"]
+    assert [row["ai"] for row in verified["ais"]] == ["OfflineBot"]
+    assert opened["lane"] == "open"
+    assert verified["lane"] == "verified"
+
+
 def test_submit_body_overrides_ai_name() -> None:
     session = session_from_task(make_task(2, 1, seed=1), ai="Old Model")
     grade = grade_progress(

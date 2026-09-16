@@ -59,6 +59,7 @@ body {
 }
 .brand b { color: var(--accent); font-size: 1.05rem; }
 .brand span { color: var(--muted); font-size: 0.85rem; font-weight: 400; }
+.brand a { color: var(--accent); margin-left: 10px; font-size: 0.82rem; }
 
 .stage {
   position: relative;

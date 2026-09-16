@@ -231,6 +231,8 @@ def _ai_solves(directory: Path | None = None) -> dict[str, dict[str, list[dict[s
         name = named_ai(rec.get("ai") or att.get("ai"))
         if not name:
             continue
+        if (rec.get("lane") or "open") == "verified":
+            continue
         grouped.setdefault(version_key(kind, size), {}).setdefault(label, []).append(
             {
                 "who": name,
@@ -387,12 +389,16 @@ def build_leaderboard(
     }
 
 
-def build_ai_leaderboard(directory: Path | None = None) -> dict[str, Any]:
+def build_ai_leaderboard(directory: Path | None = None, *, lane: str = "open") -> dict[str, Any]:
     """Rank AIs by the hardest challenge each has actually solved."""
+    want = "verified" if lane == "verified" else "open"
     rows = list_records(directory, limit=2000)
     by_ai: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
         if not row.get("solved"):
+            continue
+        row_lane = row.get("lane") or "open"
+        if row_lane != want:
             continue
         name = named_ai(row.get("ai"))
         if not name:
@@ -470,4 +476,10 @@ def build_ai_leaderboard(directory: Path | None = None) -> dict[str, Any]:
     ranking.sort(key=lambda r: (r["hardest"]["difficulty"], r["solves"]), reverse=True)
     for i, row in enumerate(ranking, start=1):
         row["rank"] = i
-    return {"ais": ranking, "count": len(ranking)}
+    return {
+        "ais": ranking,
+        "count": len(ranking),
+        "lane": want,
+        "github": "https://github.com/007vasy/rubix-eval",
+        "issues": "https://github.com/007vasy/rubix-eval/issues",
+    }
