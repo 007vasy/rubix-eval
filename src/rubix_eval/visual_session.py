@@ -169,12 +169,20 @@ def random_visual_session(
     size: int | None = None,
     depth: int | str | None = None,
     kind: str = "3d",
+    random: bool = False,
 ) -> dict[str, Any]:
+    visual = size is None and not (kind and kind[0].isdigit() and int(kind[0]) >= 5)
+    if not random:
+        if size is None:
+            size = 3
+        if depth is None:
+            depth = 1
     challenge = request_challenge(
         size=size,
         depth=depth,
         kind=kind,
-        visual=size is None and not (kind and kind[0].isdigit() and int(kind[0]) >= 5),
+        visual=visual,
+        random=random,
     )
     return session_from_challenge(challenge)
 

@@ -57,6 +57,10 @@ html, body {
   border-color: #3dd68c;
   cursor: pointer;
 }
+.pick button#pick-shuffle {
+  background: #1c222c;
+  border-color: #3a4456;
+}
 
 #help {
   position: fixed;

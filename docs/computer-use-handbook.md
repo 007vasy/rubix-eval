@@ -77,7 +77,7 @@ to the puzzle you actually got so you can copy it.
 | `size` | Cube size. 3D: 2–10. 4D: 2–5. Alias: `n`. |
 | `depth` | How many random turns from solved: `1`–`10` or `full`. Aliases: `turns`, `d`. |
 | `ai` / `agent` / `model` | Name stored on the solve. |
-| `random` | Default `1` (new scramble every load). |
+| `random` | `1` draws a fresh scramble. Omit to load the **official** puzzle for that size×turns (same cube every visit). |
 
 Examples:
 

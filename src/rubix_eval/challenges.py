@@ -1,7 +1,8 @@
-"""Challenge catalog. Each request draws a fresh random instance."""
+"""Challenge catalog. Official instances are deterministic; random=True draws a fresh scramble."""
 
 from __future__ import annotations
 
+import hashlib
 import secrets
 from dataclasses import dataclass
 from typing import Any
@@ -92,6 +93,9 @@ def catalog(*, kind: str = "3d", visual: bool = False) -> list[dict[str, Any]]:
     return entries
 
 
+_OFFICIAL: dict[tuple, Challenge] = {}
+
+
 @dataclass
 class Challenge:
     challenge_id: str
@@ -105,6 +109,12 @@ class Challenge:
         return data
 
 
+def official_seed(kind: str, size: int, depth_label: str) -> int:
+    """Stable seed so the same catalog slot is always the same scramble."""
+    raw = f"rubix-eval|{kind}|{size}|{depth_label}".encode()
+    return int.from_bytes(hashlib.sha256(raw).digest()[:4], "big") % (2**31)
+
+
 def request_challenge(
     *,
     size: int | None = None,
@@ -112,8 +122,9 @@ def request_challenge(
     kind: str = "3d",
     seed: int | None = None,
     visual: bool = False,
+    random: bool = True,
 ) -> Challenge:
-    """Build one instance. Size, depth, and seed are randomized when omitted."""
+    """Build one instance. Official (random=False) reuses a stable seed per slot."""
     entries = catalog(kind=kind, visual=visual)
     if size is not None:
         entries = [row for row in entries if row["size"] == size]
@@ -122,8 +133,20 @@ def request_challenge(
         entries = [row for row in entries if row["depth_label"] == label]
     if not entries:
         raise ValueError("no challenge matches size/depth/kind")
-    pick = entries[secrets.randbelow(len(entries))]
-    instance_seed = secrets.randbelow(2**31) if seed is None else int(seed)
+    if random or size is None or depth is None:
+        pick = entries[secrets.randbelow(len(entries))]
+    else:
+        pick = entries[0]
+    if seed is not None:
+        instance_seed = int(seed)
+    elif random:
+        instance_seed = secrets.randbelow(2**31)
+    else:
+        instance_seed = official_seed(pick["kind"], int(pick["size"]), pick["depth_label"])
+    cache_key = (pick["kind"], int(pick["size"]), pick["depth_label"], instance_seed)
+    cached = _OFFICIAL.get(cache_key)
+    if cached is not None and not random:
+        return cached
     if pick["kind"] != "3d":
         task = make_hyper_task(
             pick["scramble_depth"],
@@ -133,8 +156,11 @@ def request_challenge(
         )
     else:
         task = make_task(pick["size"], pick["scramble_depth"], instance_seed)
-    return Challenge(
+    challenge = Challenge(
         challenge_id=pick["id"],
         depth_label=pick["depth_label"],
         task=task,
     )
+    if not random:
+        _OFFICIAL[cache_key] = challenge
+    return challenge

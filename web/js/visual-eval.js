@@ -13,7 +13,6 @@ const bootQs = new URLSearchParams(location.search);
 if (bootQs.has("turns") && !bootQs.has("depth")) bootQs.set("depth", bootQs.get("turns"));
 if (bootQs.has("n") && !bootQs.has("size")) bootQs.set("size", bootQs.get("n"));
 if (bootQs.has("ndim") && !bootQs.has("kind")) bootQs.set("kind", `${bootQs.get("ndim")}d`);
-if (!bootQs.has("random")) bootQs.set("random", "1");
 const kindHint = bootQs.get("kind") || "3d";
 if (kindHint !== "3d" && !bootQs.get("size")) bootQs.set("size", "3");
 const boot = await fetch(`/api/visual/boot?${bootQs}`, { cache: "no-store" }).then(async (r) => {
@@ -64,6 +63,7 @@ canon.searchParams.delete("n");
 canon.searchParams.delete("d");
 canon.searchParams.delete("scramble");
 canon.searchParams.delete("ndim");
+if (canon.searchParams.get("random") !== "1") canon.searchParams.delete("random");
 history.replaceState(null, "", canon);
 
 const SIZES_3D = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -105,6 +105,17 @@ fillSelect(
 kindSel.addEventListener("change", syncSizeOptions);
 pick.addEventListener("submit", (event) => {
   event.preventDefault();
+  const next = new URL(location.href);
+  next.searchParams.set("kind", kindSel.value);
+  next.searchParams.set("size", sizeSel.value);
+  if (depthSel.value) next.searchParams.set("depth", depthSel.value);
+  else next.searchParams.delete("depth");
+  next.searchParams.delete("random");
+  const ai = bootQs.get("ai") || bootQs.get("agent") || bootQs.get("model");
+  if (ai) next.searchParams.set("ai", ai);
+  location.assign(next);
+});
+document.getElementById("pick-shuffle").addEventListener("click", () => {
   const next = new URL(location.href);
   next.searchParams.set("kind", kindSel.value);
   next.searchParams.set("size", sizeSel.value);

@@ -105,15 +105,17 @@ def serve(
                 depth = (query.get("depth") or query.get("turns") or query.get("d") or query.get("scramble") or [None])[0]
                 if depth in ("", "any", None):
                     depth = None
-                want_new = query.get("random", ["1"])[0] not in ("0", "false")
+                want_random = query.get("random", ["0"])[0] in ("1", "true", "yes")
                 with lock:
                     session = None
-                    if not want_new:
-                        sid = query.get("id", [current_id])[0]
+                    if not want_random:
+                        sid = query.get("id", [None])[0]
                         session = sessions.get(sid) if sid else None
                     if session is None:
                         try:
-                            session = random_visual_session(size=size, depth=depth, kind=kind)
+                            session = random_visual_session(
+                                size=size, depth=depth, kind=kind, random=want_random
+                            )
                         except ValueError as exc:
                             self._json({"error": str(exc)}, 400)
                             return

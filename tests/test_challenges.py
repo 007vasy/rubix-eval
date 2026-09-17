@@ -37,6 +37,16 @@ def test_request_randomizes_seed() -> None:
     assert len(seeds) > 1
 
 
+def test_official_challenge_is_stable() -> None:
+    a = request_challenge(size=3, depth=1, random=False)
+    b = request_challenge(size=3, depth=1, random=False)
+    assert a.task.seed == b.task.seed
+    assert a.task.state == b.task.state
+    assert a.depth_label == "1"
+    other = request_challenge(size=3, depth=2, random=False)
+    assert other.task.seed != a.task.seed
+
+
 def test_request_randomizes_size_and_depth() -> None:
     picks = {request_challenge(visual=True).challenge_id for _ in range(30)}
     assert len(picks) > 1
