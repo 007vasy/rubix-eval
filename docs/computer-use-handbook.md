@@ -68,16 +68,26 @@ Open these as the **human checker**, not as the agent:
 | `/leaderboard` | Per-puzzle board (algorithms + human WR + named AIs). |
 | `/ai` | AI-only: hardest solved challenge per named model. |
 
-Query knobs on `/eval` (all optional):
+Query knobs on `/eval` (all optional). After load, the address bar is rewritten
+to the puzzle you actually got so you can copy it.
 
 | Param | Effect |
 | --- | --- |
-| `kind` | `3d` (default) or `4d` (and `5d`… — 5D+ does **not** draw, see §7). |
-| `size` | Cube size. 4D without `size` is forced to `3`. |
-| `depth` | `1`–`10` or `full`. |
-| `random` | Default `1` (new scramble every load). |
+| `kind` | `3d` or `4d` (aliases: `ndim=4`, `kind=4`). |
+| `size` | Cube size. 3D: 2–10. 4D: 2–5. Alias: `n`. |
+| `depth` | How many random turns from solved: `1`–`10` or `full`. Aliases: `turns`, `d`. |
 | `ai` / `agent` / `model` | Name stored on the solve. |
-| `tokens` / `cost` | Optional usage the page will POST on Done. |
+| `random` | Default `1` (new scramble every load). |
+
+Examples:
+
+```
+/eval?kind=3d&size=3&depth=1
+/eval?kind=3d&size=5&turns=10
+/eval?kind=4d&size=3&depth=full&ai=Astra
+```
+
+The top bar (Cube / Size / Turns / Load) writes these params and reloads.
 
 Each load of `/eval` boots a **new** session. Reloading mid-check is a new cube.
 

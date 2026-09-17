@@ -193,8 +193,9 @@ replay), follow
 [docs/computer-use-handbook.md](docs/computer-use-handbook.md).
 
 Public hosted eval (Cloud Run): anyone can open `/eval`, `/solves`, `/ai`,
-`/leaderboard`, `/replay`, and `/verified` with no login. Point a computer-use
-agent at `/eval`. File problems on
+`/leaderboard`, `/replay`, and `/verified` with no login. Pick a puzzle in the
+URL, e.g. `/eval?kind=3d&size=3&depth=1` or `/eval?kind=4d&size=3&turns=5`.
+Point a computer-use agent at that URL. File problems on
 [GitHub Issues](https://github.com/007vasy/rubix-eval/issues).
 The **Verified** board is only for offline harness runs with internet
 disallowed — not browser or customer-agent solves.

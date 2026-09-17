@@ -11,6 +11,24 @@
   </head>
   <body>
     <canvas id="view"></canvas>
+    <form id="pick" class="pick" aria-label="Choose puzzle">
+      <label>
+        Cube
+        <select id="pick-kind" name="kind">
+          <option value="3d">3D</option>
+          <option value="4d">4D</option>
+        </select>
+      </label>
+      <label>
+        Size
+        <select id="pick-size" name="size"></select>
+      </label>
+      <label>
+        Turns
+        <select id="pick-depth" name="depth"></select>
+      </label>
+      <button type="submit">Load</button>
+    </form>
     <aside id="help" aria-label="controls">
       <div class="help-title">How to turn the cube</div>
       <ul>

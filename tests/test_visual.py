@@ -28,6 +28,7 @@ def test_boot_hides_scramble_and_oracle() -> None:
     assert "oracle" not in boot
     assert "seed" not in boot
     assert "scramble_depth" not in boot
+    assert boot["depth"] == "8"
     assert "state" in boot
     assert boot["github"].startswith("https://github.com/")
     assert session["oracle"]
@@ -38,9 +39,25 @@ def test_boot_4d() -> None:
     session = new_session(kind="4d", depth=5, seed=2)
     boot = boot_payload(session)
     assert boot["kind"] == "4d"
+    assert boot["depth"] == "5"
     assert "state" in boot
     assert "oracle" not in boot
     assert "seed" not in boot
+
+
+def test_url_picks_size_and_turns() -> None:
+    from rubix_eval.visual_session import random_visual_session
+
+    session = random_visual_session(size=2, depth=1, kind="3d")
+    boot = boot_payload(session)
+    assert boot["kind"] == "3d"
+    assert boot["size"] == 2
+    assert boot["depth"] == "1"
+    four = random_visual_session(size=3, depth="full", kind="4d")
+    boot4 = boot_payload(four)
+    assert boot4["kind"] == "4d"
+    assert boot4["size"] == 3
+    assert boot4["depth"] == "full"
 
 
 def test_submit_ignores_client_history_when_server_owns_cube() -> None:

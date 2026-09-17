@@ -90,9 +90,21 @@ def serve(
                 self._json({"solves": list_records()})
                 return
             if path == "/api/visual/boot":
-                kind = query.get("kind", ["3d"])[0]
-                size = int(query["size"][0]) if query.get("size") else None
-                depth = query["depth"][0] if query.get("depth") else None
+                kind = (query.get("kind") or [None])[0]
+                if not kind and query.get("ndim"):
+                    kind = f"{query['ndim'][0]}d"
+                if kind and kind.isdigit():
+                    kind = f"{kind}d"
+                kind = kind or "3d"
+                size_raw = (query.get("size") or query.get("n") or [None])[0]
+                try:
+                    size = int(size_raw) if size_raw not in (None, "", "any") else None
+                except (TypeError, ValueError):
+                    self._json({"error": "size must be an integer"}, 400)
+                    return
+                depth = (query.get("depth") or query.get("turns") or query.get("d") or query.get("scramble") or [None])[0]
+                if depth in ("", "any", None):
+                    depth = None
                 want_new = query.get("random", ["1"])[0] not in ("0", "false")
                 with lock:
                     session = None
@@ -100,7 +112,11 @@ def serve(
                         sid = query.get("id", [current_id])[0]
                         session = sessions.get(sid) if sid else None
                     if session is None:
-                        session = random_visual_session(size=size, depth=depth, kind=kind)
+                        try:
+                            session = random_visual_session(size=size, depth=depth, kind=kind)
+                        except ValueError as exc:
+                            self._json({"error": str(exc)}, 400)
+                            return
                         ai = (query.get("ai") or query.get("agent") or query.get("model") or [None])[0]
                         if ai and str(ai).strip():
                             session["ai"] = str(ai).strip()[:80]

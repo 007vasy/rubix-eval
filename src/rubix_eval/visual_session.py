@@ -194,11 +194,15 @@ def bind_submit_body(session: dict[str, Any], body: dict[str, Any]) -> dict[str,
 
 def boot_payload(session: dict[str, Any]) -> dict[str, Any]:
     """Public boot for the in-browser cube. Oracle and seed stay on the server."""
+    depth = session.get("depth_label")
+    if depth is None and session.get("scramble_depth") is not None:
+        depth = str(session["scramble_depth"])
     return {
         "id": session["id"],
         "kind": session["kind"],
         "size": session["size"],
         "ndim": session.get("ndim") or (3 if session.get("kind") == "3d" else 4),
+        "depth": str(depth) if depth is not None else None,
         "state": session["state"],
         "github": "https://github.com/007vasy/rubix-eval",
         "issues": "https://github.com/007vasy/rubix-eval/issues",

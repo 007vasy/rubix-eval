@@ -10,6 +10,9 @@ const done = document.getElementById("done");
 const flash = document.getElementById("flash");
 
 const bootQs = new URLSearchParams(location.search);
+if (bootQs.has("turns") && !bootQs.has("depth")) bootQs.set("depth", bootQs.get("turns"));
+if (bootQs.has("n") && !bootQs.has("size")) bootQs.set("size", bootQs.get("n"));
+if (bootQs.has("ndim") && !bootQs.has("kind")) bootQs.set("kind", `${bootQs.get("ndim")}d`);
 if (!bootQs.has("random")) bootQs.set("random", "1");
 const kindHint = bootQs.get("kind") || "3d";
 if (kindHint !== "3d" && !bootQs.get("size")) bootQs.set("size", "3");
@@ -52,9 +55,72 @@ canvas.addEventListener("pointerup", (event) => {
   });
 });
 
+const canon = new URL(location.href);
+canon.searchParams.set("kind", boot.kind || "3d");
+canon.searchParams.set("size", String(boot.size || 3));
+if (boot.depth) canon.searchParams.set("depth", String(boot.depth));
+canon.searchParams.delete("turns");
+canon.searchParams.delete("n");
+canon.searchParams.delete("d");
+canon.searchParams.delete("scramble");
+canon.searchParams.delete("ndim");
+history.replaceState(null, "", canon);
+
+const SIZES_3D = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+const SIZES_4D = [2, 3, 4, 5];
+const DEPTHS = ["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "full"];
+
+function fillSelect(el, values, selected, labels) {
+  el.innerHTML = "";
+  for (const value of values) {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = labels && labels[value] != null ? labels[value] : value || "any";
+    if (String(value) === String(selected ?? "")) opt.selected = true;
+    el.append(opt);
+  }
+}
+
+const pick = document.getElementById("pick");
+const kindSel = document.getElementById("pick-kind");
+const sizeSel = document.getElementById("pick-size");
+const depthSel = document.getElementById("pick-depth");
+
+function syncSizeOptions() {
+  const four = kindSel.value === "4d";
+  const sizes = four ? SIZES_4D : SIZES_3D;
+  const current = sizeSel.value || String(boot.size || 3);
+  fillSelect(sizeSel, sizes, sizes.includes(Number(current)) ? current : sizes[1] || sizes[0]);
+}
+
+kindSel.value = boot.kind === "4d" ? "4d" : "3d";
+syncSizeOptions();
+fillSelect(sizeSel, kindSel.value === "4d" ? SIZES_4D : SIZES_3D, boot.size);
+fillSelect(
+  depthSel,
+  DEPTHS,
+  boot.depth || "",
+  { "": "any", full: "full scramble" },
+);
+kindSel.addEventListener("change", syncSizeOptions);
+pick.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const next = new URL(location.href);
+  next.searchParams.set("kind", kindSel.value);
+  next.searchParams.set("size", sizeSel.value);
+  if (depthSel.value) next.searchParams.set("depth", depthSel.value);
+  else next.searchParams.delete("depth");
+  next.searchParams.set("random", "1");
+  const ai = bootQs.get("ai") || bootQs.get("agent") || bootQs.get("model");
+  if (ai) next.searchParams.set("ai", ai);
+  location.assign(next);
+});
+
 window.__rubixEval = {
   id: boot.id,
   kind: boot.kind,
+  size: boot.size,
+  depth: boot.depth,
   github: boot.github,
   issues: boot.issues,
   usage,
