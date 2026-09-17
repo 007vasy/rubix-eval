@@ -88,10 +88,9 @@ function permSign(seq) {
   return inv % 2 ? -1 : 1;
 }
 
-export function twist90Position(pos, cell, axisCell, turns) {
-  const n = 3;
-  const [cellAxis, cellExt] = CELL_AXIS[cell];
-  const [rotAxis, rotExt] = CELL_AXIS[axisCell];
+export function twist90Position(pos, cell, axisCell, turns, n = 3) {
+  const [cellAxis, cellExt] = cellAxisOf(cell, n);
+  const [rotAxis, rotExt] = cellAxisOf(axisCell, n);
   turns = ((turns % 4) + 4) % 4;
   if (rotExt === 0) turns = (-turns + 4) % 4;
   if (cellExt === 0) turns = (-turns + 4) % 4;

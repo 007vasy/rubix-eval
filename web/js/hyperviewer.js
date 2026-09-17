@@ -55,9 +55,9 @@ function localToOffset(cell, i, j, k, n = 3) {
   return [v4[0], v4[1], v4[2]];
 }
 
-function pos4ToOffset(cell, pos) {
+function pos4ToOffset(cell, pos, n = 3) {
   const [a, b, c] = localAxes(cell);
-  return localToOffset(cell, pos[a], pos[b], pos[c]);
+  return localToOffset(cell, pos[a], pos[b], pos[c], n);
 }
 
 function worldNormalToAxisCell(cell, nx, ny, nz, n = 3) {
@@ -111,29 +111,43 @@ function worldNormalToAxisCell(cell, nx, ny, nz, n = 3) {
   return axisCellOf(axis4, positive ? n - 1 : 0, n) || AXIS_CELL[`${axis4},${positive ? 2 : 0}`];
 }
 
-function twistWorldRotation(cell, axisCell, turns) {
-  const [cellAxis, cellExt] = CELL_AXIS[cell];
-  const rotAxis = CELL_AXIS[axisCell][0];
-  const pos = [1, 1, 1, 1];
-  pos[cellAxis] = cellExt;
-  pos[rotAxis] = 2;
-  const plane = [0, 1, 2, 3].find((a) => a !== cellAxis && a !== rotAxis);
-  pos[plane] = 2;
-  const before = new THREE.Vector3(...pos4ToOffset(cell, pos));
-  const after = new THREE.Vector3(...pos4ToOffset(cell, twist90Position(pos, cell, axisCell, turns)));
-  if (before.lengthSq() < 1e-8 || after.lengthSq() < 1e-8) {
+function sampleMovingPos(displayCell, moveCell, axisCell, n) {
+  const [cAx, cExt] = cellAxisOf(moveCell, n);
+  const [dAx, dExt] = cellAxisOf(displayCell, n);
+  const [rAx] = cellAxisOf(axisCell, n);
+  const pos = Array(4).fill(Math.floor((n - 1) / 2));
+  pos[cAx] = cExt;
+  pos[dAx] = dExt;
+  const [ii, jj] = [0, 1, 2, 3].filter((a) => a !== cAx && a !== rAx);
+  if (pos[ii] === Math.floor((n - 1) / 2)) pos[ii] = n - 1;
+  if (ii === dAx || jj === dAx) {
+    pos[dAx] = dExt;
+  }
+  return pos;
+}
+
+function cellTwistRotation(displayCell, moveCell, axisCell, turns, n) {
+  const pos = sampleMovingPos(displayCell, moveCell, axisCell, n);
+  const before = new THREE.Vector3(...pos4ToOffset(displayCell, pos, n));
+  const after = new THREE.Vector3(
+    ...pos4ToOffset(displayCell, twist90Position(pos, moveCell, axisCell, turns, n), n),
+  );
+  if (before.lengthSq() < 1e-8 && after.lengthSq() < 1e-8) {
     return { axis: new THREE.Vector3(0, 1, 0), angle: 0 };
   }
+  const q = ((turns % 4) + 4) % 4;
   const axis = new THREE.Vector3().crossVectors(before, after);
   if (axis.lengthSq() < 1e-8) {
-    const q = ((turns % 4) + 4) % 4;
     const angle = q === 2 ? Math.PI : 0;
-    const fallback = before.clone().normalize();
+    const fallback = (before.lengthSq() > 1e-8 ? before : after).clone().normalize();
     const helper = Math.abs(fallback.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
-    return { axis: new THREE.Vector3().crossVectors(fallback, helper).normalize(), angle };
+    const around = new THREE.Vector3().crossVectors(fallback, helper);
+    if (around.lengthSq() < 1e-8) return { axis: new THREE.Vector3(0, 1, 0), angle };
+    return { axis: around.normalize(), angle };
   }
   axis.normalize();
-  return { axis, angle: before.angleTo(after) };
+  const angle = q === 2 ? Math.PI : before.angleTo(after);
+  return { axis, angle };
 }
 
 function makeLabel(text, hex) {
@@ -308,6 +322,8 @@ export class HyperViewer {
             const piece = new THREE.Group();
             const off = localToOffset(cell, i, j, k, n);
             piece.position.set(...off);
+            piece.userData.pos = pos.slice();
+            piece.userData.cell = cell;
             piece.add(new THREE.Mesh(bodyGeo, plastic));
             const stickerMat = new THREE.MeshStandardMaterial({
               color: COLOR_HEX[color] ?? 0x444444,
@@ -343,30 +359,32 @@ export class HyperViewer {
     }
     this.animating = true;
     const move = this.queue.shift();
-    const group = this.root.children.find((g) => g.userData.cell === move.cell);
+    const n = this.cube.size;
     const axisCell = move.axisCells ? move.axisCells[0] : move.axis;
-    let axis = new THREE.Vector3(0, 1, 0);
-    let angle = 0;
-    if (move.order === 4 && axisCell && CELL_AXIS[axisCell]) {
-      const rot = twistWorldRotation(move.cell, axisCell, move.turns);
-      axis = rot.axis;
-      angle = rot.angle;
-    } else if (move.order === 2) {
-      angle = Math.PI;
+    const [cellAxis, cellExt] = cellAxisOf(move.cell, n);
+    const pivots = [];
+    for (const group of this.root.children) {
+      const displayCell = group.userData.cell;
+      if (!displayCell) continue;
+      const moving = [];
+      for (const child of group.children) {
+        const pos = child.userData && child.userData.pos;
+        if (!pos || pos[cellAxis] !== cellExt) continue;
+        moving.push(child);
+      }
+      if (!moving.length) continue;
+      const rot =
+        move.order === 2
+          ? { axis: new THREE.Vector3(0, 1, 0), angle: Math.PI }
+          : cellTwistRotation(displayCell, move.cell, axisCell, move.turns, n);
+      if (!rot.angle) continue;
+      const pivot = new THREE.Group();
+      group.add(pivot);
+      for (const piece of moving) pivot.attach(piece);
+      pivots.push({ pivot, axis: rot.axis, angle: rot.angle });
     }
 
-    const start = performance.now();
-    const duration = move.turns === 2 ? 280 : 200;
-    const tick = (now) => {
-      if (this._stopped) return;
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - (1 - t) ** 3;
-      if (group && angle) group.setRotationFromAxisAngle(axis, angle * eased);
-      if (t < 1) {
-        requestAnimationFrame(tick);
-        return;
-      }
-      if (group) group.rotation.set(0, 0, 0);
+    const finish = () => {
       if (!move._undo) {
         this.history.push({
           cell: move.cell,
@@ -380,6 +398,26 @@ export class HyperViewer {
       this.rebuild();
       this.notify();
       this.playNext();
+    };
+    if (!pivots.length) {
+      finish();
+      return;
+    }
+
+    const start = performance.now();
+    const duration = move.turns === 2 ? 360 : 280;
+    const tick = (now) => {
+      if (this._stopped) return;
+      const t = Math.min(1, (now - start) / duration);
+      const eased = t * t * (3 - 2 * t);
+      for (const item of pivots) {
+        item.pivot.setRotationFromAxisAngle(item.axis, item.angle * eased);
+      }
+      if (t < 1) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      finish();
     };
     requestAnimationFrame(tick);
   }
