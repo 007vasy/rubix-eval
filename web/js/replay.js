@@ -101,7 +101,7 @@ let viewer = null;
 if (drawable && rec.state) {
   viewer =
     kind === "4d"
-      ? new HyperViewer(canvas, null, { showLabels: false })
+      ? new HyperViewer(canvas, null, { showLabels: true })
       : new CubeViewer(canvas, null, { clickToTurn: false, size: rec.size });
   viewer.loadState(rec.state);
 } else {
