@@ -112,6 +112,23 @@ def test_ai_leaderboard_skips_unnamed_solves(tmp_path, monkeypatch) -> None:
     assert "unspecified AI" not in {row["ai"] for row in board["ais"]}
 
 
+def test_publish_verified_rewrites_lane(tmp_path, monkeypatch) -> None:
+    from rubix_eval.records import load_record, publish_verified
+    from rubix_eval.solvers import history_to_moves
+
+    monkeypatch.setenv("RUBIX_SOLVES_DIR", str(tmp_path))
+    session = session_from_task(make_task(2, 1, seed=1), ai="OfflineBot")
+    moves = history_to_moves("3d", session["oracle"])
+    history = [{"face": m.face, "layer": m.layer, "wide": m.wide, "turns": m.turns} for m in moves]
+    grade = grade_progress(session, {"history": history}, compare=False, record=True)
+    rec = publish_verified(grade["record_id"], tmp_path)
+    assert rec["lane"] == "verified"
+    assert rec["web_access"] is False
+    assert rec["attested"] is True
+    stored = load_record(grade["record_id"], tmp_path)
+    assert stored["lane"] == "verified"
+
+
 def test_ai_leaderboard_splits_open_and_verified(tmp_path, monkeypatch) -> None:
     from rubix_eval.solvers import history_to_moves
 

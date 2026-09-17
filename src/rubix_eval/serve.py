@@ -145,7 +145,11 @@ def serve(
                 except ValueError as exc:
                     self._json({"error": str(exc)}, 400)
                     return
-                self._json(challenge.public_dict())
+                data = challenge.public_dict()
+                data.pop("state", None)
+                data.pop("seed", None)
+                data.pop("oracle", None)
+                self._json(data)
                 return
             if path == "/api/visual/grade":
                 with lock:
@@ -160,19 +164,12 @@ def serve(
                 self._json(session["progress"])
                 return
             if path == "/api/task":
-                size = int(query.get("size", ["3"])[0])
-                depth = int(query.get("depth", ["8"])[0])
-                seed = int(query.get("seed", ["0"])[0])
-                kind = query.get("kind", ["3d"])[0]
-                ndim = int(kind[0]) if kind and kind[0].isdigit() and kind.endswith("d") and kind != "3d" else 3
-                task = (
-                    make_hyper_task(depth, seed, size=size, ndim=ndim)
-                    if ndim >= 4
-                    else make_task(size, depth, seed)
+                self._json(
+                    {
+                        "error": "cubie JSON is not served over HTTP; use the /eval page or the CLI",
+                    },
+                    404,
                 )
-                payload = task.to_dict()
-                payload.pop("oracle", None)
-                self._json(payload)
                 return
             super().do_GET()
 

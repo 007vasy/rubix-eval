@@ -25,7 +25,7 @@ COPY web /opt/rubix-eval/web
 COPY evals /opt/rubix-eval/evals
 COPY docs /opt/rubix-eval/docs
 
-RUN pip install --no-cache-dir /opt/rubix-eval
+RUN pip install --no-cache-dir /opt/rubix-eval google-cloud-storage
 
 EXPOSE 8080
 CMD ["sh", "-c", "python -m rubix_eval visual --no-open --host 0.0.0.0 --port ${PORT}"]

@@ -1,0 +1,16 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - Dockerfile.cloudrun
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/rubix/eval:$BUILD_ID
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/rubix/eval:latest
+      - .
+images:
+  - us-central1-docker.pkg.dev/$PROJECT_ID/rubix/eval:latest
+  - us-central1-docker.pkg.dev/$PROJECT_ID/rubix/eval:$BUILD_ID
+options:
+  logging: CLOUD_LOGGING_ONLY

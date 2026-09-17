@@ -128,6 +128,13 @@ def main(argv: list[str] | None = None) -> int:
     apply_p.add_argument("task", help="Task JSON path")
     apply_p.add_argument("moves", nargs="+", help="Moves to apply")
 
+    pub_p = sub.add_parser(
+        "publish-verified",
+        help="Mark a recorded solve as verified (offline, internet disallowed) and rewrite it",
+    )
+    pub_p.add_argument("record", help="Record id")
+    pub_p.add_argument("--dir", help="Solves directory (default: ./solves or RUBIX_SOLVES_BUCKET)")
+
     args = parser.parse_args(argv)
     handlers = {
         "task": _cmd_task,
@@ -141,6 +148,7 @@ def main(argv: list[str] | None = None) -> int:
         "apply": _cmd_apply,
         "solves": _cmd_solves,
         "leaderboard": _cmd_leaderboard,
+        "publish-verified": _cmd_publish_verified,
     }
     return handlers[args.cmd](args)
 
@@ -445,6 +453,20 @@ def _cmd_apply(args: argparse.Namespace) -> int:
         print(format_moves(moves))
         print(ascii_net(cube, color=sys.stdout.isatty()))
     print(f"solved={cube.is_solved()}  misplaced={cube.misplaced_stickers()}")
+    return 0
+
+
+def _cmd_publish_verified(args: argparse.Namespace) -> int:
+    from .records import publish_verified, solves_dir
+
+    directory = Path(args.dir) if args.dir else None
+    try:
+        rec = publish_verified(args.record, directory)
+    except FileNotFoundError:
+        root = directory or solves_dir()
+        print(f"no record matching {args.record!r} in {root}", file=sys.stderr)
+        return 1
+    print(json.dumps({"record_id": rec.get("record_id"), "lane": rec.get("lane"), "attested": rec.get("attested")}, indent=2))
     return 0
 
 

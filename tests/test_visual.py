@@ -8,6 +8,15 @@ from rubix_eval.visual_session import (
 from rubix_eval.task import make_task
 
 
+def test_http_task_endpoint_is_blocked() -> None:
+    from pathlib import Path
+
+    src = Path("src/rubix_eval/serve.py").read_text(encoding="utf-8")
+    chunk = src.split('if path == "/api/task":', 1)[1][:500]
+    assert "cubie JSON is not served over HTTP" in chunk
+    assert "task.to_dict()" not in chunk
+
+
 def test_boot_hides_scramble_and_oracle() -> None:
     session = new_session(size=3, depth=8, seed=1)
     boot = boot_payload(session)
