@@ -200,12 +200,24 @@ class HyperCube:
         return clone
 
     def is_solved(self) -> bool:
+        """Solved if every cell is one color and those colors are all different.
+
+        A whole-puzzle 4D rotation (e.g. R/L swapped, U/D swapped) still counts:
+        each cell is uniform, just sitting in another orientation.
+        """
+        seen: set[str] = set()
+        expected = {CELL_COLOR[cell] for cell in self._cells}
         for cell in self._cells:
-            expected = CELL_COLOR[cell]
-            for sticker in self.cell_stickers_flat(cell):
-                if sticker != expected:
-                    return False
-        return True
+            stickers = self.cell_stickers_flat(cell)
+            if not stickers:
+                return False
+            color = stickers[0]
+            if color not in expected or any(s != color for s in stickers):
+                return False
+            if color in seen:
+                return False
+            seen.add(color)
+        return seen == expected
 
     def apply(self, moves: str | Iterable[HyperMove]) -> list[HyperMove]:
         parsed = (
@@ -387,8 +399,11 @@ class HyperCube:
     def misplaced_stickers(self) -> int:
         count = 0
         for cell in self._cells:
-            expected = CELL_COLOR[cell]
-            count += sum(1 for s in self.cell_stickers_flat(cell) if s != expected)
+            stickers = self.cell_stickers_flat(cell)
+            if not stickers:
+                continue
+            color = stickers[0]
+            count += sum(1 for s in stickers if s != color)
         return count
 
     def _load_cubies(self, cubies: Iterable[Mapping[str, Any]]) -> None:

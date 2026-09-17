@@ -382,24 +382,34 @@ export class HyperCube {
   }
 
   isSolved() {
+    const expected = new Set(CELLS.map((cell) => CELL_COLOR[cell]));
+    const seen = new Set();
     for (const cell of CELLS) {
-      const expected = CELL_COLOR[cell];
+      let color = null;
       for (const layer of this.cellStickers(cell)) {
         for (const row of layer) {
-          if (row.some((s) => s !== expected)) return false;
+          for (const s of row) {
+            if (color == null) color = s;
+            if (s !== color) return false;
+          }
         }
       }
+      if (color == null || !expected.has(color) || seen.has(color)) return false;
+      seen.add(color);
     }
-    return true;
+    return seen.size === expected.size;
   }
 
   misplacedStickers() {
     let count = 0;
     for (const cell of CELLS) {
-      const expected = CELL_COLOR[cell];
+      let color = null;
       for (const layer of this.cellStickers(cell)) {
         for (const row of layer) {
-          for (const s of row) if (s !== expected) count += 1;
+          for (const s of row) {
+            if (color == null) color = s;
+            else if (s !== color) count += 1;
+          }
         }
       }
     }

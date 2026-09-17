@@ -36,6 +36,17 @@ def test_ru_scrambles() -> None:
     assert cube.misplaced_stickers() > 0
 
 
+def test_solved_allows_whole_puzzle_reorientation() -> None:
+    cube = HyperCube()
+    swap = {"R": "O", "O": "R", "W": "Y", "Y": "W"}
+    cube._cubies = {
+        pos: {cell: swap.get(color, color) for cell, color in colors.items()}
+        for pos, colors in cube._cubies.items()
+    }
+    assert cube.is_solved()
+    assert cube.misplaced_stickers() == 0
+
+
 def test_parse_hyper_notation() -> None:
     moves = parse_hyper_moves("RU IF' OL2")
     assert [m.notation() for m in moves] == ["RU", "IF'", "OL2"]
