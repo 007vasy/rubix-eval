@@ -37,3 +37,10 @@ rubix-eval publish-verified <record_id>
 ```
 
 Open / web-on records are refused. Do not point the agent at Cloud Run.
+
+If sandboxes die with `Policy fetch failed: failed to connect to OpenShell
+server`, Docker packets to `172.18.0.1:17670` are blocked (typical UFW). Fix:
+
+```bash
+sudo ./openshell/allow-docker-gateway.sh
+```
