@@ -111,8 +111,7 @@ def verify_attempt(session: dict[str, Any], progress: dict[str, Any]) -> dict[st
         cost = None
     max_moves = session["max_moves"]
     over = max_moves is not None and htm > max_moves
-    if over:
-        solved = False
+    if over and not solved:
         error = error or f"over max_moves ({htm} > {max_moves})"
     depth = int(session["scramble_depth"])
     return {

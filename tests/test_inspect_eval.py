@@ -26,6 +26,22 @@ def test_grade_completion_oracle_solves() -> None:
     assert score.metadata["htm"] == 1
 
 
+def test_grade_completion_solved_over_max_moves() -> None:
+    task = make_task(3, 2, seed=0, max_moves=1)
+    score = grade_completion(
+        task.oracle_solution(),
+        {
+            "kind": "3d",
+            "state": task.state,
+            "scramble_depth": 2,
+            "max_moves": 1,
+        },
+    )
+    assert score.value == "C"
+    assert score.metadata["solved"] is True
+    assert score.metadata["htm"] > 1
+
+
 def test_grade_completion_wrong_moves_unsolved() -> None:
     task = make_task(3, 2, seed=2)
     score = grade_completion("R", {

@@ -95,22 +95,19 @@ def grade_solution(
             size=work.size,
             error=str(exc),
         )
-    if max_moves is not None and len(moves) > max_moves:
-        return GradeResult(
-            solved=False,
-            move_count=len(moves),
-            applied=[m.notation() for m in moves],
-            cost=step_cost(moves, scramble_depth),
-            misplaced_stickers=work.misplaced_stickers(),
-            size=work.size,
-            error=f"solution has {len(moves)} moves; max_moves is {max_moves}",
-        )
     work.apply(moves)
+    solved = work.is_solved()
+    over = max_moves is not None and len(moves) > max_moves
     return GradeResult(
-        solved=work.is_solved(),
+        solved=solved,
         move_count=len(moves),
         applied=[m.notation() for m in moves],
         cost=step_cost(moves, scramble_depth),
         misplaced_stickers=work.misplaced_stickers(),
         size=work.size,
+        error=(
+            None
+            if solved or not over
+            else f"solution has {len(moves)} moves; max_moves is {max_moves}"
+        ),
     )

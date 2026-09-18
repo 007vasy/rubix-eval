@@ -51,3 +51,13 @@ def test_empty_solution_on_solved_cube() -> None:
     result = task.grade("")
     assert result.solved
     assert result.cost.htm == 0
+
+
+def test_grade_solution_over_max_still_solved() -> None:
+    task = make_task(3, 2, seed=0, max_moves=1)
+    result = grade_solution(
+        task.cube(), task.oracle_solution(), task.scramble_depth, max_moves=1
+    )
+    assert result.solved
+    assert result.cost.htm > 1
+    assert result.error is None

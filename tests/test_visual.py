@@ -80,13 +80,24 @@ def test_grade_progress_uses_server_depth() -> None:
     assert grade["efficiency"] == 0.8
 
 
-def test_over_max_moves_not_solved() -> None:
-    session = new_session(size=3, depth=2, seed=0, max_moves=3)
+def test_solved_over_max_moves_counts_solved() -> None:
+    session = new_session(size=3, depth=2, seed=0, max_moves=1)
+    grade = grade_progress(session, {"history": session["oracle"]}, compare=False)
+    assert grade["solved"] is True
+    assert grade["misplaced_stickers"] == 0
+    assert grade["htm"] > session["max_moves"]
+    assert not grade["error"]
+
+
+def test_unsolved_over_max_moves_stays_unsolved() -> None:
+    session = new_session(size=3, depth=2, seed=0, max_moves=1)
     grade = grade_progress(
-        session, {"solved": True, "htm": 9, "qtm": 9, "misplaced": 0}, compare=False
+        session,
+        {"history": [{"face": "R", "layer": 1, "wide": False, "turns": 1}] * 5},
+        compare=False,
     )
     assert grade["solved"] is False
-    assert grade["error"]
+    assert grade["htm"] > session["max_moves"]
 
 
 def test_submit_records_clicks_tokens_and_history(tmp_path, monkeypatch) -> None:

@@ -86,7 +86,7 @@ def _visual_prompt(task: EvalTask) -> str:
             f"Solve this {shape} Rubik's cube ({task.kind}).",
             f"It is {task.scramble_depth} random turns from solved.",
             _VISUAL_INSTRUCTIONS,
-            f"Stay under {task.max_moves} HTM moves.",
+            f"Aim for under {task.max_moves} HTM moves; a solved cube still counts if you go over.",
         ]
     )
 
