@@ -1,6 +1,6 @@
-# Offline eval policy for NVIDIA OpenShell.
-# Deny all outbound network. inference.local stays available so a local
-# or gateway-routed model can run without the agent reaching the public internet.
+# Verified computer-use policy for NVIDIA OpenShell.
+# Deny public internet. inference.local is a runtime exception for the model.
+# Only Chromium may talk to the local visual eval. Agent CLIs cannot curl APIs.
 version: 1
 
 filesystem_policy:
@@ -13,14 +13,26 @@ filesystem_policy:
     - /app
     - /etc
     - /var/log
+    - /opt/rubix-eval
   read_write:
     - /sandbox
     - /tmp
     - /dev/null
+    - /eval
 
 landlock:
   compatibility: best_effort
 
-# Empty on purpose: default-deny. Do not add api.openai.com, api.anthropic.com,
-# or any other egress. Route models through OpenShell inference.local instead.
-network_policies: {}
+# Chromium loads the local /eval page (HTML/JS/WebGL + boot/submit).
+# Do not add claude, codex, grok, curl, or python — those must not fetch cube JSON.
+network_policies:
+  local_eval:
+    name: local-eval
+    endpoints:
+      - { host: 127.0.0.1, port: 8766 }
+      - { host: localhost, port: 8766 }
+    binaries:
+      - { path: /usr/bin/chromium }
+      - { path: /usr/bin/chromium-browser }
+      - { path: /usr/bin/google-chrome }
+      - { path: /usr/bin/google-chrome-stable }

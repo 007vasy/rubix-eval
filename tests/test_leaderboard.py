@@ -117,7 +117,10 @@ def test_publish_verified_rewrites_lane(tmp_path, monkeypatch) -> None:
     from rubix_eval.solvers import history_to_moves
 
     monkeypatch.setenv("RUBIX_SOLVES_DIR", str(tmp_path))
+    monkeypatch.setenv("RUBIX_LANE", "verified")
     session = session_from_task(make_task(2, 1, seed=1), ai="OfflineBot")
+    assert session["lane"] == "verified"
+    assert session["web_access"] is False
     moves = history_to_moves("3d", session["oracle"])
     history = [{"face": m.face, "layer": m.layer, "wide": m.wide, "turns": m.turns} for m in moves]
     grade = grade_progress(session, {"history": history}, compare=False, record=True)
@@ -127,6 +130,24 @@ def test_publish_verified_rewrites_lane(tmp_path, monkeypatch) -> None:
     assert rec["attested"] is True
     stored = load_record(grade["record_id"], tmp_path)
     assert stored["lane"] == "verified"
+
+
+def test_publish_verified_rejects_open_lane(tmp_path, monkeypatch) -> None:
+    from rubix_eval.records import publish_verified
+    from rubix_eval.solvers import history_to_moves
+
+    monkeypatch.setenv("RUBIX_SOLVES_DIR", str(tmp_path))
+    monkeypatch.delenv("RUBIX_LANE", raising=False)
+    session = session_from_task(make_task(2, 1, seed=1), ai="BrowserBot")
+    moves = history_to_moves("3d", session["oracle"])
+    history = [{"face": m.face, "layer": m.layer, "wide": m.wide, "turns": m.turns} for m in moves]
+    grade = grade_progress(session, {"history": history}, compare=False, record=True)
+    try:
+        publish_verified(grade["record_id"], tmp_path)
+    except ValueError as exc:
+        assert "refusing to attest" in str(exc)
+    else:
+        raise AssertionError("open records must not be attested")
 
 
 def test_ai_leaderboard_splits_open_and_verified(tmp_path, monkeypatch) -> None:

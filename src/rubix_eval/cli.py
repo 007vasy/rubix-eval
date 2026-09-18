@@ -466,6 +466,9 @@ def _cmd_publish_verified(args: argparse.Namespace) -> int:
         root = directory or solves_dir()
         print(f"no record matching {args.record!r} in {root}", file=sys.stderr)
         return 1
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
     print(json.dumps({"record_id": rec.get("record_id"), "lane": rec.get("lane"), "attested": rec.get("attested")}, indent=2))
     return 0
 

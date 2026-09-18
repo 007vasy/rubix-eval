@@ -13,9 +13,9 @@ There is no internet. Do not call external APIs. If you need a model, use
 
 ## What you may do
 
-1. Open the cube window (`http://127.0.0.1:8765/eval`). Each visit is a **new
-   random challenge** (cube size and how far it is from solved are chosen
-   for you; you only see the stickers).
+1. Open the **pinned official** cube window in the browser (the prompt gives
+   the exact `http://127.0.0.1:8766/eval?...` URL). Do not Shuffle. Do not add
+   `random=1`.
 2. Look at the colored stickers.
 3. Turn the cube with the pointer (the same list is on screen in the
    bottom-left):
@@ -27,20 +27,20 @@ There is no internet. Do not call external APIs. If you need a model, use
    bottom-right) to submit.
 
 On the 4D puzzle you will see several colored cubes (cells of a tesseract).
-Click stickers on those cells the same way. There are no letter labels.
+Click stickers on those cells the same way.
 
 ## What you must not do
 
+- Do not fetch `/api/task`, `/api/grade`, `/api/challenge`, cube JSON, scramble, or oracle.
+- Do not POST to a click helper (nothing on port 9876).
 - Do not open `/eval/task.json`, `task.json`, or any JSON.
-- Do not run `rubix-eval show`, `oracle`, or `grade`.
+- Do not run `rubix-eval show`, `oracle`, `grade`, or any cube solver (kociemba).
 - Do not read the page source, network responses, or DevTools.
 - Do not type face letters as a substitute for looking at the stickers.
-- Do not fetch `/api/task` (that endpoint is for humans, not this eval).
 
 If a terminal is available, ignore it for this task. Use the display.
 
 ## Scoring (you cannot see these numbers)
 
-Solved, move count (HTM/QTM), extra moves vs scramble depth, and how that
-length compares to inverse-scramble, God's algorithm (HTM search), and
-Kociemba on 3×3×3. Shorter correct solutions score better.
+A cube with each face one color is solved. Move count is HTM. Shorter correct
+solutions score better.

@@ -134,6 +134,13 @@ def session_from_task(
     depth_label: str | None = None,
     ai: str | None = None,
 ) -> dict[str, Any]:
+    lane = (os.environ.get("RUBIX_LANE") or "open").strip().lower()
+    if lane == "verified":
+        web_access = False
+        harness = os.environ.get("RUBIX_HARNESS") or "openshell"
+    else:
+        web_access = os.environ.get("RUBIX_WEB_ACCESS", "1") not in ("0", "false", "no")
+        harness = os.environ.get("RUBIX_HARNESS") or "browser"
     return {
         "id": secrets.token_urlsafe(12),
         "kind": task.kind,
@@ -147,9 +154,9 @@ def session_from_task(
         "challenge_id": challenge_id,
         "depth_label": depth_label,
         "ai": resolve_ai_name(ai),
-        "lane": os.environ.get("RUBIX_LANE") or "open",
-        "web_access": os.environ.get("RUBIX_WEB_ACCESS", "1") not in ("0", "false", "no"),
-        "harness": os.environ.get("RUBIX_HARNESS") or "browser",
+        "lane": "verified" if lane == "verified" else "open",
+        "web_access": web_access,
+        "harness": harness,
         "progress": None,
         "submitted": False,
         "started_at": time.time(),

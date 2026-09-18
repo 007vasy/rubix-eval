@@ -137,3 +137,12 @@ def test_submit_records_clicks_tokens_and_history(tmp_path, monkeypatch) -> None
     assert hardest["click_count"] == 1
     assert hardest["tokens_used"] == 45319
     assert hardest["record_id"] == grade["record_id"]
+
+
+def test_verified_lane_forces_no_web_access(monkeypatch) -> None:
+    monkeypatch.setenv("RUBIX_LANE", "verified")
+    monkeypatch.setenv("RUBIX_WEB_ACCESS", "1")
+    session = session_from_task(make_task(2, 1, seed=1), ai="OfflineBot")
+    assert session["lane"] == "verified"
+    assert session["web_access"] is False
+    assert session["harness"] == "openshell"

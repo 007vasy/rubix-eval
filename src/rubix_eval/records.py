@@ -203,14 +203,23 @@ def list_records(directory: Path | None = None, *, limit: int = 200) -> list[dic
 
 
 def publish_verified(record_id: str, directory: Path | None = None) -> dict[str, Any]:
-    """Mark an existing record as a verified offline run and rewrite it."""
+    """Attest an offline verified run. Refuses open / web-on records."""
     rec = load_record(record_id, directory)
     if not rec:
         raise FileNotFoundError(record_id)
+    lane = rec.get("lane") or "open"
+    web_access = rec.get("web_access")
+    if web_access is None:
+        web_access = lane != "verified"
+    if lane != "verified" or web_access:
+        raise ValueError(
+            f"refusing to attest {record_id}: lane={lane!r} web_access={web_access!r} "
+            "(verified runs must be created offline with RUBIX_LANE=verified)"
+        )
     rec["lane"] = "verified"
     rec["web_access"] = False
     rec["attested"] = True
-    rec["harness"] = rec.get("harness") if rec.get("harness") not in (None, "browser") else "inspect"
+    rec["harness"] = rec.get("harness") if rec.get("harness") not in (None, "browser") else "openshell"
     write_record(rec, directory)
     return rec
 

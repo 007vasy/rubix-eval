@@ -219,7 +219,12 @@ drag empty space to orbit, use `U D L R F B` (shift for `'`). Size goes from
 and click a sticker to twist that cell. The HUD reports HTM / QTM versus
 scramble depth.
 
-## OpenShell (no internet)
+## OpenShell (verified, no internet, browser only)
+
+Verified runs use NVIDIA OpenShell with **no public internet**. The agent
+drives a local `/eval` page in Chromium. Models go through
+`https://inference.local`. There is no `task.json` oracle and no click-helper
+API. See [openshell/README.md](openshell/README.md).
 
 ```bash
 curl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | sh
@@ -229,18 +234,11 @@ openshell sandbox create \
   --from . \
   --policy ./openshell/policy.yaml \
   --no-auto-providers
-```
 
-`openshell/policy.yaml` has an empty `network_policies` map, so the agent cannot
-reach the public internet. Configure a local model with OpenShell inference
-routing if the agent needs a LLM.
-
-Inside the sandbox:
-
-```bash
-rubix-eval task --size 3 --depth 8 --seed 1 -o /eval/task.json
-# agent writes /eval/solution.txt
-rubix-eval grade /eval/task.json --solution /eval/solution.txt
+# host: visual eval on :8766, lane=verified
+./openshell/run-verified.sh serve
+./openshell/run-verified.sh fable   # or astra / grok
+rubix-eval publish-verified <record_id>
 ```
 
 ## Notation

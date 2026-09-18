@@ -300,8 +300,10 @@ Record those as **known holes** if you are scoring hardening, not as
 ### 7.6 What the agent instructions forbid
 
 `evals/AGENT.md` and `openshell/skills/rubiks-eval/SKILL.md` tell the agent
-not to read `/api/task`, page source, or `/solves`. That is policy, not a
-network block.
+not to read `/api/task`, page source, or `/solves`. Verified OpenShell runs
+also **block public internet** (`openshell/policy.yaml`): Chromium may load
+local `:8766/eval` only; agent CLIs cannot curl cube JSON. See
+[openshell/README.md](../openshell/README.md).
 
 ---
 

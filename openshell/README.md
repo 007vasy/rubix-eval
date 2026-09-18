@@ -1,34 +1,39 @@
-# OpenShell sandbox
+# OpenShell verified computer-use
 
-Run the eval so the agent has **no internet**. NVIDIA OpenShell keeps
-`https://inference.local` available for a local or gateway-routed model.
+The agent has **no public internet** and may only drive a **local browser** on
+the visual `/eval` page. Inference is `https://inference.local`. There is no
+`task.json` path and no click-helper API.
 
 ```bash
-# Install the OpenShell CLI (once)
 curl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | sh
 
-# From the repo root: build this directory as a sandbox image
 openshell sandbox create \
   --name rubix-eval \
-  --from ./openshell \
+  --from . \
   --policy ./openshell/policy.yaml \
   --no-auto-providers
 ```
 
-Inside the sandbox:
+`openshell/policy.yaml` allows Chromium to `127.0.0.1:8766` only. It does not
+allow `claude` / `codex` / `grok` / `curl` to fetch cube JSON. Do not add
+`api.anthropic.com`, `api.openai.com`, or `api.x.ai`.
+
+On the host (or inside the sandbox):
 
 ```bash
-rubix-eval task --size 3 --depth 8 --seed 1 -o /eval/task.json
-rubix-eval show /eval/task.json --no-color
+# terminal 1 — local eval, verified lane, no GCS
+RUBIX_VERIFIED_PORT=8766 ./openshell/run-verified.sh serve
+
+# terminal 2 — one agent at a time, native computer-use
+./openshell/run-verified.sh fable    # official 3x3 full
+./openshell/run-verified.sh astra    # official 3x3 d10
+./openshell/run-verified.sh grok     # official 3x3 d2
 ```
 
-Point the agent at `/eval/task.json` and collect `/eval/solution.txt`.
-Grade from the host or from the sandbox:
+After Done, the record is already `lane=verified`. Attest and upload:
 
 ```bash
-rubix-eval grade /eval/task.json --solution /eval/solution.txt
+rubix-eval publish-verified <record_id>
 ```
 
-To use a local GPU model instead of the public internet, configure OpenShell
-inference routing to Ollama/vLLM and keep this policy's empty `network_policies`.
-See https://docs.nvidia.com/openshell/sandboxes/inference-routing
+Open / web-on records are refused. Do not point the agent at Cloud Run.
