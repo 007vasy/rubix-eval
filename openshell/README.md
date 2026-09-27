@@ -27,7 +27,7 @@ RUBIX_VERIFIED_PORT=8766 ./openshell/run-verified.sh serve
 # terminal 2 — one agent at a time, native computer-use
 ./openshell/run-verified.sh fable    # official 3x3 full
 ./openshell/run-verified.sh astra    # official 3x3 d10
-./openshell/run-verified.sh grok     # official 3x3 d2
+# grok is refused: there is no OpenShell xAI provider, so a Grok run stays lane=open
 ```
 
 After Done, the record is already `lane=verified`. Attest and upload:

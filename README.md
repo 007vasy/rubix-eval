@@ -237,7 +237,7 @@ openshell sandbox create \
 
 # host: visual eval on :8766, lane=verified
 ./openshell/run-verified.sh serve
-./openshell/run-verified.sh fable   # or astra / grok
+./openshell/run-verified.sh fable   # or astra; grok is not a verified agent
 rubix-eval publish-verified <record_id>
 ```
 

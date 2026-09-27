@@ -1,37 +1,32 @@
 # syntax=docker/dockerfile:1
-# Build from the repository root:
-#   openshell sandbox create --name rubix-eval --from . --policy ./openshell/policy.yaml --no-auto-providers
-#   docker build -f openshell/Dockerfile .
+# Build on the host (has internet), then create an OpenShell sandbox from the image
+# with openshell/policy.yaml (no public internet).
+#
+#   DOCKER_HOST=unix:///var/run/docker.sock docker build -f openshell/Dockerfile -t rubix-eval-verified:local .
+#   openshell sandbox create --name rubix-eval --from rubix-eval-verified:local --policy ./openshell/policy.yaml --no-auto-providers --detach
 
-FROM python:3.12-slim-bookworm
+FROM ghcr.io/nvidia/openshell-community/sandboxes/base:latest
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PATH="/sandbox/.venv/bin:/usr/local/bin:/usr/bin:/bin" \
+USER root
+ENV DEBIAN_FRONTEND=noninteractive \
     RUBIX_LANE=verified \
     RUBIX_WEB_ACCESS=0 \
     RUBIX_HARNESS=openshell \
-    RUBIX_TRUSTED_RENDERER=0
-
-WORKDIR /opt/rubix-eval
+    RUBIX_TRUSTED_RENDERER=0 \
+    RUBIX_SOLVES_DIR=/eval/solves \
+    DISPLAY=:99
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        bash \
-        chromium \
+        xvfb \
         fonts-liberation \
-        libgl1 \
-        libglib2.0-0 \
-        libnss3 \
-        libatk-bridge2.0-0 \
-        libgtk-3-0 \
-        libasound2 \
-        libdrm2 \
-        libgbm1 \
-        libxkbcommon0 \
+        wget \
+        ca-certificates \
+    && wget -qO /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get install -y --no-install-recommends /tmp/chrome.deb \
+    && rm -f /tmp/chrome.deb \
     && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /opt/rubix-eval
 COPY pyproject.toml README.md LICENSE /opt/rubix-eval/
 COPY src /opt/rubix-eval/src
 COPY web /opt/rubix-eval/web
@@ -41,15 +36,11 @@ COPY openshell/skills /sandbox/.agents/skills
 COPY openshell/run-verified.sh /usr/local/bin/run-verified
 COPY openshell/policy.yaml /etc/openshell/policy.yaml
 
-RUN python -m venv /sandbox/.venv \
-    && /sandbox/.venv/bin/pip install --no-cache-dir /opt/rubix-eval \
-    && mkdir -p /eval /sandbox/.claude/skills /sandbox/.codex \
+RUN chmod +x /usr/local/bin/run-verified \
+    && mkdir -p /sandbox/.claude/skills /eval /eval/solves \
     && ln -sf /sandbox/.agents/skills/rubiks-eval /sandbox/.claude/skills/rubiks-eval \
-    && chmod +x /usr/local/bin/run-verified \
-    && printf 'export PATH="/sandbox/.venv/bin:/usr/local/bin:/usr/bin:/bin"\nexport PS1="rubix@openshell:\\w\\$ "\nexport RUBIX_LANE=verified\nexport RUBIX_WEB_ACCESS=0\nexport RUBIX_HARNESS=openshell\n' > /sandbox/.bashrc \
-    && useradd --create-home --home-dir /sandbox --shell /bin/bash --uid 1500 sandbox \
-    && chown -R 1500:1500 /sandbox /eval /opt/rubix-eval
+    && /sandbox/.venv/bin/pip install --no-cache-dir /opt/rubix-eval \
+    && chown -R sandbox:sandbox /opt/rubix-eval /eval /sandbox/.agents /sandbox/.claude /sandbox/.venv
 
-WORKDIR /eval
 USER sandbox
-ENTRYPOINT ["/usr/local/bin/run-verified"]
+WORKDIR /eval

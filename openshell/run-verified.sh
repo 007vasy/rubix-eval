@@ -2,7 +2,8 @@
 # Start a verified visual eval (no public internet, no click-helper API).
 # Usage:
 #   run-verified.sh serve
-#   run-verified.sh fable|astra|grok
+#   run-verified.sh fable|astra
+#   run-verified.sh grok   # refused: Grok is not a verified OpenShell agent
 set -euo pipefail
 
 PORT="${RUBIX_VERIFIED_PORT:-8766}"
@@ -11,6 +12,10 @@ export RUBIX_LANE=verified
 export RUBIX_WEB_ACCESS=0
 export RUBIX_HARNESS=openshell
 unset RUBIX_SOLVES_BUCKET || true
+if [ -d /eval ] && [ -w /eval ]; then
+  export RUBIX_SOLVES_DIR="${RUBIX_SOLVES_DIR:-/eval/solves}"
+  mkdir -p "$RUBIX_SOLVES_DIR"
+fi
 
 if [ -d /opt/rubix-eval/src/rubix_eval ]; then
   ROOT=/opt/rubix-eval
@@ -78,14 +83,12 @@ case "$cmd" in
       "$(cat "$PROMPT_DIR/astra-verified.md")"
     ;;
   grok)
-    url="$(official_url "Grok 4.6" 2)"
-    mkdir -p "$PROMPT_DIR"
-    write_prompt grok "$url" "$PROMPT_DIR/grok-verified.md"
-    echo "$url"
-    exec grok --always-approve "$(cat "$PROMPT_DIR/grok-verified.md")"
+    echo "grok is not an OpenShell verified agent (no grok binary, no inference.local xAI provider)." >&2
+    echo "A host run that can reach api.x.ai is lane=open and must not be published as verified." >&2
+    exit 2
     ;;
   *)
-    echo "usage: $0 serve|fable|astra|grok" >&2
+    echo "usage: $0 serve|fable|astra" >&2
     exit 2
     ;;
 esac

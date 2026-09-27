@@ -14,17 +14,21 @@ filesystem_policy:
     - /etc
     - /var/log
     - /opt/rubix-eval
+    - /opt/google
   read_write:
     - /sandbox
     - /tmp
     - /dev/null
     - /eval
+    - /dev/shm
+    - /run
 
 landlock:
   compatibility: best_effort
 
 # Chromium loads the local /eval page (HTML/JS/WebGL + boot/submit).
 # Do not add claude, codex, grok, curl, or python — those must not fetch cube JSON.
+# Model traffic stays on inference.local, which the gateway allows separately.
 network_policies:
   local_eval:
     name: local-eval
@@ -36,3 +40,4 @@ network_policies:
       - { path: /usr/bin/chromium-browser }
       - { path: /usr/bin/google-chrome }
       - { path: /usr/bin/google-chrome-stable }
+      - { path: /opt/google/chrome/chrome }
