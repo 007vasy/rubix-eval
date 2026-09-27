@@ -12,6 +12,7 @@ import {
   parseMoves,
   sliceIndex,
 } from "./engine.js";
+import { stickerEuler } from "./sticker-pose.js";
 
 const FACE_NORMALS = {
   R: [1, 0, 0],
@@ -47,7 +48,7 @@ export class CubeViewer {
     this.pitch = 1.08;
     this.drag = null;
     this._stopped = false;
-    this._lastClickAt = 0;
+    this._pendingClick = null;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0b0d10);
@@ -103,6 +104,7 @@ export class CubeViewer {
 
   dispose() {
     this._stopped = true;
+    if (this._pendingClick) clearTimeout(this._pendingClick.timer);
     this.canvas.removeEventListener("pointerdown", this.boundPointerDown);
     window.removeEventListener("pointermove", this.boundPointerMove);
     window.removeEventListener("pointerup", this.boundPointerUp);
@@ -208,7 +210,8 @@ export class CubeViewer {
         const mesh = new THREE.Mesh(stickerGeo, mat);
         const [nx, ny, nz] = FACE_NORMALS[face];
         mesh.position.set(nx * stickerZ, ny * stickerZ, nz * stickerZ);
-        mesh.lookAt(mesh.position.clone().add(new THREE.Vector3(nx, ny, nz)));
+        const [rx, ry, rz] = stickerEuler(nx, ny, nz);
+        mesh.rotation.set(rx, ry, rz);
         mesh.userData = { face, cubie: group.userData, color };
         group.add(mesh);
         this.stickerMeshes.push(mesh);
@@ -322,12 +325,25 @@ export class CubeViewer {
       const dx = event.clientX - this.drag.startX;
       const dy = event.clientY - this.drag.startY;
       if (Math.hypot(dx, dy) < 14) {
-        const now = performance.now();
-        const dbl = now - this._lastClickAt < 320;
-        this._lastClickAt = now;
-        let turns = this.drag.button === 2 ? 3 : 1;
-        if (dbl && this.drag.button === 0) turns = 2;
-        this.enqueue(this.stickerClickMove(this.drag.face, this.drag.cubie, turns));
+        const face = this.drag.face;
+        const cubie = this.drag.cubie;
+        const button = this.drag.button;
+        if (button === 2) {
+          if (this._pendingClick) clearTimeout(this._pendingClick.timer);
+          this._pendingClick = null;
+          this.enqueue(this.stickerClickMove(face, cubie, 3));
+        } else if (this._pendingClick && this._pendingClick.face === face && this._pendingClick.cubie === cubie) {
+          clearTimeout(this._pendingClick.timer);
+          this._pendingClick = null;
+          this.enqueue(this.stickerClickMove(face, cubie, 2));
+        } else {
+          if (this._pendingClick) clearTimeout(this._pendingClick.timer);
+          const timer = setTimeout(() => {
+            this._pendingClick = null;
+            this.enqueue(this.stickerClickMove(face, cubie, 1));
+          }, 280);
+          this._pendingClick = { timer, face, cubie };
+        }
       }
     }
     this.drag = null;

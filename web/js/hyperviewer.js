@@ -19,6 +19,7 @@ import {
   stepCost,
   twist90Position,
 } from "./hyperengine.js";
+import { stickerEuler } from "./sticker-pose.js";
 
 const PITCH = 0.98;
 const CUBIE = 0.58;
@@ -227,7 +228,7 @@ export class HyperViewer {
 
   dispose() {
     this._stopped = true;
-    if (this._pendingClick) clearTimeout(this._pendingClick);
+    if (this._pendingClick) clearTimeout(this._pendingClick.timer);
     this.canvas.removeEventListener("pointerdown", this.onDown);
     window.removeEventListener("pointermove", this.onMove);
     window.removeEventListener("pointerup", this.onUp);
@@ -334,7 +335,8 @@ export class HyperViewer {
             for (const [nx, ny, nz] of faceDirs) {
               const sticker = new THREE.Mesh(stickerGeo, stickerMat);
               sticker.position.set(nx * z, ny * z, nz * z);
-              sticker.lookAt(sticker.position.clone().add(new THREE.Vector3(nx, ny, nz)));
+              const [rx, ry, rz] = stickerEuler(nx, ny, nz);
+              sticker.rotation.set(rx, ry, rz);
               sticker.userData = { cell, i, j, k, nx, ny, nz };
               piece.add(sticker);
               this.stickerMeshes.push(sticker);
@@ -471,12 +473,23 @@ export class HyperViewer {
       axis = neighbors[0];
     }
     if (!axis) return;
-    const now = performance.now();
-    const dbl = press.button === 0 && now - (this._lastClickAt || 0) < 320;
-    this._lastClickAt = now;
-    let turns = press.button === 2 ? 3 : 1;
-    if (dbl) turns = 2;
-    this.enqueue({ cell, axis, turns, order: 4, axisCells: [axis] });
+    const spec = { cell, axis, order: 4, axisCells: [axis] };
+    if (press.button === 2) {
+      if (this._pendingClick) clearTimeout(this._pendingClick.timer);
+      this._pendingClick = null;
+      this.enqueue({ ...spec, turns: 3 });
+    } else if (this._pendingClick && this._pendingClick.cell === cell && this._pendingClick.axis === axis) {
+      clearTimeout(this._pendingClick.timer);
+      this._pendingClick = null;
+      this.enqueue({ ...spec, turns: 2 });
+    } else {
+      if (this._pendingClick) clearTimeout(this._pendingClick.timer);
+      const timer = setTimeout(() => {
+        this._pendingClick = null;
+        this.enqueue({ ...spec, turns: 1 });
+      }, 280);
+      this._pendingClick = { timer, cell, axis };
+    }
   }
 
   notify() {

@@ -185,6 +185,20 @@ async function play() {
   playBtn.textContent = "Play";
 }
 
+window.__replay = {
+  length: history.length,
+  reset,
+  async goto(n) {
+    playing = false;
+    playBtn.textContent = "Play";
+    if (viewer && rec.state) viewer.loadState(rec.state);
+    const target = Math.max(0, Math.min(history.length, n));
+    for (let i = 0; i < target; i += 1) applyInstant(history[i]);
+    index = target;
+    mark();
+  },
+};
+
 document.getElementById("reset").addEventListener("click", () => reset());
 document.getElementById("next").addEventListener("click", () => {
   playing = false;
