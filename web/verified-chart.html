@@ -17,13 +17,19 @@
       </div>
       <nav>
         <a href="/verified">verified</a>
-        <a id="link3d" href="/verified/3d">3×3×3</a>
-        <a id="link4d" href="/verified/4d">2×2×2×2</a>
+        <a href="/verified/3d">3×3×3</a>
+        <a href="/verified/4d">2×2×2×2</a>
+        <a href="/verified/3x3x3x3">3×3×3×3</a>
         <a href="/ai">open AI</a>
         <a href="/leaderboard">puzzles</a>
       </nav>
     </header>
     <main>
+      <nav class="puzzle-switch" id="puzzle-switch" aria-label="Puzzle">
+        <a href="/verified/3d"><b>3×3×3</b><span>3D · 25-turn scramble</span></a>
+        <a href="/verified/4d"><b>2×2×2×2</b><span>4D tesseract · 20 turns</span></a>
+        <a href="/verified/3x3x3x3"><b>3×3×3×3</b><span>4D · 40 turns</span></a>
+      </nav>
       <p id="blurb" class="lede"></p>
       <p id="empty" hidden>No attempts on this cube yet.</p>
       <section id="stats" class="stats" hidden></section>
@@ -48,7 +54,7 @@
     </main>
     <footer class="site">
       <a href="https://github.com/007vasy/rubix-eval">GitHub</a>
-      · Verified = offline, internet disallowed · Open computer-use runs are marked on the chart
+      · Verified = offline, internet disallowed · Open = computer-use with web access, shown separately
     </footer>
     <script type="module" src="/js/verified-chart.js"></script>
     <script type="module" src="/js/site.js"></script>

@@ -2,6 +2,43 @@ const empty = document.getElementById("empty");
 const board = document.getElementById("board");
 const rows = document.getElementById("rows");
 const detail = document.getElementById("detail");
+const puzzles = document.getElementById("puzzles");
+
+function esc(value) {
+  return String(value).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+}
+
+// One card per verified puzzle: the best verified and the best open run, side by side.
+async function renderPuzzles() {
+  const charts = ["3d", "4d", "4d3"];
+  const all = await Promise.all(
+    charts.map((k) => fetch(`/api/verified/depth?kind=${k}`, { cache: "no-store" }).then((r) => r.json())),
+  );
+  const best = (models, lane) =>
+    models
+      .filter((m) => m.lane === lane && m.solved_turns > 0)
+      .sort((a, b) => b.solved_turns - a.solved_turns || (a.htm ?? 1e9) - (b.htm ?? 1e9))[0];
+  puzzles.innerHTML = all
+    .map((d) => {
+      const line = (lane, label) => {
+        const m = best(d.models || [], lane);
+        const pct = m ? Math.min(100, (m.solved_turns / d.full_turns) * 100) : 0;
+        const depth = m ? (m.reached_full ? `full ✓` : `${m.solved_turns}/${d.full_turns}`) : "—";
+        return `<div class="lane-line"><span class="lane-chip ${lane}">${label}</span>
+          <span class="who">${m ? esc(m.ai) : "no run yet"}</span><span class="depth">${depth}</span></div>
+          <div class="mini ${lane}"><i style="width:${pct}%"></i></div>`;
+      };
+      return `<a class="puzzle-card" href="/verified/${d.slug}">
+        <h3>${esc(d.title)}</h3>
+        <div class="meta">${d.ndim}D · full scramble ${d.full_turns} turns · ${(d.models || []).length} model runs</div>
+        ${line("verified", "verified")}
+        ${line("open", "open")}
+        <span class="go">Open chart →</span>
+      </a>`;
+    })
+    .join("");
+}
+renderPuzzles();
 
 function fmtTime(s) {
   if (s == null || Number.isNaN(s)) return "—";

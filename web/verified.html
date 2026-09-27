@@ -19,6 +19,7 @@
         <a href="/eval">eval</a>
         <a href="/verified/3d">3×3×3</a>
         <a href="/verified/4d">2×2×2×2</a>
+        <a href="/verified/3x3x3x3">3×3×3×3</a>
         <a href="/ai">open AI</a>
         <a href="/leaderboard">puzzles</a>
         <a href="/solves">solves</a>
@@ -26,17 +27,12 @@
     </header>
     <main>
       <p>
-        The verified benchmark is two charts.
-        <a href="/verified/3d">3×3×3</a> and
-        <a href="/verified/4d">2×2×2×2</a>
-        show the deepest official scramble each model solved, including open computer-use runs.
-        The space to the right of a bar is the gap to a full scramble.
-        These rows were published from an offline run of
-        <a href="https://github.com/007vasy/rubix-eval">the rubix-eval harness</a>
-        with web access turned off. Open
-        <a href="/eval">/eval</a> in a browser to appear on the
-        <a href="/ai">Open</a> board instead.
+        The verified benchmark is three puzzles. Each chart shows the deepest official scramble
+        a model solved, with <b>verified offline</b> runs (OpenShell sandbox, internet disallowed)
+        ranked separately from <b>open computer-use</b> runs (a browser with web access).
+        Open <a href="/eval">/eval</a> in a browser to appear on the <a href="/ai">open board</a>.
       </p>
+      <section id="puzzles" class="puzzle-cards" aria-label="Verified puzzles"></section>
       <p id="empty" hidden>No verified solves yet.</p>
       <section id="board" class="board" hidden>
         <h2>Hardest verified solve per AI</h2>

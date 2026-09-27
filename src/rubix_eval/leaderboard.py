@@ -398,10 +398,11 @@ def build_leaderboard(
     }
 
 
-# The visual verified benchmark is one cube per dimension: 3×3×3 and 2×2×2×2.
+# The visual verified benchmark: 3×3×3, the 2×2×2×2 tesseract and the 3×3×3×3.
 VERIFIED_CHARTS: dict[str, dict[str, Any]] = {
-    "3d": {"kind": "3d", "size": 3, "ndim": 3, "title": "3×3×3"},
-    "4d": {"kind": "4d", "size": 2, "ndim": 4, "title": "2×2×2×2"},
+    "3d": {"kind": "3d", "size": 3, "ndim": 3, "title": "3×3×3", "slug": "3d"},
+    "4d": {"kind": "4d", "size": 2, "ndim": 4, "title": "2×2×2×2", "slug": "4d"},
+    "4d3": {"kind": "4d", "size": 3, "ndim": 4, "title": "3×3×3×3", "slug": "3x3x3x3"},
 }
 
 
@@ -411,10 +412,9 @@ def verified_depth_chart(
 ) -> dict[str, Any]:
     """Deepest official scramble each model solved, against a full scramble.
 
-    Verified and open computer-use records both count. The lane on the row is
-    the lane of the deepest solve (or open if the model has only failed
-    attempts). Bar height is that scramble length. The space above the bar is
-    the gap to a full scramble.
+    One row per model per lane, so a verified offline run and an open computer-use
+    run of the same model are shown (and ranked) separately. A model with only
+    failed attempts in a lane is a zero row in that lane.
     """
     spec = VERIFIED_CHARTS.get(kind)
     if spec is None:
@@ -422,38 +422,31 @@ def verified_depth_chart(
     cube_kind = spec["kind"]
     size = int(spec["size"])
     full = full_scramble_depth(size, cube_kind, spec["ndim"])
-    best: dict[str, dict[str, Any]] = {}
+    best: dict[tuple[str, str], dict[str, Any]] = {}
     for row in list_records(directory, limit=10000):
         if row.get("kind") != cube_kind or int(row.get("size") or 0) != size:
             continue
         name = named_ai(row.get("ai"))
         # Harness probes that landed in solves/, not benchmark models.
-        if not name or name.lower() in {"cheatbot", "clickprobe"}:
+        if not name or name.lower() in {"cheatbot", "clickprobe"} or name.lower().startswith("onlinetest"):
             continue
         lane = "verified" if (row.get("lane") or "open") == "verified" else "open"
         solved = bool(row.get("solved"))
         turns = int(row.get("scramble_depth") or 0) if solved else 0
         if solved and str(row.get("depth_label") or "") == "full":
             turns = full
-        current = best.get(name)
-        if current is None:
-            best[name] = {
-                "ai": name,
-                "solved_turns": turns,
-                "lane": lane if solved and turns else lane,
-                "htm": row.get("ai_htm") if solved else None,
-                "record_id": row.get("record_id") if solved and turns else None,
-            }
+        htm = row.get("ai_htm") if solved else None
+        current = best.setdefault(
+            (name, lane), {"ai": name, "lane": lane, "solved_turns": 0, "htm": None, "record_id": None}
+        )
+        if not turns:
             continue
-        if turns > int(current["solved_turns"]):
-            current["solved_turns"] = turns
-            current["htm"] = row.get("ai_htm")
-            current["record_id"] = row.get("record_id")
-            current["lane"] = lane
-        elif turns == int(current["solved_turns"]) and turns and current.get("record_id") is None:
-            current["record_id"] = row.get("record_id")
-            current["htm"] = row.get("ai_htm")
-            current["lane"] = lane
+        deeper = turns > int(current["solved_turns"])
+        tighter = turns == int(current["solved_turns"]) and (
+            current["htm"] is None or (htm is not None and htm < current["htm"])
+        )
+        if deeper or tighter:
+            current.update(solved_turns=turns, htm=htm, record_id=row.get("record_id"))
     models = []
     for row in best.values():
         solved_turns = int(row["solved_turns"])
@@ -469,14 +462,24 @@ def verified_depth_chart(
                 "record_id": row.get("record_id"),
             }
         )
-    models.sort(key=lambda item: (-item["solved_turns"], item["ai"].lower()))
+    models.sort(
+        key=lambda item: (
+            item["lane"] != "verified",
+            -item["solved_turns"],
+            item["htm"] if item["htm"] is not None else 10**9,
+            item["ai"].lower(),
+        )
+    )
     return {
         "kind": cube_kind,
+        "chart": kind,
+        "slug": spec["slug"],
         "size": size,
         "ndim": spec["ndim"],
         "title": spec["title"],
         "full_turns": full,
         "lanes": ["verified", "open"],
+        "charts": [{"chart": key, "slug": c["slug"], "title": c["title"]} for key, c in VERIFIED_CHARTS.items()],
         "models": models,
     }
 

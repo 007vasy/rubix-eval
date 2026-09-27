@@ -69,7 +69,7 @@ def serve(
                 self.path = "/verified.html"
                 super().do_GET()
                 return
-            if path in ("/verified/3d", "/verified/3d/", "/verified/4d", "/verified/4d/"):
+            if path.rstrip("/") in ("/verified/3d", "/verified/4d", "/verified/3x3x3x3"):
                 self.path = "/verified-chart.html"
                 super().do_GET()
                 return
@@ -77,8 +77,8 @@ def serve(
                 from .leaderboard import verified_depth_chart
 
                 chart_kind = query.get("kind", ["3d"])[0]
-                if chart_kind not in ("3d", "4d"):
-                    self._json({"error": "kind must be 3d or 4d"}, 400)
+                if chart_kind not in ("3d", "4d", "4d3"):
+                    self._json({"error": "kind must be 3d, 4d or 4d3"}, 400)
                     return
                 self._json(verified_depth_chart(chart_kind))
                 return
