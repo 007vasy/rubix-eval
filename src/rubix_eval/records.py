@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import json
 import os
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -93,12 +96,64 @@ def _gcs_bucket():
     return storage.Client().bucket(name)
 
 
+# Bucket reads are cached in-process: one listing per TTL, and a record is only downloaded
+# again when its generation changes. Every board is built from this, so page loads stay fast.
+BUCKET_TTL_SEC = float(os.environ.get("RUBIX_BUCKET_TTL", "30"))
+_bucket_lock = threading.Lock()
+_bucket_cache: dict[str, Any] = {"bucket": None, "listed_at": None, "records": {}}
+
+
+def _is_record_blob(name: str) -> bool:
+    return name.endswith(".json") and not name.endswith(("solves.jsonl", "algorithm_bench.json"))
+
+
+def _bucket_records(bucket) -> dict[str, dict[str, Any]]:
+    """blob name -> record, refreshed from the bucket at most once per TTL."""
+    now = time.monotonic()
+    with _bucket_lock:
+        cache = _bucket_cache
+        if cache["bucket"] != bucket.name:
+            cache.update(bucket=bucket.name, listed_at=None, records={})
+        fresh = cache["listed_at"] is not None and now - cache["listed_at"] < BUCKET_TTL_SEC
+        if fresh:
+            return {name: data for name, (_gen, data) in cache["records"].items()}
+        known = dict(cache["records"])
+    blobs = [b for b in bucket.list_blobs() if _is_record_blob(b.name)]
+    stale = [b for b in blobs if known.get(b.name, (None, None))[0] != b.generation]
+
+    def fetch(blob):
+        try:
+            return blob.name, blob.generation, json.loads(blob.download_as_text())
+        except (json.JSONDecodeError, OSError, ValueError):
+            return blob.name, blob.generation, None
+
+    fetched = {}
+    if stale:
+        with ThreadPoolExecutor(max_workers=min(16, len(stale))) as pool:
+            for name, gen, data in pool.map(fetch, stale):
+                if data is not None:
+                    fetched[name] = (gen, data)
+    live = {b.name for b in blobs}
+    with _bucket_lock:
+        records = {name: entry for name, entry in known.items() if name in live}
+        records.update(fetched)
+        _bucket_cache.update(listed_at=time.monotonic(), records=records)
+        return {name: data for name, (_gen, data) in records.items()}
+
+
+def _remember_blob(bucket_name: str, name: str, generation: Any, record: dict[str, Any]) -> None:
+    with _bucket_lock:
+        if _bucket_cache["bucket"] == bucket_name:
+            _bucket_cache["records"][name] = (generation, record)
+
+
 def write_record(record: dict[str, Any], directory: Path | None = None) -> Path:
     payload = json.dumps(record, indent=2) + "\n"
     bucket = _gcs_bucket() if directory is None else None
     if bucket is not None:
         blob = bucket.blob(blob_name_for(record))
         blob.upload_from_string(payload, content_type="application/json")
+        _remember_blob(bucket.name, blob.name, getattr(blob, "generation", None), json.loads(payload))
         return Path(f"gs://{bucket.name}/{blob.name}")
     root = directory or solves_dir()
     root.mkdir(parents=True, exist_ok=True)
@@ -113,13 +168,13 @@ def write_record(record: dict[str, Any], directory: Path | None = None) -> Path:
 def load_record(record_id: str, directory: Path | None = None) -> dict[str, Any] | None:
     bucket = _gcs_bucket() if directory is None else None
     if bucket is not None:
+        records = _bucket_records(bucket)
         for prefix in ("verified/", "open/"):
-            blob = bucket.blob(f"{prefix}{record_id}.json")
-            if blob.exists():
-                return json.loads(blob.download_as_text())
-        for blob in bucket.list_blobs():
-            if record_id in blob.name and blob.name.endswith(".json"):
-                return json.loads(blob.download_as_text())
+            if f"{prefix}{record_id}.json" in records:
+                return records[f"{prefix}{record_id}.json"]
+        for name, data in records.items():
+            if record_id in name:
+                return data
         return None
     root = directory or solves_dir()
     path = root / f"{record_id}.json"
@@ -171,15 +226,10 @@ def list_records(directory: Path | None = None, *, limit: int = 200) -> list[dic
     bucket = _gcs_bucket() if directory is None else None
     rows: list[dict[str, Any]] = []
     if bucket is not None:
-        blobs = sorted(bucket.list_blobs(), key=lambda b: b.name, reverse=True)
-        for blob in blobs:
-            if not blob.name.endswith(".json") or blob.name.endswith("solves.jsonl") or blob.name.endswith("algorithm_bench.json"):
-                continue
-            try:
-                data = json.loads(blob.download_as_text())
-            except (json.JSONDecodeError, OSError):
-                continue
-            row = _summary_row(data, Path(blob.name).stem)
+        records = _bucket_records(bucket)
+        # Newest first across both lanes (record ids start with a timestamp).
+        for name in sorted(records, key=lambda n: Path(n).stem, reverse=True):
+            row = _summary_row(records[name], Path(name).stem)
             if row:
                 rows.append(row)
             if len(rows) >= limit:

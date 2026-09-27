@@ -105,6 +105,10 @@ def main(argv: list[str] | None = None) -> int:
         help="Per-version full-solve and end-step leaderboard (algorithm time + human WR)",
     )
     board_p.add_argument("--bench", action="store_true", help="Time the local solvers and cache the result")
+    board_p.add_argument(
+        "--bench-out",
+        help="With --bench, write the timings here (e.g. src/rubix_eval/data/algorithm_bench.json to ship them)",
+    )
     board_p.add_argument("--all-sizes", action="store_true", help="Include 40³ and 100³")
     board_p.add_argument("--ai", action="store_true", dest="ai_only", help="AI-only ranking by hardest solved challenge")
     board_p.add_argument("--json", action="store_true", dest="as_json")
@@ -418,7 +422,12 @@ def _cmd_leaderboard(args: argparse.Namespace) -> int:
             )
         return 0
 
-    data = build_leaderboard(bench=args.bench, visual_only=not args.all_sizes)
+    if args.bench and args.bench_out:
+        from .leaderboard import run_benchmark
+
+        run_benchmark(visual_only=not args.all_sizes, out_path=Path(args.bench_out))
+        print(f"wrote {args.bench_out}", file=sys.stderr)
+    data = build_leaderboard(bench=args.bench and not args.bench_out, visual_only=not args.all_sizes)
     if args.as_json:
         json.dump(data, sys.stdout, indent=2)
         sys.stdout.write("\n")

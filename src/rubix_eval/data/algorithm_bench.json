@@ -1,0 +1,4009 @@
+{
+  "updated_at": "2026-09-27T22:23:54.582826+00:00",
+  "seed": 1,
+  "versions": {
+    "2x2x2": {
+      "1": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 7.1e-05,
+            "htm": 1,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0001,
+            "htm": 1,
+            "optimal": true
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 3.7e-05,
+            "htm": 2,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0001,
+            "htm": 2,
+            "optimal": true
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 4e-05,
+            "htm": 3,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.001,
+            "htm": 3,
+            "optimal": true
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 6.2e-05,
+            "htm": 4,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0009,
+            "htm": 4,
+            "optimal": true
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 7.2e-05,
+            "htm": 5,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0032,
+            "htm": 5,
+            "optimal": true
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 6.3e-05,
+            "htm": 6,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0063,
+            "htm": 5,
+            "optimal": true
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000123,
+            "htm": 7,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0099,
+            "htm": 6,
+            "optimal": true
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000111,
+            "htm": 8,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0426,
+            "htm": 7,
+            "optimal": true
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000111,
+            "htm": 9,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0403,
+            "htm": 7,
+            "optimal": true
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000111,
+            "htm": 10,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0335,
+            "htm": 7,
+            "optimal": true
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 2,
+        "depth_label": "full",
+        "scramble_depth": 11,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000118,
+            "htm": 11,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0938,
+            "htm": 8,
+            "optimal": true
+          }
+        ]
+      }
+    },
+    "3x3x3": {
+      "1": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 4e-05,
+            "htm": 1,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0001,
+            "htm": 1,
+            "optimal": true
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 8.1e-05,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 6.5e-05,
+            "htm": 2,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0002,
+            "htm": 2,
+            "optimal": true
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 3.6e-05,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 6e-05,
+            "htm": 3,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0013,
+            "htm": 3,
+            "optimal": true
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 3.5e-05,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 7.4e-05,
+            "htm": 4,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0009,
+            "htm": 4,
+            "optimal": true
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 3.5e-05,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 8.8e-05,
+            "htm": 5,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0092,
+            "htm": 5,
+            "optimal": true
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 4.4e-05,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000103,
+            "htm": 6,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0117,
+            "htm": 6,
+            "optimal": true
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 0.001852,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000124,
+            "htm": 7,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0999,
+            "htm": 7,
+            "optimal": true
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 0.001741,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000156,
+            "htm": 8,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.1722,
+            "htm": 8,
+            "optimal": true
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 0.014692,
+            "htm": 13,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000229,
+            "htm": 9,
+            "optimal": false
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 0.099185,
+            "htm": 14,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000187,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 3,
+        "depth_label": "full",
+        "scramble_depth": 25,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000496,
+            "htm": 25,
+            "optimal": false
+          },
+          {
+            "algorithm": "kociemba",
+            "label": "Kociemba two-phase",
+            "seconds": 0.57143,
+            "htm": 21,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "4x4x4": {
+      "1": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 8.3e-05,
+            "htm": 1,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0006,
+            "htm": 1,
+            "optimal": true
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 7.1e-05,
+            "htm": 2,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0009,
+            "htm": 2,
+            "optimal": true
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000107,
+            "htm": 3,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0042,
+            "htm": 3,
+            "optimal": true
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.00014,
+            "htm": 4,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0105,
+            "htm": 4,
+            "optimal": true
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000175,
+            "htm": 5,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0103,
+            "htm": 4,
+            "optimal": true
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000191,
+            "htm": 6,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.2574,
+            "htm": 5,
+            "optimal": true
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000215,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000225,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000223,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000297,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 4,
+        "depth_label": "full",
+        "scramble_depth": 45,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.001108,
+            "htm": 45,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "5x5x5": {
+      "1": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 7.6e-05,
+            "htm": 1,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0011,
+            "htm": 1,
+            "optimal": true
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 8.7e-05,
+            "htm": 2,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0016,
+            "htm": 2,
+            "optimal": true
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000138,
+            "htm": 3,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0111,
+            "htm": 3,
+            "optimal": true
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000184,
+            "htm": 4,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0273,
+            "htm": 4,
+            "optimal": true
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000179,
+            "htm": 5,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.1177,
+            "htm": 5,
+            "optimal": true
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000199,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000337,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000318,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000315,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000377,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 5,
+        "depth_label": "full",
+        "scramble_depth": 60,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.001899,
+            "htm": 60,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "6x6x6": {
+      "1": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000136,
+            "htm": 1,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0018,
+            "htm": 1,
+            "optimal": true
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.0001,
+            "htm": 2,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0025,
+            "htm": 2,
+            "optimal": true
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000145,
+            "htm": 3,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0259,
+            "htm": 3,
+            "optimal": true
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000174,
+            "htm": 4,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0532,
+            "htm": 4,
+            "optimal": true
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000236,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000317,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000288,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000309,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000414,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.00037,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 6,
+        "depth_label": "full",
+        "scramble_depth": 80,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.003323,
+            "htm": 80,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "7x7x7": {
+      "1": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.0001,
+            "htm": 1,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0024,
+            "htm": 1,
+            "optimal": true
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.00015,
+            "htm": 2,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0037,
+            "htm": 2,
+            "optimal": true
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000208,
+            "htm": 3,
+            "optimal": false
+          },
+          {
+            "algorithm": "god_htm",
+            "label": "God's algorithm (HTM search)",
+            "seconds": 0.0331,
+            "htm": 3,
+            "optimal": true
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000196,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000241,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000346,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000348,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000439,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000432,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.00049,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 7,
+        "depth_label": "full",
+        "scramble_depth": 100,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.004343,
+            "htm": 100,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "8x8x8": {
+      "1": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000165,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000145,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000318,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000375,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000428,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.00038,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000388,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000417,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000472,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000515,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 8,
+        "depth_label": "full",
+        "scramble_depth": 120,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.006046,
+            "htm": 120,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "9x9x9": {
+      "1": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000154,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000247,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000306,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000349,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000732,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000578,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000526,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.00058,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000638,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000938,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 9,
+        "depth_label": "full",
+        "scramble_depth": 140,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.008971,
+            "htm": 140,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "10x10x10": {
+      "1": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000284,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.00025,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000481,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000596,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000654,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000885,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000636,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000855,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.00073,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.000866,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "3d",
+        "size": 10,
+        "depth_label": "full",
+        "scramble_depth": 160,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble",
+            "seconds": 0.012915,
+            "htm": 160,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "2x2x2x2": {
+      "1": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 4.9e-05,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 4.3e-05,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 5.4e-05,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 6.6e-05,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 8.2e-05,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 9.3e-05,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000108,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000172,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000132,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000145,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "4d",
+        "size": 2,
+        "depth_label": "full",
+        "scramble_depth": 20,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000277,
+            "htm": 20,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "3x3x3x3": {
+      "1": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 5.6e-05,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 9.5e-05,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00024,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000136,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000215,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000199,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000277,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000252,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000328,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000311,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "4d",
+        "size": 3,
+        "depth_label": "full",
+        "scramble_depth": 40,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001272,
+            "htm": 40,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "4x4x4x4": {
+      "1": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000188,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000203,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000231,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000397,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000488,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00058,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000453,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000504,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000615,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00061,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "4d",
+        "size": 4,
+        "depth_label": "full",
+        "scramble_depth": 80,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.004501,
+            "htm": 80,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "5x5x5x5": {
+      "1": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000209,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00044,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000425,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000717,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000675,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000664,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001112,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000811,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000904,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001067,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "4d",
+        "size": 5,
+        "depth_label": "full",
+        "scramble_depth": 120,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.011243,
+            "htm": 120,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "6x6x6x6": {
+      "1": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000318,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000625,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000846,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000756,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001468,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.0011,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001238,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001846,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002074,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002712,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "4d",
+        "size": 6,
+        "depth_label": "full",
+        "scramble_depth": 160,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.024904,
+            "htm": 160,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "7x7x7x7": {
+      "1": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000727,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000947,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001003,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001203,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002103,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00169,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001901,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002491,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00253,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002556,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "4d",
+        "size": 7,
+        "depth_label": "full",
+        "scramble_depth": 200,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.048901,
+            "htm": 200,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "2x2x2x2x2": {
+      "1": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 3.5e-05,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 5.5e-05,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 7.6e-05,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 9.7e-05,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000119,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000139,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000222,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000188,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000201,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00022,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "5d",
+        "size": 2,
+        "depth_label": "full",
+        "scramble_depth": 40,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00085,
+            "htm": 40,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "3x3x3x3x3": {
+      "1": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000118,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000226,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.0003,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.093945,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000464,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000568,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00061,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.0007,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000778,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000884,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "5d",
+        "size": 3,
+        "depth_label": "full",
+        "scramble_depth": 80,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.006858,
+            "htm": 80,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "4x4x4x4x4": {
+      "1": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000623,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00108,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000909,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001259,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001411,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00218,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002037,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002292,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002428,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.00244,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "5d",
+        "size": 4,
+        "depth_label": "full",
+        "scramble_depth": 160,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.037664,
+            "htm": 160,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "2x2x2x2x2x2": {
+      "1": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 9.7e-05,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000116,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000144,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000237,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000313,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000277,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000311,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000407,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000393,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000422,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "6d",
+        "size": 2,
+        "depth_label": "full",
+        "scramble_depth": 60,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002713,
+            "htm": 60,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "3x3x3x3x3x3": {
+      "1": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000778,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000644,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001194,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001117,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001518,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.001717,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002076,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002551,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002588,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.003026,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "6d",
+        "size": 3,
+        "depth_label": "full",
+        "scramble_depth": 120,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.031322,
+            "htm": 120,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "2x2x2x2x2x2x2": {
+      "1": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000145,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000195,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000301,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000425,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000433,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000524,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000616,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000682,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000744,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.000825,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "7d",
+        "size": 2,
+        "depth_label": "full",
+        "scramble_depth": 80,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.006766,
+            "htm": 80,
+            "optimal": false
+          }
+        ]
+      }
+    },
+    "3x3x3x3x3x3x3": {
+      "1": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "1",
+        "scramble_depth": 1,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002194,
+            "htm": 1,
+            "optimal": false
+          }
+        ]
+      },
+      "2": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "2",
+        "scramble_depth": 2,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.002744,
+            "htm": 2,
+            "optimal": false
+          }
+        ]
+      },
+      "3": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "3",
+        "scramble_depth": 3,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.004211,
+            "htm": 3,
+            "optimal": false
+          }
+        ]
+      },
+      "4": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "4",
+        "scramble_depth": 4,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.004471,
+            "htm": 4,
+            "optimal": false
+          }
+        ]
+      },
+      "5": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "5",
+        "scramble_depth": 5,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.005096,
+            "htm": 5,
+            "optimal": false
+          }
+        ]
+      },
+      "6": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "6",
+        "scramble_depth": 6,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.006491,
+            "htm": 6,
+            "optimal": false
+          }
+        ]
+      },
+      "7": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "7",
+        "scramble_depth": 7,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.006406,
+            "htm": 7,
+            "optimal": false
+          }
+        ]
+      },
+      "8": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "8",
+        "scramble_depth": 8,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.006788,
+            "htm": 8,
+            "optimal": false
+          }
+        ]
+      },
+      "9": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "9",
+        "scramble_depth": 9,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.008066,
+            "htm": 9,
+            "optimal": false
+          }
+        ]
+      },
+      "10": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "10",
+        "scramble_depth": 10,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.009909,
+            "htm": 10,
+            "optimal": false
+          }
+        ]
+      },
+      "full": {
+        "kind": "7d",
+        "size": 3,
+        "depth_label": "full",
+        "scramble_depth": 160,
+        "algorithms": [
+          {
+            "algorithm": "inverse_scramble",
+            "label": "Inverse scramble (MC4D cheat-solve)",
+            "seconds": 0.124444,
+            "htm": 160,
+            "optimal": false
+          }
+        ]
+      }
+    }
+  }
+}

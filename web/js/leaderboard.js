@@ -195,15 +195,13 @@ modeTabs.forEach((tab) => {
   });
 });
 
-status.innerHTML = `<span class="spin">Timing local solvers…</span>`;
-let data = await fetch("/api/leaderboard", { cache: "no-store" }).then((r) => r.json());
-if (!data.updated_at) {
-  data = await fetch("/api/leaderboard?bench=1", { cache: "no-store" }).then((r) => r.json());
-}
+status.innerHTML = `<span class="spin">Loading leaderboard…</span>`;
+// Solver times are precomputed and shipped with the server; the page never triggers a benchmark.
+const data = await fetch("/api/leaderboard", { cache: "no-store" }).then((r) => r.json());
 DATA = data;
 const asOf = data.human_records_as_of ? ` Human records as of ${data.human_records_as_of}.` : "";
 status.textContent =
   (data.updated_at
-    ? `Algorithm times cached ${String(data.updated_at).slice(0, 19).replace("T", " ")} UTC.`
-    : "Algorithm times from recorded solves.") + asOf;
+    ? `Solver times precomputed ${String(data.updated_at).slice(0, 10)}.`
+    : "Solver times from recorded solves.") + asOf;
 render();

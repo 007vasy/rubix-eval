@@ -227,3 +227,107 @@ def test_submit_body_overrides_ai_name() -> None:
         session, {"history": [], "ai": "Claude"}, compare=False
     )
     assert grade["ai"] == "Claude"
+
+
+class _FakeBlob:
+    def __init__(self, bucket, name, payload, generation):
+        self.bucket, self.name, self.payload, self.generation = bucket, name, payload, generation
+
+    def download_as_text(self):
+        self.bucket.downloads.append(self.name)
+        return self.payload
+
+
+class _FakeBucket:
+    name = "fake-solves"
+
+    def __init__(self):
+        self.blobs = {}
+        self.downloads = []
+        self.listings = 0
+
+    def put(self, name, record, generation=1):
+        import json
+
+        self.blobs[name] = _FakeBlob(self, name, json.dumps(record), generation)
+
+    def list_blobs(self):
+        self.listings += 1
+        return list(self.blobs.values())
+
+
+def _bucket_record(record_id, ai="Model", solved=True, lane="open"):
+    return {
+        "record_id": record_id,
+        "ai": ai,
+        "kind": "3d",
+        "size": 3,
+        "scramble_depth": 2,
+        "depth_label": "2",
+        "lane": lane,
+        "attempt": {"solved": solved, "htm": 2, "elapsed_sec": 12.5},
+    }
+
+
+def test_bucket_records_are_cached_and_only_changed_blobs_refetched(monkeypatch) -> None:
+    from rubix_eval import records
+
+    bucket = _FakeBucket()
+    bucket.put("open/20260101T000000-a.json", _bucket_record("20260101T000000-a"))
+    bucket.put("verified/20260102T000000-b.json", _bucket_record("20260102T000000-b", lane="verified"))
+    bucket.put("open/solves.jsonl", {"ignored": True})
+    monkeypatch.setattr(records, "_gcs_bucket", lambda: bucket)
+    monkeypatch.setattr(records, "_bucket_cache", {"bucket": None, "listed_at": None, "records": {}})
+    monkeypatch.setattr(records, "BUCKET_TTL_SEC", 60.0)
+
+    rows = records.list_records()
+    assert [r["record_id"] for r in rows] == ["20260102T000000-b", "20260101T000000-a"]
+    assert records.load_record("20260101T000000-a")["ai"] == "Model"
+    records.list_records()
+    assert bucket.listings == 1  # inside the TTL nothing goes back to the bucket
+    assert sorted(bucket.downloads) == ["open/20260101T000000-a.json", "verified/20260102T000000-b.json"]
+
+    monkeypatch.setattr(records, "BUCKET_TTL_SEC", 0.0)
+    bucket.downloads.clear()
+    bucket.put("open/20260101T000000-a.json", _bucket_record("20260101T000000-a", ai="Renamed"), generation=2)
+    bucket.put("open/20260103T000000-c.json", _bucket_record("20260103T000000-c"))
+    del bucket.blobs["verified/20260102T000000-b.json"]
+    rows = records.list_records()
+    assert [r["record_id"] for r in rows] == ["20260103T000000-c", "20260101T000000-a"]
+    assert rows[1]["ai"] == "Renamed"
+    assert sorted(bucket.downloads) == ["open/20260101T000000-a.json", "open/20260103T000000-c.json"]
+    assert records.load_record("20260102T000000-b") is None
+
+
+def test_ai_board_is_built_from_summaries_without_refetching(monkeypatch) -> None:
+    from rubix_eval import leaderboard, records
+
+    bucket = _FakeBucket()
+    bucket.put("open/20260101T000000-a.json", _bucket_record("20260101T000000-a", ai="Speedy"))
+    bucket.put("open/20260101T000001-x.json", _bucket_record("20260101T000001-x", ai="Slowpoke", solved=False))
+    monkeypatch.setattr(records, "_gcs_bucket", lambda: bucket)
+    monkeypatch.setattr(records, "_bucket_cache", {"bucket": None, "listed_at": None, "records": {}})
+    grouped = leaderboard._ai_solves()
+    (row,) = grouped["3x3x3"]["2"]
+    assert (row["who"], row["seconds"], row["htm"]) == ("Speedy", 12.5, 2)
+    assert len(bucket.downloads) == 2
+
+
+def test_bundled_bench_covers_every_board_and_newest_wins(tmp_path, monkeypatch) -> None:
+    import json
+
+    from rubix_eval import leaderboard
+    from rubix_eval.challenges import VISUAL_SIZES
+    from rubix_eval.human_records import version_key
+
+    bundled = json.loads(leaderboard.BUNDLED_BENCH.read_text(encoding="utf-8"))
+    for kind, size, ndim in leaderboard.versions_for(VISUAL_SIZES):
+        slots = bundled["versions"][version_key(kind, size, ndim)]
+        assert slots["full"]["algorithms"], (kind, size, ndim)
+
+    monkeypatch.setenv("RUBIX_SOLVES_DIR", str(tmp_path))
+    assert leaderboard.load_bench()["updated_at"] == bundled["updated_at"]
+    (tmp_path / "algorithm_bench.json").write_text(json.dumps({"updated_at": "1999-01-01", "versions": {}}))
+    assert leaderboard.load_bench()["updated_at"] == bundled["updated_at"]
+    (tmp_path / "algorithm_bench.json").write_text(json.dumps({"updated_at": "2999-01-01", "versions": {}}))
+    assert leaderboard.load_bench()["updated_at"] == "2999-01-01"

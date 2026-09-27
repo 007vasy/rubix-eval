@@ -30,6 +30,9 @@ Homepage = "https://github.com/007vasy/rubix-eval"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+rubix_eval = ["data/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

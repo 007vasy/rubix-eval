@@ -11,7 +11,7 @@ from typing import Any
 from .challenges import DEPTH_LABELS, SIZES, VISUAL_SIZES, full_scramble_depth
 from .human_records import human_record, version_key
 from .puzzles import ND_PUZZLES, difficulty_score, difficulty_tuple, nd_label, puzzle_label
-from .records import list_records, load_record, solves_dir
+from .records import list_records, solves_dir
 from .solvers import compare_algorithms
 from .visual_session import session_from_task
 from .task import make_hyper_task, make_task
@@ -30,6 +30,11 @@ def named_ai(value: Any) -> str | None:
 
 def bench_path() -> Path:
     return solves_dir() / "algorithm_bench.json"
+
+
+# Solver timings precomputed with `rubix-eval leaderboard --bench --bench-out ...` and shipped
+# with the package, so the public board never has to time the solvers on a page load.
+BUNDLED_BENCH = Path(__file__).resolve().parent / "data" / "algorithm_bench.json"
 
 
 def _label_for(kind: str, size: int, scramble_depth: int, depth_label: str | None) -> str:
@@ -55,18 +60,25 @@ def _alg_entry(row: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def load_bench() -> dict[str, Any]:
-    path = bench_path()
+def _read_bench(path: Path) -> dict[str, Any] | None:
     if not path.exists():
-        return {"versions": {}}
+        return None
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
+        return None
+
+
+def load_bench() -> dict[str, Any]:
+    """The newest of the local bench (solves/) and the bundled precomputed one."""
+    found = [b for b in (_read_bench(bench_path()), _read_bench(BUNDLED_BENCH)) if b]
+    if not found:
         return {"versions": {}}
+    return max(found, key=lambda b: str(b.get("updated_at") or ""))
 
 
-def save_bench(data: dict[str, Any]) -> Path:
-    path = bench_path()
+def save_bench(data: dict[str, Any], path: Path | None = None) -> Path:
+    path = path or bench_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     return path
@@ -119,15 +131,15 @@ def run_benchmark(
     visual_only: bool = True,
     time_limit: float = 0.8,
     seed: int = 1,
+    out_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Time the local solvers on each version. Inverse scramble is always run;
-    HTM search / Kociemba run where they finish inside the per-slot budget."""
+    """Time the local solvers on every board (3D sizes and the nD puzzles). Inverse
+    scramble is always run; HTM search / Kociemba run where they finish inside the
+    per-slot budget."""
     sizes = VISUAL_SIZES if visual_only else SIZES
-    versions: list[tuple[str, int, int]] = [("3d", n, 3) for n in sizes]
-    versions.append(("4d", 3, 4))
     out: dict[str, Any] = {"updated_at": _now(), "seed": seed, "versions": {}}
-    for kind, size, _ndim in versions:
-        key = version_key(kind, size)
+    for kind, size, ndim in versions_for(sizes):
+        key = version_key(kind, size, ndim)
         slots: dict[str, Any] = {}
         labels = list(END_STEP_LABELS) + ["full"]
         if size >= 40:
@@ -141,7 +153,7 @@ def run_benchmark(
                 time_limit=_search_budget(kind, size, label, time_limit),
             )
         out["versions"][key] = slots
-    save_bench(out)
+    save_bench(out, out_path)
     return out
 
 
@@ -215,36 +227,33 @@ def _rank_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def _ai_solves(directory: Path | None = None) -> dict[str, dict[str, list[dict[str, Any]]]]:
     grouped: dict[str, dict[str, list[dict[str, Any]]]] = {}
+    # Summary rows carry everything needed; no second fetch per record.
     for row in list_records(directory, limit=500):
-        rec = load_record(row["record_id"], directory)
-        if not rec:
+        if not row.get("solved"):
             continue
-        att = rec.get("attempt") or {}
-        if not att.get("solved"):
-            continue
-        kind = rec.get("kind") or "3d"
-        size = int(rec.get("size") or 3)
-        label = _label_for(kind, size, int(rec.get("scramble_depth") or 0), rec.get("depth_label"))
-        elapsed = att.get("elapsed_sec")
+        kind = row.get("kind") or "3d"
+        size = int(row.get("size") or 3)
+        label = _label_for(kind, size, int(row.get("scramble_depth") or 0), row.get("depth_label"))
+        elapsed = row.get("elapsed_sec")
         if elapsed is None:
             continue
-        name = named_ai(rec.get("ai") or att.get("ai"))
+        name = named_ai(row.get("ai"))
         if not name:
             continue
-        if (rec.get("lane") or "open") == "verified":
+        if (row.get("lane") or "open") == "verified":
             continue
         grouped.setdefault(version_key(kind, size), {}).setdefault(label, []).append(
             {
                 "who": name,
                 "kind": "ai",
                 "seconds": float(elapsed),
-                "htm": att.get("htm"),
-                "note": rec.get("record_id"),
-                "record_id": rec.get("record_id"),
-                "click_count": att.get("click_count"),
-                "step_count": att.get("step_count") if att.get("step_count") is not None else att.get("move_count"),
-                "tokens_used": att.get("tokens_used"),
-                "token_cost_usd": att.get("token_cost_usd"),
+                "htm": row.get("ai_htm"),
+                "note": row.get("record_id"),
+                "record_id": row.get("record_id"),
+                "click_count": row.get("click_count"),
+                "step_count": row.get("step_count"),
+                "tokens_used": row.get("tokens_used"),
+                "token_cost_usd": row.get("token_cost_usd"),
                 "source": "computer-use",
                 "highlight": False,
             }
