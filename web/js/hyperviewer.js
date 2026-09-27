@@ -17,7 +17,6 @@ import {
   invertHyperMoves,
   parseHyperMoves,
   stepCost,
-  twist90Position,
 } from "./hyperengine.js";
 import { stickerEuler } from "./sticker-pose.js";
 
@@ -112,43 +111,22 @@ function worldNormalToAxisCell(cell, nx, ny, nz, n = 3) {
   return axisCellOf(axis4, positive ? n - 1 : 0, n) || AXIS_CELL[`${axis4},${positive ? 2 : 0}`];
 }
 
-function sampleMovingPos(displayCell, moveCell, axisCell, n) {
-  const [cAx, cExt] = cellAxisOf(moveCell, n);
-  const [dAx, dExt] = cellAxisOf(displayCell, n);
-  const [rAx] = cellAxisOf(axisCell, n);
-  const pos = Array(4).fill(Math.floor((n - 1) / 2));
-  pos[cAx] = cExt;
-  pos[dAx] = dExt;
-  const [ii, jj] = [0, 1, 2, 3].filter((a) => a !== cAx && a !== rAx);
-  if (pos[ii] === Math.floor((n - 1) / 2)) pos[ii] = n - 1;
-  if (ii === dAx || jj === dAx) {
-    pos[dAx] = dExt;
-  }
-  return pos;
-}
-
-function cellTwistRotation(displayCell, moveCell, axisCell, turns, n) {
-  const pos = sampleMovingPos(displayCell, moveCell, axisCell, n);
-  const before = new THREE.Vector3(...pos4ToOffset(displayCell, pos, n));
-  const after = new THREE.Vector3(
-    ...pos4ToOffset(displayCell, twist90Position(pos, moveCell, axisCell, turns, n), n),
-  );
-  if (before.lengthSq() < 1e-8 && after.lengthSq() < 1e-8) {
-    return { axis: new THREE.Vector3(0, 1, 0), angle: 0 };
-  }
-  const q = ((turns % 4) + 4) % 4;
-  const axis = new THREE.Vector3().crossVectors(before, after);
-  if (axis.lengthSq() < 1e-8) {
-    const angle = q === 2 ? Math.PI : 0;
-    const fallback = (before.lengthSq() > 1e-8 ? before : after).clone().normalize();
-    const helper = Math.abs(fallback.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
-    const around = new THREE.Vector3().crossVectors(fallback, helper);
-    if (around.lengthSq() < 1e-8) return { axis: new THREE.Vector3(0, 1, 0), angle };
-    return { axis: around.normalize(), angle };
-  }
-  axis.normalize();
-  const angle = q === 2 ? Math.PI : before.angleTo(after);
-  return { axis, angle };
+/** The rotation about the cell centre that carries every `from` offset onto its `target`. */
+function rigidRotation(items) {
+  const a1 = items.find((it) => it.from.lengthSq() > 1e-6);
+  if (!a1) return new THREE.Quaternion();
+  const a2 = items.find((it) => it.from.lengthSq() > 1e-6 && it.from.clone().cross(a1.from).lengthSq() > 1e-6);
+  if (!a2) return new THREE.Quaternion().setFromUnitVectors(a1.from.clone().normalize(), a1.target.clone().normalize());
+  const frame = (u, v) => {
+    const x = u.clone().normalize();
+    const z = u.clone().cross(v).normalize();
+    const y = z.clone().cross(x);
+    return new THREE.Matrix4().makeBasis(x, y, z);
+  };
+  const before = frame(a1.from, a2.from);
+  const after = frame(a1.target, a2.target);
+  const m = after.multiply(before.transpose());
+  return new THREE.Quaternion().setFromRotationMatrix(m);
 }
 
 function makeLabel(text, hex) {
@@ -354,6 +332,25 @@ export class HyperViewer {
     }
   }
 
+  /** Where each displayed sticker ("pos|cell") lands after `move`, straight from the engine. */
+  stickerDestinations(move) {
+    const probe = Object.assign(Object.create(Object.getPrototypeOf(this.cube)), this.cube);
+    probe.cubies = new Map();
+    for (const [key, cubie] of this.cube.cubies) {
+      const colors = {};
+      for (const cell of Object.keys(cubie.colors || {})) colors[cell] = `${cubie.pos.join(",")}|${cell}`;
+      probe.cubies.set(key, { pos: cubie.pos.slice(), colors });
+    }
+    probe.applyMove(move);
+    const out = new Map();
+    for (const cubie of probe.cubies.values()) {
+      for (const [cell, id] of Object.entries(cubie.colors)) {
+        if (id !== `${cubie.pos.join(",")}|${cell}`) out.set(id, { cell, pos: cubie.pos });
+      }
+    }
+    return out;
+  }
+
   playNext() {
     if (!this.queue.length) {
       this.animating = false;
@@ -362,28 +359,45 @@ export class HyperViewer {
     this.animating = true;
     const move = this.queue.shift();
     const n = this.cube.size;
-    const axisCell = move.axisCells ? move.axisCells[0] : move.axis;
-    const [cellAxis, cellExt] = cellAxisOf(move.cell, n);
+    const dest = this.stickerDestinations(move);
     const pivots = [];
-    for (const group of this.root.children) {
+    const flights = [];
+    const up = new THREE.Vector3(0, 1, 0);
+    for (const group of [...this.root.children]) {
       const displayCell = group.userData.cell;
       if (!displayCell) continue;
-      const moving = [];
-      for (const child of group.children) {
-        const pos = child.userData && child.userData.pos;
-        if (!pos || pos[cellAxis] !== cellExt) continue;
-        moving.push(child);
+      const staying = [];
+      for (const piece of [...group.children]) {
+        const pos = piece.userData && piece.userData.pos;
+        if (!pos) continue;
+        const to = dest.get(`${pos.join(",")}|${displayCell}`);
+        if (!to) continue;
+        const from = new THREE.Vector3(...pos4ToOffset(displayCell, pos, n));
+        const target = new THREE.Vector3(...pos4ToOffset(to.cell, to.pos, n));
+        if (to.cell === displayCell) {
+          if (from.distanceToSquared(target) > 1e-6) staying.push({ piece, from, target });
+          continue;
+        }
+        // The twist carries this sticker into another cell: fly it there through the gap.
+        const start = new THREE.Vector3(...CELL_ORIGIN[displayCell]).add(from);
+        const end = new THREE.Vector3(...CELL_ORIGIN[to.cell]).add(target);
+        const mid = start.clone().add(end).multiplyScalar(0.5);
+        const centre = new THREE.Vector3(...CELL_ORIGIN[displayCell])
+          .add(new THREE.Vector3(...CELL_ORIGIN[to.cell]))
+          .multiplyScalar(0.5);
+        const bulge = mid.clone().sub(centre);
+        if (bulge.lengthSq() < 1e-6) bulge.copy(up);
+        const control = mid.add(bulge.normalize().multiplyScalar(start.distanceTo(end) * 0.22));
+        this.root.attach(piece);
+        flights.push({ piece, start, control, end });
       }
-      if (!moving.length) continue;
-      const rot =
-        move.order === 2
-          ? { axis: new THREE.Vector3(0, 1, 0), angle: Math.PI }
-          : cellTwistRotation(displayCell, move.cell, axisCell, move.turns, n);
-      if (!rot.angle) continue;
+      if (!staying.length) continue;
+      // Stickers that stay in this cell turn together as one rigid block about the cell centre.
+      const q = rigidRotation(staying);
       const pivot = new THREE.Group();
       group.add(pivot);
-      for (const piece of moving) pivot.attach(piece);
-      pivots.push({ pivot, axis: rot.axis, angle: rot.angle });
+      for (const item of staying) pivot.attach(item.piece);
+      pivots.push({ pivot, q });
     }
 
     const finish = () => {
@@ -401,19 +415,27 @@ export class HyperViewer {
       this.notify();
       this.playNext();
     };
-    if (!pivots.length) {
+    if (!pivots.length && !flights.length) {
       finish();
       return;
     }
 
     const start = performance.now();
-    const duration = move.turns === 2 ? 360 : 280;
+    const duration = (move.turns === 2 || move.order === 2 ? 460 : 360) * (flights.length ? 1.15 : 1);
+    const identity = new THREE.Quaternion();
+    const p = new THREE.Vector3();
     const tick = (now) => {
       if (this._stopped) return;
       const t = Math.min(1, (now - start) / duration);
       const eased = t * t * (3 - 2 * t);
-      for (const item of pivots) {
-        item.pivot.setRotationFromAxisAngle(item.axis, item.angle * eased);
+      for (const item of pivots) item.pivot.quaternion.slerpQuaternions(identity, item.q, eased);
+      for (const f of flights) {
+        const u = 1 - eased;
+        p.copy(f.start).multiplyScalar(u * u)
+          .addScaledVector(f.control, 2 * u * eased)
+          .addScaledVector(f.end, eased * eased);
+        f.piece.position.copy(p);
+        f.piece.scale.setScalar(1 - 0.18 * Math.sin(Math.PI * eased));
       }
       if (t < 1) {
         requestAnimationFrame(tick);
