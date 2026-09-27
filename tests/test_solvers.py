@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+from rubix_eval.challenges import request_challenge
 from rubix_eval.cube import Cube
 from rubix_eval.kociemba import solve_kociemba
 from rubix_eval.records import list_records
 from rubix_eval.search import solve_optimal
 from rubix_eval.solvers import compare_algorithms, history_to_moves, score_optimality, verify_attempt
-from rubix_eval.task import make_task
-from rubix_eval.visual_session import grade_progress, session_from_task
+from rubix_eval.task import make_hyper_task, make_task
+from rubix_eval.visual_session import grade_progress, session_from_challenge, session_from_task
 
 
 def test_history_replay_does_not_trust_client() -> None:
@@ -16,6 +17,47 @@ def test_history_replay_does_not_trust_client() -> None:
     assert verified["solved"] is False
     assert verified["htm"] == 0
     assert verified["verified_from_history"] is True
+
+
+def test_claimed_solved_without_path_is_unsolved() -> None:
+    session = session_from_challenge(
+        request_challenge(kind="4d", size=2, depth="full", random=False, visual=True)
+    )
+    verified = verify_attempt(session, {"solved": True, "htm": 20, "qtm": 20, "misplaced": 0})
+    assert verified["solved"] is False
+    assert verified["misplaced_stickers"] > 0
+    assert verified["htm"] == 0
+    assert verified["moves"] == ""
+    assert verified["verified_from_history"] is False
+    claimed = verify_attempt(
+        session, {"solved": True, "htm": 20, "moves": "not-a-real-move"}
+    )
+    assert claimed["solved"] is False
+    assert claimed["htm"] == 0
+    assert claimed["moves"] == ""
+
+
+def test_4d_any_path_to_solved_counts() -> None:
+    session = session_from_task(make_hyper_task(4, seed=7, size=2, ndim=4))
+    oracle = session["oracle"]
+    via_inverse = verify_attempt(session, {"moves": oracle, "solved": False})
+    detour = " ".join(oracle.split()[:1] + ["RU", "RU'"] + oracle.split()[1:])
+    via_detour = verify_attempt(session, {"moves": detour, "solved": False})
+    assert via_inverse["solved"] is True
+    assert via_inverse["misplaced_stickers"] == 0
+    assert via_detour["solved"] is True
+    assert via_detour["misplaced_stickers"] == 0
+    assert via_detour["htm"] > via_inverse["htm"]
+
+
+def test_4d_oracle_inverse_still_solves_engine() -> None:
+    session = session_from_challenge(
+        request_challenge(kind="4d", size=2, depth="full", random=False, visual=True)
+    )
+    verified = verify_attempt(session, {"moves": session["oracle"]})
+    assert verified["solved"] is True
+    assert verified["misplaced_stickers"] == 0
+    assert verified["htm"] == session["scramble_depth"]
 
 
 def test_history_to_moves_keeps_hyper_layer() -> None:

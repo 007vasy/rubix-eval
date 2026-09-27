@@ -82,12 +82,14 @@ def history_as_dicts(kind: str, moves: list) -> list[dict[str, Any]]:
 
 
 def verify_attempt(session: dict[str, Any], progress: dict[str, Any]) -> dict[str, Any]:
-    """Replay submitted clicks on the scramble. Do not trust the client counts."""
+    """Replay submitted clicks on the scramble. Any path that reaches a solved
+    sticker state counts. Do not trust the client ``solved`` / HTM flags."""
     kind = session["kind"]
     cube = HyperCube.from_dict(session["state"]) if kind != "3d" else Cube.from_dict(session["state"])
     error = None
     moves: list = []
-    if progress.get("history") is not None or progress.get("moves") is not None:
+    has_path = progress.get("history") is not None or progress.get("moves") is not None
+    if has_path:
         try:
             raw = progress.get("history")
             if raw is None:
@@ -98,27 +100,24 @@ def verify_attempt(session: dict[str, Any], progress: dict[str, Any]) -> dict[st
             error = str(exc)
             moves = []
             cube = HyperCube.from_dict(session["state"]) if kind != "3d" else Cube.from_dict(session["state"])
-    if error is None and (progress.get("history") is not None or progress.get("moves") is not None):
-        cost = step_cost(moves, int(session["scramble_depth"]))
-        misplaced = cube.misplaced_stickers()
+    solved = cube.is_solved()
+    misplaced = cube.misplaced_stickers()
+    depth = int(session["scramble_depth"])
+    if has_path and error is None:
+        cost = step_cost(moves, depth)
         htm, qtm = cost.htm, cost.qtm
-        solved = cube.is_solved()
     else:
-        htm = int(progress.get("htm") or 0)
-        qtm = int(progress.get("qtm") or 0)
-        misplaced = int(progress.get("misplaced") or cube.misplaced_stickers())
-        solved = bool(progress.get("solved"))
+        htm, qtm = 0, 0
         cost = None
     max_moves = session["max_moves"]
     over = max_moves is not None and htm > max_moves
     if over and not solved:
         error = error or f"over max_moves ({htm} > {max_moves})"
-    depth = int(session["scramble_depth"])
     return {
         "solved": solved,
         "htm": htm,
         "qtm": qtm,
-        "moves": format_history(kind, moves) if moves else (progress.get("moves") or ""),
+        "moves": format_history(kind, moves) if moves else "",
         "move_count": len(moves) if moves else htm,
         "misplaced_stickers": misplaced,
         "excess_htm": htm - depth,

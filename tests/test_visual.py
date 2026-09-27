@@ -71,13 +71,17 @@ def test_submit_ignores_client_history_when_server_owns_cube() -> None:
 
 def test_grade_progress_uses_server_depth() -> None:
     session = session_from_task(make_task(3, 8, 1))
-    grade = grade_progress(
+    claimed = grade_progress(
         session, {"solved": True, "htm": 10, "qtm": 12, "misplaced": 0}, compare=False
     )
-    assert grade["solved"] is True
-    assert grade["scramble_depth"] == 8
-    assert grade["excess_htm"] == 2
-    assert grade["efficiency"] == 0.8
+    assert claimed["solved"] is False
+    assert claimed["scramble_depth"] == 8
+    assert claimed["htm"] == 0
+    assert claimed["misplaced_stickers"] > 0
+    solved = grade_progress(session, {"history": session["oracle"]}, compare=False)
+    assert solved["solved"] is True
+    assert solved["scramble_depth"] == 8
+    assert solved["excess_htm"] == solved["htm"] - 8
 
 
 def test_solved_over_max_moves_counts_solved() -> None:
