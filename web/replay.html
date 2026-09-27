@@ -6,7 +6,7 @@
     <title>rubix-eval — replay</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="stylesheet" href="./css/eval.css" />
+    <link rel="stylesheet" href="./css/solves.css" />
     <link rel="stylesheet" href="./css/replay.css" />
     <script type="importmap">
       { "imports": { "three": "./vendor/three.module.js" } }
@@ -26,21 +26,57 @@
         <a href="/solves">solves</a>
       </nav>
     </header>
-    <canvas id="view"></canvas>
-    <p id="nodraw" hidden>This puzzle is not drawn in the viewer. Step through the recorded moves below.</p>
-    <aside id="panel">
-      <div class="stats" id="stats"></div>
-      <div class="transport">
-        <button type="button" id="reset">Reset</button>
-        <button type="button" id="prev">Prev</button>
-        <button type="button" id="play">Play</button>
-        <button type="button" id="next">Next</button>
-      </div>
-      <p class="progress" id="progress">0 / 0</p>
-      <ol id="moves"></ol>
-      <h3 id="clicks-title" hidden>Clicks</h3>
-      <ol id="clicks" hidden></ol>
-    </aside>
+    <div class="replay-app">
+      <section class="theater">
+        <div class="stage-wrap" id="stage-wrap">
+          <div class="stage" id="stage">
+            <canvas id="view"></canvas>
+            <svg class="overlay" id="overlay" aria-hidden="true"></svg>
+            <div class="hud">
+              <span class="chip" id="clock">0:00</span>
+              <span class="chip think" id="think" hidden></span>
+            </div>
+            <div class="action" id="action" hidden></div>
+          </div>
+          <p id="nodraw" hidden>This puzzle is not drawn in the viewer. Step through the recorded moves on the right.</p>
+        </div>
+        <div class="controls">
+          <div class="transport">
+            <button type="button" id="reset" title="Back to the scramble (Home)">⏮</button>
+            <button type="button" id="prev" title="Previous step (←)">◀</button>
+            <button type="button" id="play" class="play" title="Play / pause (Space)">Play</button>
+            <button type="button" id="next" title="Next step (→)">▶</button>
+            <label class="speed">Speed
+              <select id="speed">
+                <option value="0.5">0.5×</option>
+                <option value="1" selected>1×</option>
+                <option value="2">2×</option>
+                <option value="4">4×</option>
+              </select>
+            </label>
+            <span class="progress" id="progress">0 / 0</span>
+          </div>
+          <div class="timeline" id="timeline" role="slider" tabindex="0" aria-label="Replay position">
+            <div class="tl-track"></div>
+            <div class="tl-marks" id="tl-marks"></div>
+            <div class="tl-head" id="tl-head"></div>
+          </div>
+          <div class="tl-legend">
+            <span><i class="dot left"></i>left click</span>
+            <span><i class="dot right"></i>right click</span>
+            <span><i class="dot drag"></i>drag / orbit</span>
+            <span><i class="tick"></i>layer turn</span>
+            <span class="tl-span" id="tl-span"></span>
+          </div>
+          <p class="notice" id="notice" hidden></p>
+        </div>
+      </section>
+      <aside id="panel">
+        <div class="stats" id="stats"></div>
+        <h3>What the agent did</h3>
+        <ol id="events"></ol>
+      </aside>
+    </div>
     <script type="module" src="./js/replay.js"></script>
   </body>
 </html>

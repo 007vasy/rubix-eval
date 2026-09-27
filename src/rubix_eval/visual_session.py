@@ -77,17 +77,47 @@ def sanitize_clicks(raw: Any, *, limit: int = 4000) -> list[dict[str, Any]] | No
         if not isinstance(item, dict):
             continue
         kind = str(item.get("kind") or "pointer")[:24]
-        out.append(
-            {
-                "t": _as_int(item.get("t")),
-                "x": _as_int(item.get("x")),
-                "y": _as_int(item.get("y")),
-                "button": _as_int(item.get("button")),
-                "dbl": bool(item.get("dbl")),
-                "kind": kind,
-            }
-        )
+        click: dict[str, Any] = {
+            "t": _as_int(item.get("t")),
+            "x": _as_int(item.get("x")),
+            "y": _as_int(item.get("y")),
+            "button": _as_int(item.get("button")),
+            "dbl": bool(item.get("dbl")),
+            "kind": kind,
+        }
+        # Replay context: canvas size, moves landed before the click, drag start, camera.
+        for key in ("w", "h", "n", "x0", "y0"):
+            value = _as_int(item.get(key))
+            if value is not None:
+                click[key] = value
+        for key in ("cam", "cam_end"):
+            cam = _camera(item.get(key))
+            if cam is not None:
+                click[key] = cam
+        out.append(click)
     return out
+
+
+def _camera(raw: Any) -> list[float] | None:
+    if not isinstance(raw, list) or len(raw) != 3:
+        return None
+    out = []
+    for value in raw:
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value != value:  # noqa: PLR0124
+            return None
+        if abs(value) > 1000:
+            return None
+        out.append(round(float(value), 3))
+    return out
+
+
+def sanitize_move_times(raw: Any, *, limit: int = 4000) -> list[int] | None:
+    if not isinstance(raw, list):
+        return None
+    out = [_as_int(value) for value in raw[:limit]]
+    if any(value is None for value in out):
+        return None
+    return out  # type: ignore[return-value]
 
 
 def collect_usage(progress: dict[str, Any], verified: dict[str, Any]) -> dict[str, Any]:
@@ -122,6 +152,9 @@ def collect_usage(progress: dict[str, Any], verified: dict[str, Any]) -> dict[st
     }
     if clicks is not None:
         usage["clicks"] = clicks
+    move_times = sanitize_move_times(progress.get("move_times"))
+    if move_times is not None and len(move_times) == len(verified.get("history") or []):
+        usage["move_times"] = move_times
     if verified.get("history") is not None:
         usage["history"] = verified["history"]
     return usage

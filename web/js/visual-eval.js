@@ -31,8 +31,13 @@ const usage = {
 };
 
 const clicks = [];
-function onChange() {
+// performance.now() when each history entry landed, so a replay can line moves up with clicks.
+const moveTimes = [];
+function onChange(state) {
   /* CubeViewer / HyperViewer notify on turns; history lives on the viewer. */
+  const n = (state && state.history && state.history.length) || 0;
+  if (n < moveTimes.length) moveTimes.length = n;
+  while (moveTimes.length < n) moveTimes.push(Math.round(performance.now()));
 }
 
 const viewer =
@@ -42,16 +47,44 @@ const viewer =
 if (boot.state) viewer.loadState(boot.state);
 if (typeof viewer.resize === "function") viewer.resize();
 
+function cameraPos() {
+  const cam = viewer && viewer.camera;
+  if (!cam) return null;
+  return [cam.position.x, cam.position.y, cam.position.z].map((v) => Math.round(v * 1000) / 1000);
+}
+
+// Everything a replay needs to redraw a click on the same view: where, on what size canvas,
+// from which camera, and how many moves had landed before it.
+let press = null;
+canvas.addEventListener("pointerdown", (event) => {
+  const rect = canvas.getBoundingClientRect();
+  press = { x: Math.round(event.clientX - rect.left), y: Math.round(event.clientY - rect.top), cam: cameraPos() };
+});
 canvas.addEventListener("pointerup", (event) => {
   const rect = canvas.getBoundingClientRect();
-  clicks.push({
+  const x = Math.round(event.clientX - rect.left);
+  const y = Math.round(event.clientY - rect.top);
+  const dragged = press && Math.hypot(x - press.x, y - press.y) >= 14;
+  const click = {
     t: Math.round(performance.now()),
-    x: Math.round(event.clientX - rect.left),
-    y: Math.round(event.clientY - rect.top),
+    x,
+    y,
+    w: Math.round(rect.width),
+    h: Math.round(rect.height),
     button: event.button,
     dbl: event.detail === 2,
-    kind: "pointer",
-  });
+    kind: dragged ? "drag" : "pointer",
+    n: (viewer && viewer.history && viewer.history.length) || 0,
+    cam: dragged ? press.cam : cameraPos(),
+  };
+  if (dragged) {
+    click.x0 = press.x;
+    click.y0 = press.y;
+  }
+  clicks.push(click);
+  press = null;
+  // An orbit drag keeps easing after release; keep the settled camera for the next view.
+  if (dragged) setTimeout(() => (click.cam_end = cameraPos()), 600);
 });
 
 const canon = new URL(location.href);
@@ -146,6 +179,7 @@ done.addEventListener("click", async () => {
     history: (viewer && viewer.history) || [],
     clicks,
     click_count: clicks.length,
+    move_times: moveTimes.slice(),
     tokens_used: usage.tokens_used,
     token_cost_usd: usage.token_cost_usd,
   };

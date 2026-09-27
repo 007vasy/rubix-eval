@@ -143,6 +143,47 @@ def test_submit_records_clicks_tokens_and_history(tmp_path, monkeypatch) -> None
     assert hardest["record_id"] == grade["record_id"]
 
 
+def test_submit_keeps_click_replay_context(tmp_path, monkeypatch) -> None:
+    from rubix_eval.records import load_record, public_record
+    from rubix_eval.solvers import history_to_moves
+
+    monkeypatch.setenv("RUBIX_SOLVES_DIR", str(tmp_path))
+    session = session_from_task(make_task(2, 1, seed=1), ai="ReplayBot")
+    moves = history_to_moves("3d", session["oracle"])
+    history = [{"face": m.face, "layer": m.layer, "wide": m.wide, "turns": m.turns} for m in moves]
+    clicks = [
+        {"t": 10, "x": 100, "y": 90, "x0": 40, "y0": 50, "w": 1280, "h": 720, "n": 0,
+         "button": 0, "kind": "drag", "cam": [4.6, 3.8, 6.2], "cam_end": [6.0, 2.0, 5.0]},
+        {"t": 900, "x": 640, "y": 400, "w": 1280, "h": 720, "n": 0, "button": 0,
+         "kind": "pointer", "cam": [6.0, 2.0, "x"]},
+    ]
+    grade = grade_progress(
+        session,
+        {"history": history, "clicks": clicks, "move_times": [1250]},
+        compare=False,
+        record=True,
+    )
+    pub = public_record(load_record(grade["record_id"], tmp_path))
+    drag, click = pub["attempt"]["clicks"]
+    assert drag["kind"] == "drag"
+    assert (drag["x0"], drag["y0"], drag["w"], drag["h"], drag["n"]) == (40, 50, 1280, 720, 0)
+    assert drag["cam"] == [4.6, 3.8, 6.2]
+    assert drag["cam_end"] == [6.0, 2.0, 5.0]
+    assert "cam" not in click  # malformed camera is dropped, the click is kept
+    assert pub["attempt"]["move_times"] == [1250]
+
+
+def test_move_times_must_match_history(tmp_path, monkeypatch) -> None:
+    from rubix_eval.records import load_record
+
+    monkeypatch.setenv("RUBIX_SOLVES_DIR", str(tmp_path))
+    session = session_from_task(make_task(2, 1, seed=1))
+    grade = grade_progress(
+        session, {"history": session["oracle"], "move_times": [1, 2, 3]}, compare=False, record=True
+    )
+    assert "move_times" not in load_record(grade["record_id"], tmp_path)["attempt"]
+
+
 def test_verified_lane_forces_no_web_access(monkeypatch) -> None:
     monkeypatch.setenv("RUBIX_LANE", "verified")
     monkeypatch.setenv("RUBIX_WEB_ACCESS", "1")
