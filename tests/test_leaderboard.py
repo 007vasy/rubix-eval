@@ -150,6 +150,53 @@ def test_publish_verified_rejects_open_lane(tmp_path, monkeypatch) -> None:
         raise AssertionError("open records must not be attested")
 
 
+def test_verified_depth_chart_shows_the_gap_to_full(tmp_path) -> None:
+    import json
+
+    from rubix_eval.leaderboard import verified_depth_chart
+
+    def write(name, **fields):
+        record = {
+            "record_id": name,
+            "ai": "Model",
+            "lane": "verified",
+            "kind": "4d",
+            "size": 2,
+            "ndim": 4,
+            "attempt": {"solved": True, "htm": 12, "history": [{"turns": 1}]},
+        }
+        record.update(fields)
+        (tmp_path / f"{name}.json").write_text(json.dumps(record), encoding="utf-8")
+
+    write("full", ai="Fable", depth_label="full", scramble_depth=20)
+    write("ten", ai="Fable", depth_label="10", scramble_depth=10, attempt={"solved": True, "htm": 30})
+    write("miss", ai="Astra", depth_label="5", scramble_depth=5, attempt={"solved": False, "htm": 4})
+    write("open", ai="Grok 4.6", lane="open", depth_label="2", scramble_depth=2)
+    write("other", ai="Other", kind="3d", size=3, ndim=3, depth_label="2", scramble_depth=2)
+
+    chart = verified_depth_chart("4d", tmp_path)
+    assert chart["full_turns"] == 20
+    assert chart["title"] == "2×2×2×2"
+    by_name = {row["ai"]: row for row in chart["models"]}
+    assert set(by_name) == {"Fable", "Astra", "Grok 4.6"}
+    assert by_name["Fable"]["solved_turns"] == 20
+    assert by_name["Fable"]["gap_turns"] == 0
+    assert by_name["Fable"]["reached_full"] is True
+    assert by_name["Fable"]["lane"] == "verified"
+    assert by_name["Astra"]["solved_turns"] == 0
+    assert by_name["Astra"]["gap_turns"] == 20
+    assert by_name["Grok 4.6"]["solved_turns"] == 2
+    assert by_name["Grok 4.6"]["lane"] == "open"
+    assert by_name["Grok 4.6"]["gap_turns"] == 18
+    assert chart["models"][0]["ai"] == "Fable"
+
+    three = verified_depth_chart("3d", tmp_path)
+    assert three["full_turns"] == 25
+    assert [row["ai"] for row in three["models"]] == ["Other"]
+    assert three["models"][0]["solved_turns"] == 2
+    assert three["models"][0]["gap_turns"] == 23
+
+
 def test_ai_leaderboard_splits_open_and_verified(tmp_path, monkeypatch) -> None:
     from rubix_eval.solvers import history_to_moves
 

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rubix-eval — verified depth</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="stylesheet" href="/css/solves.css" />
+    <link rel="stylesheet" href="/css/leaderboard.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <b id="title">Verified</b>
+        <span id="subtitle">Deepest official scramble solved</span>
+      </div>
+      <nav>
+        <a href="/verified">verified</a>
+        <a id="link3d" href="/verified/3d">3×3×3</a>
+        <a id="link4d" href="/verified/4d">2×2×2×2</a>
+        <a href="/ai">open AI</a>
+        <a href="/leaderboard">puzzles</a>
+      </nav>
+    </header>
+    <main>
+      <p id="blurb" class="lede"></p>
+      <p id="empty" hidden>No attempts on this cube yet.</p>
+      <section id="stats" class="stats" hidden></section>
+      <section id="chart" class="depth-chart" hidden></section>
+      <section id="table-wrap" class="board" hidden>
+        <h2>Numbers</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Lane</th>
+              <th>Solved scramble</th>
+              <th>Full scramble</th>
+              <th>Gap</th>
+              <th>HTM</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </section>
+    </main>
+    <footer class="site">
+      <a href="https://github.com/007vasy/rubix-eval">GitHub</a>
+      · Verified = offline, internet disallowed · Open computer-use runs are marked on the chart
+    </footer>
+    <script type="module" src="/js/verified-chart.js"></script>
+    <script type="module" src="/js/site.js"></script>
+  </body>
+</html>

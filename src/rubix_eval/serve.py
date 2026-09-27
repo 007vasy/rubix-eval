@@ -69,6 +69,19 @@ def serve(
                 self.path = "/verified.html"
                 super().do_GET()
                 return
+            if path in ("/verified/3d", "/verified/3d/", "/verified/4d", "/verified/4d/"):
+                self.path = "/verified-chart.html"
+                super().do_GET()
+                return
+            if path == "/api/verified/depth":
+                from .leaderboard import verified_depth_chart
+
+                chart_kind = query.get("kind", ["3d"])[0]
+                if chart_kind not in ("3d", "4d"):
+                    self._json({"error": "kind must be 3d or 4d"}, 400)
+                    return
+                self._json(verified_depth_chart(chart_kind))
+                return
             if path == "/api/leaderboard/ai":
                 lane = query.get("lane", ["open"])[0]
                 self._json(build_ai_leaderboard(lane=lane))
