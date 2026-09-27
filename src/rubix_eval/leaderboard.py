@@ -37,7 +37,22 @@ def bench_path() -> Path:
 BUNDLED_BENCH = Path(__file__).resolve().parent / "data" / "algorithm_bench.json"
 
 
+def effective_depth(
+    kind: str | None, size: int, scramble_depth: int | None, depth_label: str | None, ndim: int | None = None
+) -> tuple[str | None, bool]:
+    """(depth label to rank by, legacy). A run labelled "full" only counts as full if its
+    scramble was at least today's full length; the old 40-twist 3x3x3x3 "full" (drawn by
+    the broken v1 generator) is ranked as the 40 random turns it was."""
+    if depth_label != "full" or not scramble_depth:
+        return depth_label, False
+    full = full_scramble_depth(int(size or 3), kind or "3d", ndim)
+    if int(scramble_depth) < full:
+        return str(int(scramble_depth)), True
+    return depth_label, False
+
+
 def _label_for(kind: str, size: int, scramble_depth: int, depth_label: str | None) -> str:
+    depth_label, _legacy = effective_depth(kind, size, scramble_depth, depth_label)
     if depth_label:
         return str(depth_label)
     if scramble_depth == full_scramble_depth(size, kind):
@@ -432,12 +447,13 @@ def verified_depth_chart(
             continue
         lane = "verified" if (row.get("lane") or "open") == "verified" else "open"
         solved = bool(row.get("solved"))
-        turns = int(row.get("scramble_depth") or 0) if solved else 0
-        if solved and str(row.get("depth_label") or "") == "full":
-            turns = full
+        # Bars show the scramble the model actually faced, so an old short "full" is not full.
+        turns = min(full, int(row.get("scramble_depth") or 0)) if solved else 0
+        _label, legacy = effective_depth(cube_kind, size, row.get("scramble_depth"), row.get("depth_label"), spec["ndim"])
         htm = row.get("ai_htm") if solved else None
         current = best.setdefault(
-            (name, lane), {"ai": name, "lane": lane, "solved_turns": 0, "htm": None, "record_id": None}
+            (name, lane),
+            {"ai": name, "lane": lane, "solved_turns": 0, "htm": None, "record_id": None, "legacy_scramble": False},
         )
         if not turns:
             continue
@@ -446,7 +462,7 @@ def verified_depth_chart(
             current["htm"] is None or (htm is not None and htm < current["htm"])
         )
         if deeper or tighter:
-            current.update(solved_turns=turns, htm=htm, record_id=row.get("record_id"))
+            current.update(solved_turns=turns, htm=htm, record_id=row.get("record_id"), legacy_scramble=legacy)
     models = []
     for row in best.values():
         solved_turns = int(row["solved_turns"])
@@ -460,6 +476,7 @@ def verified_depth_chart(
                 "reached_full": solved_turns >= full and full > 0,
                 "htm": row.get("htm"),
                 "record_id": row.get("record_id"),
+                "legacy_scramble": bool(row.get("legacy_scramble")),
             }
         )
     models.sort(
@@ -498,24 +515,23 @@ def build_ai_leaderboard(directory: Path | None = None, *, lane: str = "open") -
         name = named_ai(row.get("ai"))
         if not name:
             continue
+        label, legacy = effective_depth(
+            row.get("kind"), int(row.get("size") or 3), row.get("scramble_depth"), row.get("depth_label"), row.get("ndim")
+        )
         key = difficulty_tuple(
             kind=row.get("kind"),
             size=row.get("size"),
             scramble_depth=row.get("scramble_depth"),
-            depth_label=row.get("depth_label"),
+            depth_label=label,
             ndim=row.get("ndim"),
         )
+        puzzle = puzzle_label(row.get("kind"), int(row.get("size") or 3), row.get("ndim"), label, row.get("scramble_depth"))
         entry = {
             **row,
             "difficulty": difficulty_score(key),
             "difficulty_key": list(key),
-            "puzzle": puzzle_label(
-                row.get("kind"),
-                int(row.get("size") or 3),
-                row.get("ndim"),
-                row.get("depth_label"),
-                row.get("scramble_depth"),
-            ),
+            "legacy_scramble": legacy,
+            "puzzle": f"{puzzle} (old scramble)" if legacy else puzzle,
         }
         by_ai.setdefault(name, []).append(entry)
     ranking = []
@@ -550,6 +566,7 @@ def build_ai_leaderboard(directory: Path | None = None, *, lane: str = "open") -
                     "optimality_ratio": hardest.get("optimality_ratio"),
                     "record_id": hardest.get("record_id"),
                     "difficulty": hardest["difficulty"],
+                    "legacy_scramble": hardest.get("legacy_scramble", False),
                 },
                 "solved": [
                     {

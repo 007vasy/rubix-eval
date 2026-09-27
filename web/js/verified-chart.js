@@ -110,7 +110,7 @@ if (!models.length) {
       : `${model.solved_turns} <small>/ ${full}</small>`;
     return `
       <div class="vc-row">
-        <div class="vc-label"><span class="rank">${rank}</span>${name}</div>
+        <div class="vc-label"><span class="rank">${rank}</span>${name}${model.legacy_scramble ? `<span class="old-chip" title="Solved on the old, too-short scramble (v1 generator)">old scramble</span>` : ""}</div>
         <div class="vc-track" data-i="${k}">
           ${grid}
           <div class="vc-target"></div>
@@ -171,7 +171,9 @@ if (!models.length) {
       <div class="row"><span>Lane</span><span>${laneName(m.lane)}</span></div>
       <div class="row"><span>Solved depth</span><span>${m.solved_turns} / ${full}${m.reached_full ? " ✓" : ""}</span></div>
       <div class="row"><span>Gap to full</span><span>${m.gap_turns}</span></div>
-      <div class="row"><span>Moves used</span><span>${m.htm ?? "—"} HTM</span></div>`;
+      <div class="row"><span>Moves used</span><span>${m.htm ?? "—"} HTM</span></div>${
+        m.legacy_scramble ? `<div class="row"><span>Scramble</span><span>old ${m.solved_turns}-twist “full”</span></div>` : ""
+      }`;
     tip.hidden = false;
     const pad = 14;
     const { width, height } = tip.getBoundingClientRect();

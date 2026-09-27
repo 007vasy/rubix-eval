@@ -29,7 +29,7 @@ def test_full_scramble_lengths() -> None:
     assert full_scramble_depth(10) == 160
     assert full_scramble_depth(40) == 480
     assert full_scramble_depth(100) == 1200
-    assert full_scramble_depth(3, "4d") == 40
+    assert full_scramble_depth(3, "4d") == 120
 
 
 def test_request_randomizes_seed() -> None:

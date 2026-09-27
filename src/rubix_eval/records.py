@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from .paths import repo_root
+from .scramble import SCRAMBLE_VERSION
 
 
 def solves_dir() -> Path:
@@ -65,6 +66,7 @@ def make_record(
         "web_access": web_access,
         "harness": str(harness)[:32],
         "attested": lane == "verified",
+        "scramble_version": SCRAMBLE_VERSION,
         "attempt": verified,
         "client": {
             "solved": (progress or {}).get("solved"),
@@ -219,6 +221,7 @@ def _summary_row(data: dict[str, Any], fallback_id: str = "") -> dict[str, Any] 
         "web_access": data.get("web_access") if data.get("web_access") is not None else data.get("lane") != "verified",
         "harness": data.get("harness") or "browser",
         "attested": bool(data.get("attested")),
+        "scramble_version": data.get("scramble_version") or 1,
     }
 
 

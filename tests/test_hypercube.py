@@ -83,3 +83,30 @@ def test_seed_stable() -> None:
     text = format_hyper_moves(generate_hyper_scramble(8, seed=1))
     assert text == format_hyper_moves(generate_hyper_scramble(8, seed=1))
     assert parse_hyper_moves(text)
+
+
+def test_scramble_uses_every_layer_and_axis() -> None:
+    """Regression: low-bit LCG picks locked a 3^4 scramble to one layer and half the axes."""
+    from collections import Counter
+
+    from rubix_eval.challenges import full_scramble_depth, official_seed
+
+    depth = full_scramble_depth(3, "4d", 4)
+    moves = generate_hyper_scramble(depth, official_seed("4d", 3, "full"), size=3, ndim=4)
+    layers = Counter(m.layer for m in moves)
+    assert set(layers) == {None, 2} and min(layers.values()) > depth // 4
+    per_cell_axes = {}
+    for m in moves:
+        per_cell_axes.setdefault(m.cell, set()).add(m.axis)
+    assert len(per_cell_axes) == 8
+    assert all(len(axes) >= 5 for axes in per_cell_axes.values())
+    for seed in range(1, 30):
+        assert len({m.layer for m in generate_hyper_scramble(40, seed, size=3, ndim=4)}) == 2
+
+
+def test_full_3x3x3x3_scramble_mixes_every_cell() -> None:
+    from rubix_eval.challenges import full_scramble_depth, official_seed
+
+    cube = HyperCube(size=3, ndim=4)
+    cube.apply(generate_hyper_scramble(full_scramble_depth(3, "4d", 4), official_seed("4d", 3, "full"), size=3, ndim=4))
+    assert all(len(set(cube.cell_stickers_flat(cell))) == 8 for cell in cube._cells)

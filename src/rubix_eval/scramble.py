@@ -13,7 +13,9 @@ _FACES = ("U", "D", "L", "R", "F", "B")
 _OPPOSITE = {"U": "D", "D": "U", "L": "R", "R": "L", "F": "B", "B": "F"}
 _TURNS = (1, 2, 3)
 
-# Numerical Recipes LCG, 32-bit. Shared with web/js/engine.js.
+# Numerical Recipes LCG, 32-bit. Shared with web/js/engine.js and hyperengine.js.
+# SCRAMBLE_VERSION 2 = picks from the high bits (v1 used the broken low bits).
+SCRAMBLE_VERSION = 2
 _LCG_A = 1664525
 _LCG_C = 1013904223
 _LCG_M = 2**32
@@ -27,7 +29,10 @@ class LCG:
         if n <= 0:
             raise ValueError("n must be positive")
         self.state = (_LCG_A * self.state + _LCG_C) % _LCG_M
-        return self.state % n
+        # The low bits of a power-of-two LCG repeat with a tiny period (bit 0 just
+        # alternates), so `state % n` locked every 4D twist to one layer and half the
+        # axes. The high 16 bits are well mixed.
+        return (self.state >> 16) % n
 
     def choice(self, seq):
         return seq[self.next_int(len(seq))]

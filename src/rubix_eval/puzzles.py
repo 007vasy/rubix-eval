@@ -13,7 +13,8 @@ from typing import Any
 # visual: 4D size 2–5 is drawable; higher D is JSON/ASCII only.
 ND_PUZZLES: tuple[dict[str, Any], ...] = (
     {"ndim": 4, "size": 2, "visual": True, "full_depth": 20},
-    {"ndim": 4, "size": 3, "visual": True, "full_depth": 40},
+    # 40 twists cannot reach most 3^4 positions (counting bound ~56); 120 does.
+    {"ndim": 4, "size": 3, "visual": True, "full_depth": 120},
     {"ndim": 4, "size": 4, "visual": True, "full_depth": 80},
     {"ndim": 4, "size": 5, "visual": True, "full_depth": 120},
     {"ndim": 4, "size": 6, "visual": False, "full_depth": 160},

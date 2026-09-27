@@ -109,7 +109,7 @@ def test_parse_concatenated() -> None:
 
 
 def test_seed_is_stable() -> None:
-    assert format_moves(generate_scramble(3, 8, seed=1)) == "U F2 L2 D' F2 L U2 L2"
+    assert format_moves(generate_scramble(3, 8, seed=1)) == "F' D2 R B U2 F' D U'"
 
 
 def test_2x2_faces_only() -> None:

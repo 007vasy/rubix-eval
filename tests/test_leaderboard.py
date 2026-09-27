@@ -344,7 +344,9 @@ def test_verified_chart_ranks_lanes_separately_and_covers_3x3x3x3(tmp_path) -> N
         record.update(fields)
         (tmp_path / f"{name}.json").write_text(json.dumps(record), encoding="utf-8")
 
-    write("a", ai="Fable", depth_label="full", scramble_depth=40, attempt={"solved": True, "htm": 64})
+    write("a", ai="Fable", depth_label="full", scramble_depth=120, attempt={"solved": True, "htm": 164})
+    # An old 40-twist "full" from the broken v1 generator ranks as 40 turns, not full.
+    write("old", ai="Opus", depth_label="full", scramble_depth=40, attempt={"solved": True, "htm": 80})
     write("b", ai="Fable", lane="verified", depth_label="5", scramble_depth=5, attempt={"solved": True, "htm": 9})
     write("c", ai="Opus", depth_label="5", scramble_depth=5, attempt={"solved": True, "htm": 41})
     write("d", ai="Opus", depth_label="5", scramble_depth=5, attempt={"solved": True, "htm": 30})
@@ -352,9 +354,11 @@ def test_verified_chart_ranks_lanes_separately_and_covers_3x3x3x3(tmp_path) -> N
     write("f", ai="Tiny", size=2, depth_label="2", scramble_depth=2)
 
     chart = verified_depth_chart("4d3", tmp_path)
-    assert (chart["title"], chart["full_turns"], chart["slug"]) == ("3×3×3×3", 40, "3x3x3x3")
+    assert (chart["title"], chart["full_turns"], chart["slug"]) == ("3×3×3×3", 120, "3x3x3x3")
     rows = [(m["ai"], m["lane"], m["solved_turns"], m["htm"]) for m in chart["models"]]
     # Verified rows come first; each lane keeps its own best per model.
-    assert rows == [("Fable", "verified", 5, 9), ("Fable", "open", 40, 64), ("Opus", "open", 5, 30)]
+    assert rows == [("Fable", "verified", 5, 9), ("Fable", "open", 120, 164), ("Opus", "open", 40, 80)]
     assert chart["models"][1]["reached_full"] is True
+    assert chart["models"][2]["reached_full"] is False
+    assert chart["models"][2]["legacy_scramble"] is True
     assert {c["chart"] for c in chart["charts"]} == {"3d", "4d", "4d3"}

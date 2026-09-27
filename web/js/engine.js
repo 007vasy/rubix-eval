@@ -149,7 +149,8 @@ class LCG {
   }
   nextInt(n) {
     this.state = (Math.imul(1664525, this.state) + 1013904223) >>> 0;
-    return this.state % n;
+    // High bits: the low bits of this LCG have a tiny period (see scramble.py).
+    return (this.state >>> 16) % n;
   }
   choice(seq) {
     return seq[this.nextInt(seq.length)];

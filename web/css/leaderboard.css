@@ -545,3 +545,14 @@ tr.lane-row:hover td { background: none; }
 .puzzle-card .mini i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 3px 3px 0; background: var(--series-alg); }
 .puzzle-card .mini.open i { background: var(--series-ai); }
 .puzzle-card .go { margin-top: auto; color: var(--accent-2); font-size: 0.82rem; font-weight: 600; }
+.old-chip {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
