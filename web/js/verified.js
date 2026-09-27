@@ -12,6 +12,11 @@ function fmtTime(s) {
   return `${m}:${r}`;
 }
 
+function solvesBar(n) {
+  const max = Math.max(1, ...ais.map((a) => a.solves || 0));
+  return `<div class="tbar sm"><div class="tbar-track"><span class="tbar-fill" style="--w:${Math.max(3, (n / max) * 100)}%"></span></div><span class="tbar-val">${n}</span></div>`;
+}
+
 function replayLink(id) {
   if (!id) return "";
   return `<a class="replay" href="/replay?id=${encodeURIComponent(id)}">Replay</a>`;
@@ -28,12 +33,12 @@ if (!ais.length) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${row.rank}</td>
-      <td class="kind-ai">${row.ai}</td>
+      <td class="kind-algorithm"><b>${row.ai}</b></td>
       <td>${h.puzzle || "—"}</td>
       <td>${h.htm ?? "—"}</td>
       <td>${h.step_count ?? "—"}</td>
       <td>${fmtTime(h.elapsed_sec)}</td>
-      <td>${row.solves}</td>
+      <td>${solvesBar(row.solves)}</td>
       <td>${replayLink(h.record_id)}</td>
     `;
     rows.append(tr);

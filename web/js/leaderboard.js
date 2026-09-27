@@ -27,6 +27,41 @@ function scrambleTitle(label, depth) {
   return `${n} turn${n === "1" ? "" : "s"} from solved`;
 }
 
+// Shared log scale for every time bar in the current view, so bars compare across groups.
+let scale = { lo: 0, hi: 1 };
+
+function setScale(entryLists) {
+  const secs = entryLists.flat().map((e) => e.seconds).filter((s) => s > 0);
+  if (!secs.length) {
+    scale = { lo: 0, hi: 1 };
+    return;
+  }
+  const lo = Math.log10(Math.min(...secs)) - 0.5;
+  const hi = Math.log10(Math.max(...secs)) + 0.05;
+  scale = { lo, hi: Math.max(hi, lo + 1) };
+}
+
+function timeBar(row) {
+  const s = row.seconds;
+  if (s == null || Number.isNaN(s)) return `<span class="note">—</span>`;
+  const t = s > 0 ? (Math.log10(s) - scale.lo) / (scale.hi - scale.lo) : 0;
+  const w = Math.max(2, Math.min(100, t * 100));
+  const tone = row.highlight || row.kind === "human" ? "human" : row.kind === "ai" ? "ai" : "";
+  return `<div class="tbar" title="${fmtTime(s)}">
+      <div class="tbar-track"><span class="tbar-fill ${tone}" style="--w:${w.toFixed(1)}%"></span></div>
+      <span class="tbar-val">${fmtTime(s)}</span>
+    </div>`;
+}
+
+function legendNote() {
+  return `<p class="scale-note">
+    <span><i class="swatch human"></i>Human record</span>
+    <span><i class="swatch"></i>Known algorithm</span>
+    <span><i class="swatch ai"></i>AI</span>
+    <span>· Shorter bar = faster · log scale shared across this view</span>
+  </p>`;
+}
+
 function entryRow(row, { markBestAlg = false } = {}) {
   const wr = row.highlight || row.kind === "human";
   const badge = wr ? `<span class="badge-wr">${row.badge || "Human WR"}</span>` : "";
@@ -40,7 +75,7 @@ function entryRow(row, { markBestAlg = false } = {}) {
     <td>${row.rank}</td>
     <td class="kind-${row.kind}">${row.who}${badge}</td>
     <td>${kindLabel(row.kind)}</td>
-    <td>${fmtTime(row.seconds)}</td>
+    <td>${timeBar(row)}</td>
     <td>${row.htm ?? "—"}</td>
     <td class="note">${extra}</td>
   </tr>`;
@@ -55,7 +90,7 @@ function rankedTable(entries) {
     .map((row) => entryRow(row, { markBestAlg: row.rank === firstAlgRank }))
     .join("");
   return `<table>
-    <thead><tr><th>#</th><th>Who</th><th>Kind</th><th>Time</th><th>HTM</th><th></th></tr></thead>
+    <thead><tr><th>#</th><th>Who</th><th>Kind</th><th class="bar-col">Time <span class="note">(log scale)</span></th><th>HTM</th><th></th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 }
@@ -113,7 +148,8 @@ function render() {
     const refs = (board.references || [])
       .map((r) => `<a href="${r.url}" target="_blank" rel="noreferrer">${r.name}</a> — ${r.note}`)
       .join("<br>");
-    el.innerHTML = `<h2>${board.label}</h2><p class="sub">${wr}</p>${refs ? `<p class="sub refs">${refs}</p>` : ""}`;
+    setScale((board.groups || []).map((g) => g.entries || []));
+    el.innerHTML = `<h2>${board.label}</h2><p class="sub">${wr}</p>${refs ? `<p class="sub refs">${refs}</p>` : ""}${legendNote()}`;
     for (const group of board.groups || []) {
       const extra = group.full && board.human ? "Human world record is highlighted." : "";
       el.insertAdjacentHTML("beforeend", groupBlock(group.title, extra, group.entries || []));
@@ -140,6 +176,8 @@ function render() {
   wrap.innerHTML = `<section class="board"><h2>${heading}</h2>
     <p class="sub">${selected === "full" ? "Human world records are highlighted on each size." : "End-step: known algorithms only (plus any AI solves). No human WR."}</p></section>`;
   const host = wrap.firstElementChild;
+  setScale(boardList.map((b) => (b.groups || []).find((g) => g.depth_label === selected)?.entries || []));
+  host.insertAdjacentHTML("beforeend", legendNote());
   for (const board of boardList) {
     const group = (board.groups || []).find((g) => g.depth_label === selected);
     if (!group) continue;

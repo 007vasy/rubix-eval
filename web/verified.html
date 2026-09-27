@@ -17,6 +17,8 @@
       </div>
       <nav>
         <a href="/eval">eval</a>
+        <a href="/verified/3d">3×3×3</a>
+        <a href="/verified/4d">2×2×2×2</a>
         <a href="/ai">open AI</a>
         <a href="/leaderboard">puzzles</a>
         <a href="/solves">solves</a>
@@ -24,12 +26,16 @@
     </header>
     <main>
       <p>
+        The verified benchmark is two charts.
+        <a href="/verified/3d">3×3×3</a> and
+        <a href="/verified/4d">2×2×2×2</a>
+        show the deepest official scramble each model solved, including open computer-use runs.
+        The space to the right of a bar is the gap to a full scramble.
         These rows were published from an offline run of
         <a href="https://github.com/007vasy/rubix-eval">the rubix-eval harness</a>
-        (Inspect / OpenShell) with web access turned off. Open
-        <a href="/eval">/eval</a> in a browser — by hand or with an AI agent — to
-        appear on the <a href="/ai">Open</a> board instead.
-        Problems: <a href="https://github.com/007vasy/rubix-eval/issues">GitHub Issues</a>.
+        with web access turned off. Open
+        <a href="/eval">/eval</a> in a browser to appear on the
+        <a href="/ai">Open</a> board instead.
       </p>
       <p id="empty" hidden>No verified solves yet.</p>
       <section id="board" class="board" hidden>
@@ -44,7 +50,7 @@
               <th>HTM</th>
               <th>Steps</th>
               <th>Time</th>
-              <th>Solves</th>
+              <th class="bar-col sm">Solves</th>
               <th></th>
             </tr>
           </thead>
@@ -60,5 +66,6 @@
       · Open board = web on · Verified = offline, internet disallowed
     </footer>
     <script type="module" src="./js/verified.js"></script>
+    <script type="module" src="/js/site.js"></script>
   </body>
 </html>
