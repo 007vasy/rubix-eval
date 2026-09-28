@@ -111,6 +111,69 @@ function worldNormalToAxisCell(cell, nx, ny, nz, n = 3) {
   return axisCellOf(axis4, positive ? n - 1 : 0, n) || AXIS_CELL[`${axis4},${positive ? 2 : 0}`];
 }
 
+const ARC_CACHE = new Map();
+const ARC_DIRS = [];
+for (const x of [-1, 0, 1]) for (const y of [-1, 0, 1]) for (const z of [-1, 0, 1]) {
+  if (x || y || z) ARC_DIRS.push(new THREE.Vector3(x, y, z).normalize());
+}
+
+/**
+ * How a sticker flies from one exploded cell to another: the lowest arc (and its sideways
+ * direction) that keeps every piece of the slab clear of all the other cells. In the
+ * exploded layout a hop like O -> L crosses the whole puzzle, and a straight or naively
+ * bulged path runs through the I and R cells. Searched once per cell pair and size.
+ */
+function flightArc(fromCell, toCell, n) {
+  const key = `${fromCell}>${toCell}>${n}`;
+  if (ARC_CACHE.has(key)) return ARC_CACHE.get(key);
+  const s = new THREE.Vector3(...CELL_ORIGIN[fromCell]);
+  const e = new THREE.Vector3(...CELL_ORIGIN[toCell]);
+  const dir = e.clone().sub(s).normalize();
+  const mid = s.clone().add(e).multiplyScalar(0.5);
+  const reach = ((n - 1) / 2) * PITCH;
+  const half = reach + CUBIE / 2 + 0.15;
+  const offsets = [new THREE.Vector3()];
+  for (const x of [-reach, reach]) for (const y of [-reach, reach]) for (const z of [-reach, reach]) {
+    offsets.push(new THREE.Vector3(x, y, z));
+  }
+  const others = CELLS.filter((c) => c !== fromCell && c !== toCell).map((c) => new THREE.Vector3(...CELL_ORIGIN[c]));
+  const p = new THREE.Vector3();
+  const clears = (ctrl) => {
+    for (const off of offsets) {
+      for (let i = 1; i < 24; i += 1) {
+        const t = i / 24;
+        const u = 1 - t;
+        p.copy(s).add(off).multiplyScalar(u * u)
+          .addScaledVector(ctrl.clone().add(off), 2 * u * t)
+          .addScaledVector(e.clone().add(off), t * t);
+        for (const c of others) {
+          const gap = Math.max(Math.abs(p.x - c.x), Math.abs(p.y - c.y), Math.abs(p.z - c.z)) - half;
+          if (gap < 0.2) return false;
+        }
+      }
+    }
+    return true;
+  };
+  let found = null;
+  for (let height = 0.5; height <= 12 && !found; height += 0.25) {
+    for (const cand of ARC_DIRS) {
+      const side = cand.clone().addScaledVector(dir, -cand.dot(dir));
+      if (side.lengthSq() < 0.3) continue;
+      side.normalize();
+      if (clears(mid.clone().addScaledVector(side, 2 * height))) {
+        found = { side, height };
+        break;
+      }
+    }
+  }
+  if (!found) {
+    const side = new THREE.Vector3(0, 1, 0).addScaledVector(dir, -dir.y).normalize();
+    found = { side, height: 0.35 + 0.16 * s.distanceTo(e) };
+  }
+  ARC_CACHE.set(key, found);
+  return found;
+}
+
 /** The rotation about the cell centre that carries every `from` offset onto its `target`. */
 function rigidRotation(items) {
   const a1 = items.find((it) => it.from.lengthSq() > 1e-6);
@@ -362,7 +425,6 @@ export class HyperViewer {
     const dest = this.stickerDestinations(move);
     const pivots = [];
     const flights = [];
-    const up = new THREE.Vector3(0, 1, 0);
     for (const group of [...this.root.children]) {
       const displayCell = group.userData.cell;
       if (!displayCell) continue;
@@ -381,13 +443,9 @@ export class HyperViewer {
         // The twist carries this sticker into another cell: fly it there through the gap.
         const start = new THREE.Vector3(...CELL_ORIGIN[displayCell]).add(from);
         const end = new THREE.Vector3(...CELL_ORIGIN[to.cell]).add(target);
-        const mid = start.clone().add(end).multiplyScalar(0.5);
-        const centre = new THREE.Vector3(...CELL_ORIGIN[displayCell])
-          .add(new THREE.Vector3(...CELL_ORIGIN[to.cell]))
-          .multiplyScalar(0.5);
-        const bulge = mid.clone().sub(centre);
-        if (bulge.lengthSq() < 1e-6) bulge.copy(up);
-        const control = mid.add(bulge.normalize().multiplyScalar(start.distanceTo(end) * 0.22));
+        // Arc around the other cells instead of through them (see flightArc).
+        const arc = flightArc(displayCell, to.cell, n);
+        const control = start.clone().add(end).multiplyScalar(0.5).addScaledVector(arc.side, 2 * arc.height);
         this.root.attach(piece);
         flights.push({ piece, start, control, end });
       }
